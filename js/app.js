@@ -1,7 +1,7 @@
 // app.js — Main entry point for Gideon Bonsai (Supabase version)
 import {
   initSupabase, getUser, onAuthChange,
-  signInWithGoogle, signInWithEmail, signUpWithEmail, signOut,
+  signInWithEmail, signUpWithEmail, signOut,
   SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos
 } from './supabase.js';
 
