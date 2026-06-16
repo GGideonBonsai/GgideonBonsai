@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<title>Gideon Bonsai 義典</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-light: #3d3d3d;
+    --stone: #7a7a72;
+    --parchment: #f5f2ed;
+    --paper: #faf9f7;
+    --moss: #5a6b4a;
+    --moss-light: #8a9b7a;
+    --earth: #8b6f47;
+    --earth-light: #c4a882;
+    --ash: #e8e5e0;
+    --white: #ffffff;
+    --danger: #8b3a3a;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--parchment);
+    color: var(--ink);
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* HEADER */
+  .app-header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 12px 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-circle {
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    letter-spacing: -1px;
+    color: var(--white);
+    position: relative;
+  }
+  .logo-circle::before {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+  }
+  .app-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+  .app-subtitle {
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-icon {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: var(--white);
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: background 0.15s;
+  }
+  .btn-icon:hover { background: rgba(255,255,255,0.2); }
+
+  /* SEARCH */
+  .search-wrap {
+    background: var(--white);
+    border-bottom: 1px solid var(--ash);
+    padding: 8px 12px;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--parchment);
+    border: 1px solid var(--ash);
+    border-radius: 20px;
+    padding: 7px 14px 7px 34px;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    position: relative;
+  }
+  .search-input:focus { border-color: var(--moss-light); }
+  .search-wrap-inner {
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--stone);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: var(--ink);
+    display: flex;
+    position: sticky;
+    top: 58px;
+    z-index: 99;
+  }
+  .nav-tab {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    transition: color 0.15s;
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-tab .tab-icon { font-size: 18px; }
+  .nav-tab.active {
+    color: var(--earth-light);
+    border-bottom-color: var(--earth-light);
+  }
+
+  /* CONTENT */
+  .content { padding: 12px; min-height: calc(100vh - 160px); }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 13px;
+    color: var(--stone);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+  .count-badge {
+    background: var(--ash);
+    color: var(--stone);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* FOLDER CARD (species) */
+  .folder-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.1s;
+    border: 1px solid var(--ash);
+  }
+  .folder-card:active { transform: scale(0.99); }
+  .folder-card-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+  }
+  .species-icon {
+    width: 40px; height: 40px;
+    background: var(--parchment);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    border: 1px solid var(--ash);
+  }
+  .folder-info { flex: 1; min-width: 0; }
+  .folder-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .folder-latin {
+    font-size: 11px;
+    color: var(--stone);
+    font-style: italic;
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .folder-code {
+    font-size: 10px;
+    color: var(--moss);
+    font-family: monospace;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .folder-arrow {
+    color: var(--ash);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .folder-count {
+    font-size: 11px;
+    color: var(--stone);
+    background: var(--parchment);
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  /* PLANT ROW */
+  .plant-row {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+    border: 1px solid var(--ash);
+  }
+  .plant-row:active { opacity: 0.85; }
+  .plant-thumb {
+    width: 48px; height: 48px;
+    border-radius: 6px;
+    background: var(--parchment);
+    border: 1px solid var(--ash);
+    object-fit: cover;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    color: var(--stone);
+  }
+  .plant-info { flex: 1; min-width: 0; }
+  .plant-line1 {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plant-line2 {
+    font-size: 11px;
+    color: var(--stone);
+    font-family: monospace;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-working { background: var(--earth); }
+  .status-done { background: var(--moss); }
+  .status-adding { background: #c4a82a; }
+
+  /* ADD BUTTON */
+  .add-btn {
+    width: 100%;
+    background: none;
+    border: 1.5px dashed var(--ash);
+    border-radius: var(--radius);
+    padding: 12px;
+    color: var(--stone);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .add-btn:hover { border-color: var(--moss-light); color: var(--moss); }
+
+  /* DEALS BUTTON */
+  .deals-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 16px;
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    z-index: 90;
+    transition: transform 0.15s;
+  }
+  .deals-fab:active { transform: scale(0.96); }
+  .deals-badge {
+    background: var(--earth);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal {
+    background: var(--white);
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    padding-bottom: 24px;
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: var(--ash);
+    border-radius: 2px;
+    margin: 10px auto 16px;
+  }
+  .modal-header {
+    padding: 0 16px 12px;
+    border-bottom: 1px solid var(--ash);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--stone);
+    cursor: pointer;
+    padding: 4px;
+  }
+  .modal-body { padding: 16px; }
+
+  /* PLANT DETAIL */
+  .detail-header {
+    background: var(--ink);
+    color: var(--white);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px;
+  }
+  .detail-title { font-size: 15px; font-weight: 500; }
+
+  .plant-detail-thumb {
+    width: 100%;
+    height: 180px;
+    background: var(--parchment);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+    border-bottom: 1px solid var(--ash);
+    position: relative;
+  }
+  .plant-detail-codes {
+    padding: 12px 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--ash);
+  }
+  .code-line1 {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 3px;
+  }
+  .code-line2 {
+    font-size: 12px;
+    color: var(--stone);
+    font-family: monospace;
+  }
+
+  /* INNER TABS */
+  .inner-tabs {
+    display: flex;
+    background: var(--white);
+    border-bottom: 1px solid var(--ash);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .inner-tab {
+    flex: 1;
+    padding: 10px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    color: var(--stone);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .inner-tab.active {
+    color: var(--moss);
+    border-bottom-color: var(--moss);
+    font-weight: 500;
+  }
+
+  /* FORM ELEMENTS */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--stone);
+    margin-bottom: 5px;
+    display: block;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--parchment);
+    border: 1px solid var(--ash);
+    border-radius: var(--radius);
+    padding: 9px 12px;
+    font-size: 14px;
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+  }
+  .form-input:focus { border-color: var(--moss-light); }
+  .form-textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  /* CHIP BUTTONS */
+  .chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    background: var(--parchment);
+    border: 1px solid var(--ash);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--ink-light);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .chip.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--white);
+  }
+  .chip-icon { font-size: 16px; padding: 5px 10px; }
+
+  /* ACTION BUTTONS */
+  .btn-primary {
+    background: var(--ink);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 20px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:active { opacity: 0.85; }
+  .btn-secondary {
+    background: none;
+    color: var(--ink);
+    border: 1px solid var(--ash);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn-danger {
+    background: none;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 10px 20px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  /* LANDSCAPE CARD */
+  .landscape-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    border: 1px solid var(--ash);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .landscape-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    gap: 10px;
+  }
+  .landscape-icon {
+    width: 38px; height: 38px;
+    background: var(--parchment);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    border: 1px solid var(--ash);
+    flex-shrink: 0;
+  }
+  .landscape-name { font-size: 14px; font-weight: 500; }
+  .landscape-code { font-size: 11px; color: var(--stone); font-family: monospace; margin-top: 2px; }
+  .landscape-locations {
+    border-top: 1px solid var(--ash);
+    padding: 6px 12px;
+    background: var(--parchment);
+  }
+  .location-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ash);
+    cursor: pointer;
+  }
+  .location-item:last-child { border-bottom: none; }
+  .location-name { font-size: 13px; color: var(--ink-light); }
+  .location-code { font-size: 11px; color: var(--stone); font-family: monospace; }
+  .location-arrow { color: var(--ash); font-size: 14px; }
+
+  /* POT CARD */
+  .pot-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    border: 1px solid var(--ash);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .pot-thumb {
+    width: 44px; height: 44px;
+    background: var(--parchment);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    border: 1px solid var(--ash);
+    flex-shrink: 0;
+  }
+  .pot-code { font-size: 12px; font-family: monospace; color: var(--moss); font-weight: 500; }
+  .pot-desc { font-size: 11px; color: var(--stone); margin-top: 2px; }
+
+  /* DEALS */
+  .deal-item {
+    background: var(--white);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    border: 1px solid var(--ash);
+    padding: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: var(--shadow);
+  }
+  .deal-check {
+    width: 22px; height: 22px;
+    border: 2px solid var(--ash);
+    border-radius: 50%;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .deal-check:hover { border-color: var(--moss); }
+  .deal-info { flex: 1; }
+  .deal-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .deal-plant { font-size: 11px; color: var(--stone); margin-top: 2px; }
+  .deal-date { font-size: 11px; color: var(--earth); margin-top: 2px; font-family: monospace; }
+  .deal-type-reg { color: var(--moss); font-size: 10px; background: rgba(90,107,74,0.1); padding: 1px 6px; border-radius: 10px; display: inline-block; margin-top: 3px; }
+  .deal-type-task { color: var(--earth); font-size: 10px; background: rgba(139,111,71,0.1); padding: 1px 6px; border-radius: 10px; display: inline-block; margin-top: 3px; }
+
+  /* HISTORY ITEM */
+  .history-item {
+    border-left: 2px solid var(--ash);
+    margin-left: 8px;
+    padding: 0 0 16px 16px;
+    position: relative;
+  }
+  .history-item::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 4px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--moss-light);
+    border: 2px solid var(--white);
+  }
+  .history-date { font-size: 10px; color: var(--stone); font-family: monospace; margin-bottom: 4px; }
+  .history-title { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .history-comment { font-size: 12px; color: var(--ink-light); margin-top: 3px; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: var(--ash);
+    margin: 12px 0;
+  }
+
+  /* ORNAMENT */
+  .enso-ornament {
+    text-align: center;
+    color: var(--ash);
+    font-family: 'Noto Serif JP', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 8px 0 4px;
+    opacity: 0.6;
+  }
+
+  /* STATUS CHIP */
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: monospace;
+  }
+  .status-working-chip { background: rgba(139,111,71,0.12); color: var(--earth); }
+  .status-done-chip { background: rgba(90,107,74,0.12); color: var(--moss); }
+
+  /* LINK */
+  .link-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--parchment);
+    border-radius: var(--radius);
+    cursor: pointer;
+    border: 1px solid var(--ash);
+    margin-bottom: 8px;
+  }
+  .link-label { font-size: 12px; color: var(--stone); }
+  .link-value { font-size: 13px; font-family: monospace; color: var(--moss); display: flex; align-items: center; gap: 6px; }
+  .link-arrow { color: var(--ash); font-size: 14px; }
+
+  /* SAVE/DATA CONTROLS */
+  .data-bar {
+    background: var(--ink);
+    padding: 8px 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .data-btn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; gap: 5px;
+    transition: background 0.15s;
+  }
+  .data-btn:hover { background: rgba(255,255,255,0.2); }
+  .data-status { font-size: 11px; color: rgba(255,255,255,0.4); margin-left: auto; }
+
+  .hidden { display: none !important; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .photo-drop-zone {
+    border: 2px dashed var(--ash);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    background: var(--parchment);
+    position: relative;
+  }
+  .photo-drop-zone.drag-over {
+    border-color: var(--moss);
+    background: rgba(90,107,74,0.05);
+  }
+  .photo-drop-zone input[type=file] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .photo-drop-zone-text { font-size: 13px; color: var(--stone); pointer-events: none; }
+  .photo-drop-zone-icon { font-size: 28px; margin-bottom: 6px; pointer-events: none; }
+  .photo-preview-wrap { margin-top: 10px; }
+  .photo-preview-wrap img { max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--ash); }
+
+</style>
+</head>
+<body>
+
+<!-- APP HEADER -->
+<header class="app-header">
+  <div class="logo-wrap">
+    <div class="logo-circle">義典</div>
+    <div>
+      <div class="app-title">Gideon Bonsai</div>
+      <div class="app-subtitle">Коллекция растений</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="showDataMenu()" title="Данные">💾</button>
+  </div>
+</header>
+
+<!-- DATA BAR -->
+<div class="data-bar" id="dataBar" style="display:none">
+  <button class="data-btn" onclick="saveData()">⬇ Сохранить JSON</button>
+  <button class="data-btn" onclick="document.getElementById('loadFile').click()">⬆ Загрузить</button>
+  <input type="file" id="loadFile" accept=".json" style="display:none" onchange="loadData(event)">
+  <span class="data-status" id="dataStatus">не сохранено</span>
+</div>
+
+<!-- NAV TABS -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="switchTab('plants')" id="tab-plants">
+    <span class="tab-icon">🌿</span>
+    <span>Растения</span>
+  </button>
+  <button class="nav-tab" onclick="switchTab('landscapes')" id="tab-landscapes">
+    <span class="tab-icon">🌍</span>
+    <span>Ландшафты</span>
+  </button>
+  <button class="nav-tab" onclick="switchTab('pots')" id="tab-pots">
+    <span class="tab-icon">🪴</span>
+    <span>Горшки</span>
+  </button>
+</nav>
+
+<!-- SEARCH -->
+<div class="search-wrap" id="searchWrap">
+  <div class="search-wrap-inner">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="searchInput" type="search" placeholder="Поиск по кодам, названиям..." oninput="handleSearch()">
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content" id="mainContent">
+
+  <!-- PLANTS PAGE -->
+  <div class="page active" id="page-plants">
+    <div class="section-header">
+      <span class="section-title">Виды</span>
+      <span class="count-badge" id="speciesCount">0 видов</span>
+    </div>
+    <div id="speciesList"></div>
+    <button class="add-btn" onclick="openAddSpecies()">＋ Добавить вид</button>
+    <div style="height:80px"></div>
+  </div>
+
+  <!-- LANDSCAPES PAGE -->
+  <div class="page" id="page-landscapes">
+    <div class="section-header">
+      <span class="section-title">Ландшафты</span>
+      <span class="count-badge" id="landscapeCount">0</span>
+    </div>
+    <div id="landscapeList"></div>
+    <button class="add-btn" onclick="openAddLandscape()">＋ Добавить ландшафт</button>
+  </div>
+
+  <!-- POTS PAGE -->
+  <div class="page" id="page-pots">
+    <div class="section-header">
+      <span class="section-title">Горшки</span>
+    </div>
+    <div id="potsList"></div>
+    <button class="add-btn" onclick="openAddPot()">＋ Добавить горшок</button>
+  </div>
+
+</div>
+
+<!-- DEALS FAB -->
+<button class="deals-fab" onclick="openDeals()" id="dealsFab">
+  ✅ Дела
+  <span class="deals-badge" id="dealsBadge">0</span>
+</button>
+
+<!-- ============ MODALS ============ -->
+
+<!-- SPECIES LIST (inside folder) -->
+<div class="modal-overlay" id="modal-species">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modalSpeciesTitle">Вид</span>
+      <button class="modal-close" onclick="closeModal('modal-species')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-wrap-inner" style="margin-bottom:10px">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="speciesSearchInput" type="search" placeholder="Поиск в виде..." oninput="handleSpeciesSearch()">
+      </div>
+      <div id="plantsList"></div>
+      <button class="add-btn" onclick="openAddPlant(currentSpeciesId)">＋ Добавить растение</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLANT DETAIL -->
+<div class="modal-overlay" id="modal-plant">
+  <div class="modal" style="border-radius:0; max-height:100vh; height:100vh;">
+    <div class="detail-header">
+      <button class="back-btn" onclick="closeModal('modal-plant');document.getElementById('dealsFab').style.display='flex'">← Назад</button>
+      <span class="detail-title" id="plantDetailTitle">Растение</span>
+    </div>
+    <div style="overflow-y:auto; height:calc(100vh - 50px);">
+      <div class="plant-detail-thumb" id="plantDetailThumb">🌱</div>
+      <div class="plant-detail-codes" id="plantDetailCodes"></div>
+      <div class="inner-tabs">
+        <button class="inner-tab active" onclick="switchInnerTab('description')">📋 Описание</button>
+        <button class="inner-tab" onclick="switchInnerTab('photos')">📷 Фото</button>
+        <button class="inner-tab" onclick="switchInnerTab('history')">📜 История</button>
+      </div>
+      <div id="innerTabDescription" style="padding:16px">
+        <div id="plantDescriptionContent"></div>
+      </div>
+      <div id="innerTabPhotos" class="hidden" style="padding:16px">
+        <div id="plantPhotosContent"></div>
+      </div>
+      <div id="innerTabHistory" class="hidden" style="padding:16px">
+        <div id="plantHistoryContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SPECIES MODAL -->
+<div class="modal-overlay" id="modal-add-species">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Новый вид</span>
+      <button class="modal-close" onclick="closeModal('modal-add-species')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Русское название</label>
+        <input class="form-input" id="newSpeciesRu" placeholder="Фикус Бенджамина">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Латинское название</label>
+        <input class="form-input" id="newSpeciesLat" placeholder="Ficus benjamina" style="font-style:italic">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Код вида (ID без номера)</label>
+        <input class="form-input" id="newSpeciesCode" placeholder="ФБе" style="font-family:monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Синонимы</label>
+        <input class="form-input" id="newSpeciesSynonyms" placeholder="Фикус плакучий, Weeping fig">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Тип растения</label>
+        <div class="chip-group" id="newSpeciesType">
+          <button class="chip chip-icon selected" data-val="🌳" onclick="selectChip(this,'newSpeciesType')">🌳</button>
+          <button class="chip chip-icon" data-val="🌵" onclick="selectChip(this,'newSpeciesType')">🌵</button>
+          <button class="chip chip-icon" data-val="🪴" onclick="selectChip(this,'newSpeciesType')">🪴</button>
+          <button class="chip chip-icon" data-val="盆" onclick="selectChip(this,'newSpeciesType')">盆</button>
+          <button class="chip chip-icon" data-val="🌲" onclick="selectChip(this,'newSpeciesType')">🌲</button>
+          <button class="chip chip-icon" data-val="🌱" onclick="selectChip(this,'newSpeciesType')">🌱</button>
+          <button class="chip chip-icon" data-val="✾" onclick="selectChip(this,'newSpeciesType')">✾</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Полный код ухода</label>
+        <input class="form-input" id="newSpeciesCareCode" placeholder="EV.T18-35.Z15-20.W3.L5.S234.P6.R2" style="font-family:monospace; font-size:12px">
+      </div>
+      <button class="btn-primary" onclick="saveNewSpecies()">Добавить вид</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PLANT MODAL -->
+<div class="modal-overlay" id="modal-add-plant">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="addPlantTitle">Новое растение</span>
+      <button class="modal-close" onclick="closeModal('modal-add-plant')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Номер (ID)</label>
+        <input class="form-input" id="newPlantNumber" placeholder="1" type="number" min="1">
+        <div style="font-size:11px; color:var(--stone); margin-top:4px" id="newPlantCodePreview"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Статус</label>
+        <div class="chip-group" id="newPlantStatus">
+          <button class="chip selected" data-val="°" onclick="selectChip(this,'newPlantStatus')">° В работе</button>
+          <button class="chip" data-val="+" onclick="selectChip(this,'newPlantStatus')">+ Добавляется</button>
+          <button class="chip" data-val="✓" onclick="selectChip(this,'newPlantStatus')">✓ Закрыто</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Короткий код ухода</label>
+        <input class="form-input" id="newPlantShortCare" placeholder="≈○⌂◇" style="font-size:16px">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Способ получения</label>
+        <div class="chip-group" id="newPlantOrigin">
+          <button class="chip" data-val="черенок" onclick="selectChip(this,'newPlantOrigin')">🌿 Черенок</button>
+          <button class="chip" data-val="семя" onclick="selectChip(this,'newPlantOrigin')">🌱 Семя</button>
+          <button class="chip" data-val="ямадори" onclick="selectChip(this,'newPlantOrigin')">⛰️ Ямадори</button>
+          <button class="chip" data-val="куплено" onclick="selectChip(this,'newPlantOrigin')">🛒 Куплено</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Дата начала</label>
+        <input class="form-input" id="newPlantDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ландшафт</label>
+        <select class="form-input" id="newPlantLandscape">
+          <option value="">— выбрать —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Горшок</label>
+        <select class="form-input" id="newPlantPot">
+          <option value="">— выбрать —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Сорт / Вариация</label>
+        <input class="form-input" id="newPlantVariety" placeholder="опционально">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Страна</label>
+        <input class="form-input" id="newPlantCountry" placeholder="Израиль">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Цена</label>
+          <input class="form-input" id="newPlantPrice" type="number" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Количество</label>
+          <input class="form-input" id="newPlantQty" type="number" placeholder="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Комментарий</label>
+        <textarea class="form-input form-textarea" id="newPlantComment"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveNewPlant()">Сохранить растение</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LANDSCAPE MODAL -->
+<div class="modal-overlay" id="modal-add-landscape">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Ландшафт</span>
+      <button class="modal-close" onclick="closeModal('modal-add-landscape')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Название</label>
+        <input class="form-input" id="newLandscapeName" placeholder="Теплица 1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Код</label>
+        <input class="form-input" id="newLandscapeCode" placeholder="Т¹" style="font-family:monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Освещённость</label>
+        <div class="chip-group" id="newLandscapeLight">
+          <button class="chip chip-icon" data-val="☀️" onclick="selectChip(this,'newLandscapeLight')">☀️</button>
+          <button class="chip chip-icon" data-val="⛅" onclick="selectChip(this,'newLandscapeLight')">⛅</button>
+          <button class="chip chip-icon" data-val="☁️" onclick="selectChip(this,'newLandscapeLight')">☁️</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Темп. мин °C</label>
+          <input class="form-input" id="newLandscapeTempMin" type="number" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Темп. макс °C</label>
+          <input class="form-input" id="newLandscapeTempMax" type="number" placeholder="35">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Влажность</label>
+        <div class="chip-group" id="newLandscapeHumidity">
+          <button class="chip" data-val="~" onclick="selectChip(this,'newLandscapeHumidity')">~ Низкая</button>
+          <button class="chip" data-val="≈" onclick="selectChip(this,'newLandscapeHumidity')">≈ Средняя</button>
+          <button class="chip" data-val="≋" onclick="selectChip(this,'newLandscapeHumidity')">≋ Высокая</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveNewLandscape()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD POT MODAL -->
+<div class="modal-overlay" id="modal-add-pot">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Горшок</span>
+      <button class="modal-close" onclick="closeModal('modal-add-pot')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Материал</label>
+        <div class="chip-group" id="newPotMaterial">
+          <button class="chip selected" data-val="PL" onclick="selectChip(this,'newPotMaterial')">PL Пластик</button>
+          <button class="chip" data-val="CL" onclick="selectChip(this,'newPotMaterial')">CL Глина</button>
+          <button class="chip" data-val="CR" onclick="selectChip(this,'newPotMaterial')">CR Керамика</button>
+          <button class="chip" data-val="CN" onclick="selectChip(this,'newPotMaterial')">CN Бетон</button>
+          <button class="chip" data-val="FB" onclick="selectChip(this,'newPotMaterial')">FB Ткань</button>
+          <button class="chip" data-val="WD" onclick="selectChip(this,'newPotMaterial')">WD Дерево</button>
+          <button class="chip" data-val="MT" onclick="selectChip(this,'newPotMaterial')">MT Металл</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Номер (трёхзначный)</label>
+        <input class="form-input" id="newPotNumber" type="number" placeholder="001" min="1">
+        <div style="font-size:11px; color:var(--stone); margin-top:4px" id="newPotCodePreview"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Форма</label>
+        <div class="chip-group" id="newPotShape">
+          <button class="chip" data-val="RD" onclick="selectChip(this,'newPotShape')">RD Круглый</button>
+          <button class="chip" data-val="SQ" onclick="selectChip(this,'newPotShape')">SQ Квадрат</button>
+          <button class="chip" data-val="RC" onclick="selectChip(this,'newPotShape')">RC Прямоуг.</button>
+          <button class="chip" data-val="OV" onclick="selectChip(this,'newPotShape')">OV Овал</button>
+          <button class="chip" data-val="HEX" onclick="selectChip(this,'newPotShape')">HEX Шестигр.</button>
+          <button class="chip" data-val="BWL" onclick="selectChip(this,'newPotShape')">BWL Плошка</button>
+          <button class="chip" data-val="NAT" onclick="selectChip(this,'newPotShape')">NAT Природная</button>
+          <button class="chip" data-val="RAW" onclick="selectChip(this,'newPotShape')">RAW Грубая</button>
+          <button class="chip" data-val="STN" onclick="selectChip(this,'newPotShape')">STN Камень</button>
+          <button class="chip" data-val="ORG" onclick="selectChip(this,'newPotShape')">ORG Органик</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Пропорции</label>
+        <div class="chip-group" id="newPotProp">
+          <button class="chip" data-val="^" onclick="selectChip(this,'newPotProp')">^ Высокий</button>
+          <button class="chip" data-val=">" onclick="selectChip(this,'newPotProp')">> Низкий</button>
+          <button class="chip" data-val="=" onclick="selectChip(this,'newPotProp')">=  Пропорц.</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Размер</label>
+        <div class="chip-group" id="newPotSize">
+          <button class="chip" data-val="XS" onclick="selectChip(this,'newPotSize')">XS &lt;7см</button>
+          <button class="chip" data-val="S" onclick="selectChip(this,'newPotSize')">S 7-12</button>
+          <button class="chip selected" data-val="M" onclick="selectChip(this,'newPotSize')">M 12-20</button>
+          <button class="chip" data-val="L" onclick="selectChip(this,'newPotSize')">L 20-35</button>
+          <button class="chip" data-val="XL" onclick="selectChip(this,'newPotSize')">XL &gt;35</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Цвет</label>
+        <div class="chip-group" id="newPotColor">
+          <button class="chip" data-val="BK" onclick="selectChip(this,'newPotColor')">BK Чёрный</button>
+          <button class="chip" data-val="WH" onclick="selectChip(this,'newPotColor')">WH Белый</button>
+          <button class="chip" data-val="BR" onclick="selectChip(this,'newPotColor')">BR Коричневый</button>
+          <button class="chip" data-val="BE" onclick="selectChip(this,'newPotColor')">BE Бежевый</button>
+          <button class="chip" data-val="TC" onclick="selectChip(this,'newPotColor')">TC Терракота</button>
+          <button class="chip" data-val="GY" onclick="selectChip(this,'newPotColor')">GY Серый</button>
+          <button class="chip" data-val="GR" onclick="selectChip(this,'newPotColor')">GR Зелёный</button>
+          <button class="chip" data-val="BL" onclick="selectChip(this,'newPotColor')">BL Синий</button>
+          <button class="chip" data-val="RD" onclick="selectChip(this,'newPotColor')">RD Красный</button>
+          <button class="chip" data-val="TR" onclick="selectChip(this,'newPotColor')">TR Прозрачный</button>
+          <button class="chip" data-val="TQ" onclick="selectChip(this,'newPotColor')">TQ Бирюзовый</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Рисунок/узор</label>
+        <div class="chip-group" id="newPotPattern">
+          <button class="chip selected" data-val="" onclick="selectChip(this,'newPotPattern')">Без рисунка</button>
+          <button class="chip" data-val=".P" onclick="selectChip(this,'newPotPattern')">.P С рисунком</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveNewPot()">Сохранить горшок</button>
+    </div>
+  </div>
+</div>
+
+<!-- DEALS MODAL -->
+<div class="modal-overlay" id="modal-deals">
+  <div class="modal" style="border-radius:16px 16px 0 0; max-height:85vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">✅ Дела</span>
+      <button class="modal-close" onclick="closeModal('modal-deals')">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto; max-height:calc(85vh - 80px);">
+      <div class="search-wrap-inner" style="margin-bottom:12px">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="dealsSearchInput" type="search" placeholder="Поиск в делах...">
+      </div>
+      <div style="margin-bottom:10px">
+        <button class="add-btn" onclick="openAddTask()">＋ Добавить задачу для вида</button>
+      </div>
+      <div id="dealsList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PLANT MODAL -->
+<div class="modal-overlay" id="modal-edit-plant">
+  <div class="modal" style="max-height:92vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="editPlantTitle">Редактировать</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-plant')">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;max-height:calc(92vh - 80px);">
+      <div class="form-group">
+        <label class="form-label">Статус обработки</label>
+        <div class="chip-group" id="editPlantStatus">
+          <button class="chip" data-val="°" onclick="selectChip(this,'editPlantStatus')">° В работе</button>
+          <button class="chip" data-val="+" onclick="selectChip(this,'editPlantStatus')">+ Добавляется</button>
+          <button class="chip" data-val="✓" onclick="selectChip(this,'editPlantStatus')">✓ Закрыто</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Флаги обработки</label>
+        <div class="chip-group" id="editPlantFlags">
+          <button class="chip" data-val="#" onclick="toggleFlag(this,'#')"># Физ. действия</button>
+          <button class="chip" data-val="§" onclick="toggleFlag(this,'§')">§ В приложениях</button>
+          <button class="chip" data-val="∆" onclick="toggleFlag(this,'∆')">∆ В таблицах</button>
+          <button class="chip" data-val="©" onclick="toggleFlag(this,'©')">© QR-код</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Короткий код ухода</label>
+        <input class="form-input" id="editPlantShortCare" placeholder="≈○⌂◇" style="font-size:16px">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Способ получения</label>
+        <div class="chip-group" id="editPlantOrigin">
+          <button class="chip" data-val="черенок" onclick="selectChip(this,'editPlantOrigin')">🌿 Черенок</button>
+          <button class="chip" data-val="семя" onclick="selectChip(this,'editPlantOrigin')">🌱 Семя</button>
+          <button class="chip" data-val="ямадори" onclick="selectChip(this,'editPlantOrigin')">⛰️ Ямадори</button>
+          <button class="chip" data-val="куплено" onclick="selectChip(this,'editPlantOrigin')">🛒 Куплено</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Стиль бонсай</label>
+        <select class="form-input" id="editPlantBonsaiStyle">
+          <option value="">— не выбран —</option>
+          <option>Чоккан — формальный прямой</option>
+          <option>Мёги — неформальный прямой</option>
+          <option>Шакан — склонный</option>
+          <option>Кенгай — каскадный</option>
+          <option>Хан-Кенгай — полукаскадный</option>
+          <option>Фукинанагаши — подветренный</option>
+          <option>Бунжинги — литерат</option>
+          <option>Хокидачи — веничный</option>
+          <option>Сокан — двойной ствол</option>
+          <option>Санкан — три ствола</option>
+          <option>Кабудачи — многоствольный</option>
+          <option>Икадабуки — плот</option>
+          <option>Неагари — обнажённые корни</option>
+          <option>Сэкиддзёдзю — корни на камне</option>
+          <option>Ишитцуки — корень на камне</option>
+          <option>Пенцзин-Сайкэй — миниатюрный пейзаж</option>
+          <option>Недзикан — крученый ствол</option>
+          <option>Банкан — изогнутый</option>
+          <option>Такодзукури — осьминог</option>
+          <option>Сабамики — выдалбливаемый ствол</option>
+          <option>Шаримики — мёртвая древесина</option>
+          <option>Канжо — петля/кольцо</option>
+          <option>Ёса-Уэ — лесная/групповая посадка</option>
+          <option>Бёртон-Космический</option>
+          <option>Другой</option>
+        </select>
+      </div>
+      <div class="form-group" id="editBonsaiOtherWrap" style="display:none">
+        <label class="form-label">Другой стиль</label>
+        <input class="form-input" id="editPlantBonsaiOther" placeholder="Название стиля">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Дата начала</label>
+        <input class="form-input" id="editPlantDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ландшафт</label>
+        <select class="form-input" id="editPlantLandscape"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Горшок</label>
+        <select class="form-input" id="editPlantPot"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Сорт / Вариация</label>
+        <input class="form-input" id="editPlantVariety">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Страна</label>
+        <input class="form-input" id="editPlantCountry">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Цена</label>
+          <input class="form-input" id="editPlantPrice" type="number">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Количество</label>
+          <input class="form-input" id="editPlantQty" type="number">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Комментарий</label>
+        <textarea class="form-input form-textarea" id="editPlantComment"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveEditPlant()">💾 Сохранить изменения</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD HISTORY MODAL -->
+<div class="modal-overlay" id="modal-add-history">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Запись в историю</span>
+      <button class="modal-close" onclick="closeModal('modal-add-history')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Действие</label>
+        <input class="form-input" id="historyTitle" placeholder="Пересадка, Обрезка, Подкормка...">
+        <div id="historyTitleSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Дата</label>
+        <input class="form-input" id="historyDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Комментарий</label>
+        <textarea class="form-input form-textarea" id="historyComment" placeholder="Подробности..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Фото (опционально)</label>
+        <div class="photo-drop-zone" id="historyDropZone" ondragover="handleDragOver(event,'historyDropZone')" ondragleave="handleDragLeave('historyDropZone')" ondrop="handleDrop(event,'historyPhotoPreview','historyPhotoData')">
+          <input type="file" accept="image/*" onchange="handleFileInput(event,'historyPhotoPreview','historyPhotoData')">
+          <div class="photo-drop-zone-icon">📷</div>
+          <div class="photo-drop-zone-text">Нажмите или перетащите фото<br><span style="font-size:11px">Также Ctrl+V для вставки</span></div>
+        </div>
+        <div class="photo-preview-wrap" id="historyPhotoPreview"></div>
+        <input type="hidden" id="historyPhotoData">
+      </div>
+      <button class="btn-primary" id="historySaveBtn" onclick="saveHistory()">Сохранить запись</button>
+      <button class="btn-danger" id="historyDeleteBtn" style="margin-top:8px;display:none" onclick="deleteHistoryEntry()">🗑 Удалить запись</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PHOTO MODAL -->
+<div class="modal-overlay" id="modal-add-photo">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Добавить фото</span>
+      <button class="modal-close" onclick="closeModal('modal-add-photo')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Фото</label>
+        <div class="photo-drop-zone" id="photoDropZone" ondragover="handleDragOver(event,'photoDropZone')" ondragleave="handleDragLeave('photoDropZone')" ondrop="handleDrop(event,'photoPreview','newPhotoData')">
+          <input type="file" accept="image/*" onchange="handleFileInput(event,'photoPreview','newPhotoData')">
+          <div class="photo-drop-zone-icon">📷</div>
+          <div class="photo-drop-zone-text">Нажмите или перетащите фото<br><span style="font-size:11px">Также можно вставить из буфера (Ctrl+V)</span></div>
+        </div>
+        <div class="photo-preview-wrap" id="photoPreview"></div>
+        <input type="hidden" id="newPhotoData">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Дата фото</label>
+        <input class="form-input" id="newPhotoDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Заметка</label>
+        <input class="form-input" id="newPhotoNote" placeholder="опционально">
+      </div>
+      <button class="btn-primary" onclick="savePhoto()">Добавить фото</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="modal-add-task">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Новая задача</span>
+      <button class="modal-close" onclick="closeModal('modal-add-task')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Тип задачи</label>
+        <div class="chip-group" id="newTaskType">
+          <button class="chip selected" data-val="species" onclick="selectChip(this,'newTaskType')">🌿 Для вида</button>
+          <button class="chip" data-val="plant" onclick="selectChip(this,'newTaskType')">🪴 Для растения</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Название задачи</label>
+        <input class="form-input" id="newTaskName" placeholder="Перенести на зимовку">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Вид / Растение</label>
+        <select class="form-input" id="newTaskTarget">
+          <option value="">— выбрать —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Дата</label>
+        <input class="form-input" id="newTaskDate" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Комментарий</label>
+        <textarea class="form-input form-textarea" id="newTaskComment" style="min-height:50px"></textarea>
+      </div>
+      <button class="btn-primary" onclick="saveNewTask()">Сохранить задачу</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT SPECIES MODAL -->
+<div class="modal-overlay" id="modal-edit-species">
+  <div class="modal" style="max-height:90vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Редактировать вид</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-species')">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;max-height:calc(90vh-80px)">
+      <div class="form-group">
+        <label class="form-label">Русское название</label>
+        <input class="form-input" id="editSpeciesRu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Латинское название</label>
+        <input class="form-input" id="editSpeciesLat" style="font-style:italic">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Код вида</label>
+        <input class="form-input" id="editSpeciesCode" style="font-family:monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Синонимы</label>
+        <input class="form-input" id="editSpeciesSynonyms">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Тип растения</label>
+        <div class="chip-group" id="editSpeciesType">
+          <button class="chip chip-icon" data-val="🌳" onclick="selectChip(this,'editSpeciesType')">🌳</button>
+          <button class="chip chip-icon" data-val="🌵" onclick="selectChip(this,'editSpeciesType')">🌵</button>
+          <button class="chip chip-icon" data-val="🪴" onclick="selectChip(this,'editSpeciesType')">🪴</button>
+          <button class="chip chip-icon" data-val="盆" onclick="selectChip(this,'editSpeciesType')">盆</button>
+          <button class="chip chip-icon" data-val="🌲" onclick="selectChip(this,'editSpeciesType')">🌲</button>
+          <button class="chip chip-icon" data-val="🌱" onclick="selectChip(this,'editSpeciesType')">🌱</button>
+          <button class="chip chip-icon" data-val="✾" onclick="selectChip(this,'editSpeciesType')">✾</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Полный код ухода</label>
+        <input class="form-input" id="editSpeciesCareCode" style="font-family:monospace;font-size:12px">
+      </div>
+      <button class="btn-primary" onclick="saveEditSpecies()">💾 Сохранить вид</button>
+      <button class="btn-danger" style="margin-top:8px" onclick="deleteSpecies()">🗑 Удалить вид</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT LANDSCAPE MODAL -->
+<div class="modal-overlay" id="modal-edit-landscape">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Редактировать ландшафт</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-landscape')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Название</label>
+        <input class="form-input" id="editLandscapeName">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Код</label>
+        <input class="form-input" id="editLandscapeCode" style="font-family:monospace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Освещённость</label>
+        <div class="chip-group" id="editLandscapeLight">
+          <button class="chip chip-icon" data-val="☀️" onclick="selectChip(this,'editLandscapeLight')">☀️</button>
+          <button class="chip chip-icon" data-val="⛅" onclick="selectChip(this,'editLandscapeLight')">⛅</button>
+          <button class="chip chip-icon" data-val="☁️" onclick="selectChip(this,'editLandscapeLight')">☁️</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Темп. мин °C</label>
+          <input class="form-input" id="editLandscapeTempMin" type="number">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Темп. макс °C</label>
+          <input class="form-input" id="editLandscapeTempMax" type="number">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Влажность</label>
+        <div class="chip-group" id="editLandscapeHumidity">
+          <button class="chip" data-val="~" onclick="selectChip(this,'editLandscapeHumidity')">~ Низкая</button>
+          <button class="chip" data-val="≈" onclick="selectChip(this,'editLandscapeHumidity')">≈ Средняя</button>
+          <button class="chip" data-val="≋" onclick="selectChip(this,'editLandscapeHumidity')">≋ Высокая</button>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveEditLandscape()">💾 Сохранить</button>
+      <button class="btn-danger" style="margin-top:8px" onclick="deleteLandscape()">🗑 Удалить ландшафт</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POT MODAL -->
+<div class="modal-overlay" id="modal-edit-pot">
+  <div class="modal" style="max-height:90vh;">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title">Редактировать горшок</span>
+      <button class="modal-close" onclick="closeModal('modal-edit-pot')">✕</button>
+    </div>
+    <div class="modal-body" style="overflow-y:auto;max-height:calc(90vh-80px)">
+      <div class="form-group">
+        <label class="form-label">Текущий код</label>
+        <div id="editPotCurrentCode" style="font-family:monospace;font-size:13px;color:var(--moss);padding:8px;background:var(--parchment);border-radius:6px"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Материал</label>
+        <div class="chip-group" id="editPotMaterial">
+          <button class="chip" data-val="PL" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">PL Пластик</button>
+          <button class="chip" data-val="CL" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">CL Глина</button>
+          <button class="chip" data-val="CR" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">CR Керамика</button>
+          <button class="chip" data-val="CN" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">CN Бетон</button>
+          <button class="chip" data-val="FB" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">FB Ткань</button>
+          <button class="chip" data-val="WD" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">WD Дерево</button>
+          <button class="chip" data-val="MT" onclick="selectChip(this,'editPotMaterial');updateEditPotCode()">MT Металл</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Форма</label>
+        <div class="chip-group" id="editPotShape">
+          <button class="chip" data-val="RD" onclick="selectChip(this,'editPotShape');updateEditPotCode()">RD Круглый</button>
+          <button class="chip" data-val="SQ" onclick="selectChip(this,'editPotShape');updateEditPotCode()">SQ Квадрат</button>
+          <button class="chip" data-val="RC" onclick="selectChip(this,'editPotShape');updateEditPotCode()">RC Прямоуг.</button>
+          <button class="chip" data-val="OV" onclick="selectChip(this,'editPotShape');updateEditPotCode()">OV Овал</button>
+          <button class="chip" data-val="HEX" onclick="selectChip(this,'editPotShape');updateEditPotCode()">HEX Шестигр.</button>
+          <button class="chip" data-val="BWL" onclick="selectChip(this,'editPotShape');updateEditPotCode()">BWL Плошка</button>
+          <button class="chip" data-val="NAT" onclick="selectChip(this,'editPotShape');updateEditPotCode()">NAT Природная</button>
+          <button class="chip" data-val="RAW" onclick="selectChip(this,'editPotShape');updateEditPotCode()">RAW Грубая</button>
+          <button class="chip" data-val="STN" onclick="selectChip(this,'editPotShape');updateEditPotCode()">STN Камень</button>
+          <button class="chip" data-val="ORG" onclick="selectChip(this,'editPotShape');updateEditPotCode()">ORG Органик</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Пропорции</label>
+        <div class="chip-group" id="editPotProp">
+          <button class="chip" data-val="^" onclick="selectChip(this,'editPotProp');updateEditPotCode()">^ Высокий</button>
+          <button class="chip" data-val=">" onclick="selectChip(this,'editPotProp');updateEditPotCode()">> Низкий</button>
+          <button class="chip" data-val="=" onclick="selectChip(this,'editPotProp');updateEditPotCode()">=  Пропорц.</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Размер</label>
+        <div class="chip-group" id="editPotSize">
+          <button class="chip" data-val="XS" onclick="selectChip(this,'editPotSize');updateEditPotCode()">XS &lt;7см</button>
+          <button class="chip" data-val="S" onclick="selectChip(this,'editPotSize');updateEditPotCode()">S 7-12</button>
+          <button class="chip" data-val="M" onclick="selectChip(this,'editPotSize');updateEditPotCode()">M 12-20</button>
+          <button class="chip" data-val="L" onclick="selectChip(this,'editPotSize');updateEditPotCode()">L 20-35</button>
+          <button class="chip" data-val="XL" onclick="selectChip(this,'editPotSize');updateEditPotCode()">XL &gt;35</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Цвет</label>
+        <div class="chip-group" id="editPotColor">
+          <button class="chip" data-val="BK" onclick="selectChip(this,'editPotColor');updateEditPotCode()">BK Чёрный</button>
+          <button class="chip" data-val="WH" onclick="selectChip(this,'editPotColor');updateEditPotCode()">WH Белый</button>
+          <button class="chip" data-val="BR" onclick="selectChip(this,'editPotColor');updateEditPotCode()">BR Коричневый</button>
+          <button class="chip" data-val="BE" onclick="selectChip(this,'editPotColor');updateEditPotCode()">BE Бежевый</button>
+          <button class="chip" data-val="TC" onclick="selectChip(this,'editPotColor');updateEditPotCode()">TC Терракота</button>
+          <button class="chip" data-val="GY" onclick="selectChip(this,'editPotColor');updateEditPotCode()">GY Серый</button>
+          <button class="chip" data-val="GR" onclick="selectChip(this,'editPotColor');updateEditPotCode()">GR Зелёный</button>
+          <button class="chip" data-val="BL" onclick="selectChip(this,'editPotColor');updateEditPotCode()">BL Синий</button>
+          <button class="chip" data-val="RD" onclick="selectChip(this,'editPotColor');updateEditPotCode()">RD Красный</button>
+          <button class="chip" data-val="TR" onclick="selectChip(this,'editPotColor');updateEditPotCode()">TR Прозрачный</button>
+          <button class="chip" data-val="TQ" onclick="selectChip(this,'editPotColor');updateEditPotCode()">TQ Бирюзовый</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Рисунок</label>
+        <div class="chip-group" id="editPotPattern">
+          <button class="chip" data-val="" onclick="selectChip(this,'editPotPattern');updateEditPotCode()">Без рисунка</button>
+          <button class="chip" data-val=".P" onclick="selectChip(this,'editPotPattern');updateEditPotCode()">.P С рисунком</button>
+        </div>
+      </div>
+      <div style="font-size:13px;font-family:monospace;color:var(--moss);padding:8px;background:var(--parchment);border-radius:6px;margin-bottom:12px" id="editPotNewCode">Новый код: —</div>
+      <button class="btn-primary" onclick="saveEditPot()">💾 Сохранить горшок</button>
+      <button class="btn-danger" style="margin-top:8px" onclick="deletePot()">🗑 Удалить горшок</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA STORE ============
+let db = {
+  species: [],
+  plants: [],
+  landscapes: [],
+  pots: [],
+  tasks: [],
+  history: []
+};
+
+let currentSpeciesId = null;
+let currentPlantId = null;
+
+// ============ INIT ============
+function init() {
+  const saved = localStorage.getItem('gideonBonsaiDB');
+  if (saved) {
+    try {
+      db = JSON.parse(saved);
+      updateStatus('загружено из кэша');
+    } catch(e) {}
+  } else {
+    loadDefaultData();
+  }
+  loadPhotos();
+  render();
+}
+
+function loadDefaultData() {
+  db.landscapes = [
+    {id:'l1', name:'Теплица 1', code:'Т¹', light:'☀️', tempMin:10, tempMax:40, humidity:'≈', locations:[]},
+    {id:'l2', name:'Теплица 2', code:'Т²', light:'☀️', tempMin:10, tempMax:40, humidity:'≈', locations:[]},
+    {id:'l3', name:'Комната 1', code:'Км¹', light:'⛅', tempMin:18, tempMax:28, humidity:'~', locations:[]},
+    {id:'l4', name:'Улица Входная зона', code:'УВ', light:'☀️', tempMin:5, tempMax:45, humidity:'~', locations:[]},
+    {id:'l5', name:'Улица Боковая зона', code:'УБ', light:'⛅', tempMin:5, tempMax:45, humidity:'~', locations:[]},
+    {id:'l6', name:'Улица Шкафчики', code:'УШк', light:'⛅', tempMin:5, tempMax:45, humidity:'~', locations:[]},
+    {id:'l7', name:'Клетка', code:'Кл', light:'☀️', tempMin:5, tempMax:45, humidity:'~', locations:[]},
+    {id:'l8', name:'Трава', code:'Тр', light:'☀️', tempMin:5, tempMax:45, humidity:'≈', locations:[]},
+    {id:'l9', name:'Горка', code:'Гр', light:'☀️', tempMin:5, tempMax:45, humidity:'~', locations:[]},
+  ];
+  db.pots = [
+    {id:'pot-pl', material:'PL', matName:'Пластик', number:'001', shape:'RD', prop:'^', size:'M', color:'TR', pattern:'', code:'POT.PL001.RD^.M.TR'},
+    {id:'pot-cl', material:'CL', matName:'Глина', number:'001', shape:'SQ', prop:'=', size:'M', color:'TC', pattern:'', code:'POT.CL001.SQ=.M.TC'},
+    {id:'pot-cr', material:'CR', matName:'Керамика', number:'001', shape:'OV', prop:'>', size:'L', color:'BL', pattern:'', code:'POT.CR001.OV>.L.BL'},
+    {id:'pot-cn', material:'CN', matName:'Бетон', number:'001', shape:'NAT', prop:'>', size:'L', color:'GY', pattern:'', code:'POT.CN001.NAT>.L.GY'},
+    {id:'pot-fb', material:'FB', matName:'Ткань', number:'001', shape:'RD', prop:'=', size:'L', color:'BK', pattern:'', code:'POT.FB001.RD=.L.BK'},
+    {id:'pot-wd', material:'WD', matName:'Дерево', number:'001', shape:'RC', prop:'^', size:'M', color:'BR', pattern:'', code:'POT.WD001.RC^.M.BR'},
+    {id:'pot-mt', material:'MT', matName:'Металл', number:'001', shape:'RD', prop:'=', size:'M', color:'BK', pattern:'', code:'POT.MT001.RD=.M.BK'},
+  ];
+  db.species = [
+    {id:'s-fbe', nameRu:'Фикус Бенджамина', nameLat:'Ficus benjamina', code:'ФБе', type:'🌳', synonyms:'Фикус плакучий, Weeping fig', careCode:'EV.T18-35.Z15.W3.L4.S23.P6.R2'},
+    {id:'s-bna', nameRu:'Брахихитон наскальный', nameLat:'Brachychiton rupestris', code:'БНа', type:'🌳', synonyms:'Queensland bottle tree', careCode:'EV.T18-40.Z10.W2.L5.S34.P8.R3'},
+    {id:'s-jac', nameRu:'Жакаранда', nameLat:'Jacaranda mimosifolia', code:'ЖАк', type:'🌳', synonyms:'', careCode:'DE-SE.T18-35.Z15-20.W3-4.L5.S234.P2-3.R4a'},
+  ];
+  db.plants = [
+    {id:'p1', speciesId:'s-fbe', number:1, status:'✓', shortCare:'≈○⌂◇', origin:'куплено', bonsaiStyle:'Мёги', dateStart:'2022-03-15', landscapeId:'l1', potId:'pot-cr', variety:'', country:'Израиль', price:45, qty:1, comment:'Хорошо укоренился', photos:[], checkFlags:[], history:[]},
+    {id:'p2', speciesId:'s-bna', number:11, status:'°', shortCare:'☀◎⌂▽', origin:'семя', bonsaiStyle:'Чоккан', dateStart:'2021-06-01', landscapeId:'l4', potId:'pot-pl', variety:'', country:'Австралия', price:0, qty:1, comment:'', photos:[], checkFlags:['#','§'], history:[]},
+    {id:'p3', speciesId:'s-jac', number:1, status:'°', shortCare:'≈○⌂◇', origin:'куплено', bonsaiStyle:'', dateStart:'2023-01-10', landscapeId:'l1', potId:'pot-pl', variety:'', country:'Израиль', price:30, qty:1, comment:'', photos:[], checkFlags:['#'], history:[]},
+  ];
+  autosave();
+}
+
+// ============ RENDER ============
+function render() {
+  renderSpecies();
+  renderLandscapes();
+  renderPots();
+  updateDealsBadge();
+}
+
+function renderSpecies(filter='') {
+  const list = document.getElementById('speciesList');
+  const f = filter.toLowerCase();
+  const filtered = db.species.filter(s =>
+    !f || s.nameRu.toLowerCase().includes(f) || s.nameLat.toLowerCase().includes(f) || s.code.toLowerCase().includes(f)
+  ).sort((a,b) => a.nameRu.localeCompare(b.nameRu, 'ru'));
+
+  document.getElementById('speciesCount').textContent = `${filtered.length} видов`;
+
+  list.innerHTML = filtered.map(s => {
+    const count = db.plants.filter(p => p.speciesId === s.id).length;
+    return `<div class="folder-card">
+      <div class="folder-card-header" onclick="openSpecies('${s.id}')">
+        <div class="species-icon">${s.type || '🌱'}</div>
+        <div class="folder-info">
+          <div class="folder-name">${s.nameRu}</div>
+          <div class="folder-latin">${s.nameLat}</div>
+          <div class="folder-code">${s.code} · ${s.careCode || '—'}</div>
+        </div>
+        <span class="folder-count">${count}</span>
+      </div>
+      <div style="display:flex;border-top:1px solid var(--ash)">
+        <button onclick="openSpecies('${s.id}')" style="flex:1;padding:8px;background:none;border:none;border-right:1px solid var(--ash);font-size:12px;color:var(--moss);cursor:pointer">🌿 Открыть</button>
+        <button onclick="openEditSpecies('${s.id}')" style="flex:1;padding:8px;background:none;border:none;font-size:12px;color:var(--stone);cursor:pointer">✏️ Редактировать</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLandscapes(filter='') {
+  const list = document.getElementById('landscapeList');
+  const f = filter.toLowerCase();
+  const filtered = db.landscapes.filter(l =>
+    !f || l.name.toLowerCase().includes(f) || l.code.toLowerCase().includes(f)
+  );
+  document.getElementById('landscapeCount').textContent = filtered.length;
+  list.innerHTML = filtered.map(l => `
+    <div class="landscape-card">
+      <div class="landscape-header" onclick="this.parentElement.querySelector('.landscape-locations').classList.toggle('hidden')">
+        <div class="landscape-icon">${l.light || '🌍'}</div>
+        <div style="flex:1">
+          <div class="landscape-name">${l.name}</div>
+          <div class="landscape-code">${l.code} · ${l.tempMin||'?'}–${l.tempMax||'?'}°C · ${l.humidity||''}</div>
+        </div>
+        <button onclick="event.stopPropagation();openEditLandscape('${l.id}')" style="background:none;border:none;font-size:13px;color:var(--stone);cursor:pointer;padding:4px 8px">✏️</button>
+        <span class="folder-arrow">›</span>
+      </div>
+      <div class="landscape-locations hidden">
+        ${(l.locations||[]).length === 0 ? '<div style="padding:8px;font-size:12px;color:var(--stone)">Нет локаций</div>' :
+          (l.locations||[]).map(loc => `
+          <div class="location-item">
+            <div>
+              <div class="location-name">${loc.name}</div>
+              <div class="location-code">${loc.code}</div>
+            </div>
+            <span class="location-arrow">›</span>
+          </div>`).join('')}
+        <button class="add-btn" style="margin:6px 0" onclick="openAddLocation('${l.id}')">＋ Локация</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPots(filter='') {
+  const list = document.getElementById('potsList');
+  const f = filter.toLowerCase();
+
+  const materials = ['PL','CL','CR','CN','FB','WD','MT'];
+  const matNames = {PL:'Пластик',CL:'Глина',CR:'Керамика',CN:'Бетон',FB:'Ткань',WD:'Дерево',MT:'Металл'};
+
+  let html = '';
+  materials.forEach(mat => {
+    const pots = db.pots.filter(p => p.material === mat && (!f || p.code.toLowerCase().includes(f)));
+    if (pots.length === 0 && f) return;
+    html += `<div class="section-header" style="margin-top:12px"><span class="section-title">${matNames[mat]}</span><span class="count-badge">${pots.length}</span></div>`;
+    html += pots.map(p => `
+      <div class="pot-card">
+        <div class="pot-thumb">🪴</div>
+        <div style="flex:1">
+          <div class="pot-code">${p.code}</div>
+          <div class="pot-desc">${matNames[p.material]||''}</div>
+        </div>
+        <button onclick="openEditPot('${p.id}')" style="background:none;border:none;font-size:13px;color:var(--stone);cursor:pointer;padding:4px 8px">✏️</button>
+      </div>
+    `).join('');
+    html += `<button class="add-btn" onclick="openAddPot('${mat}')">＋ ${matNames[mat]}</button>`;
+  });
+  list.innerHTML = html;
+}
+
+function renderPlantsList(speciesId, filter='') {
+  const species = db.species.find(s => s.id === speciesId);
+  if (!species) return;
+  const f = filter.toLowerCase();
+  const plants = db.plants.filter(p => p.speciesId === speciesId && (
+    !f || getPlantLine1(p, species).toLowerCase().includes(f) || getPlantLine2(p, species).toLowerCase().includes(f)
+  ));
+
+  document.getElementById('plantsList').innerHTML = plants.map(p => `
+    <div class="plant-row" onclick="openPlant('${p.id}')">
+      <div class="plant-thumb">${species.type || '🌱'}</div>
+      <div class="plant-info">
+        <div class="plant-line1">${getPlantLine1(p, species)}</div>
+        <div class="plant-line2">${getPlantLine2(p, species)}</div>
+      </div>
+      <div class="status-dot ${p.status==='✓'?'status-done':p.status==='+'?'status-adding':'status-working'}"></div>
+    </div>
+  `).join('');
+}
+
+function getPlantLine1(p, species) {
+  const flags = (p.checkFlags||[]).join("");
+  const status = p.status || "°";
+  const landscape = db.landscapes.find(l => l.id === p.landscapeId);
+  const lCode = landscape ? landscape.code : "";
+  return `${status}${species.code}${String(p.number).padStart(2,"0")} ${lCode} ${species.type||""} ${flags} ${p.shortCare||""}`.trim();
+}
+
+function getPlantLine2(p, species) {
+  return species.nameRu;
+}
+
+function getPlantLine3(p, species) {
+  return species.nameLat;
+}
+
+function renderDealsList() {
+  const list = document.getElementById('dealsList');
+  const tasks = db.tasks.filter(t => !t.done);
+  if (tasks.length === 0) {
+    list.innerHTML = '<div style="text-align:center;color:var(--stone);padding:24px;font-size:13px">Нет активных дел 🌿</div>';
+    return;
+  }
+  list.innerHTML = tasks.map(t => {
+    const target = t.type === 'species'
+      ? db.species.find(s => s.id === t.targetId)
+      : db.plants.find(p => p.id === t.targetId);
+    const targetName = target ? (target.nameRu || getPlantLine1(target, db.species.find(s=>s.id===target.speciesId))) : '—';
+    return `<div class="deal-item">
+      <div class="deal-check" onclick="completeTask('${t.id}')"></div>
+      <div class="deal-info">
+        <div class="deal-title">${t.name}</div>
+        <div class="deal-plant">${targetName}</div>
+        ${t.date ? `<div class="deal-date">${t.date}</div>` : ''}
+        ${t.comment ? `<div class="history-comment">${t.comment}</div>` : ''}
+        <span class="${t.type==='species'?'deal-type-reg':'deal-type-task'}">${t.type==='species'?'Для вида':'Для растения'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPlantDetail(plantId) {
+  const plant = db.plants.find(p => p.id === plantId);
+  if (!plant) return;
+  const species = db.species.find(s => s.id === plant.speciesId);
+  if (!species) return;
+
+  document.getElementById('plantDetailTitle').textContent = `${species.code}${String(plant.number).padStart(2,'0')}`;
+  const mainPhoto = (plant.photos||[]).find(ph => ph.id === plant.mainPhotoId) || plant.photos?.[0];
+  const thumbEl = document.getElementById('plantDetailThumb');
+  if (mainPhoto) {
+    thumbEl.innerHTML = `<img src="${mainPhoto.data}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`;
+    thumbEl.style.position = 'relative';
+    thumbEl.style.overflow = 'hidden';
+  } else {
+    thumbEl.innerHTML = species.type || '🌱';
+    thumbEl.style.fontSize = '64px';
+  }
+  document.getElementById('plantDetailCodes').innerHTML = `
+    <div class="code-line1">${getPlantLine1(plant, species)}</div>
+    <div class="code-line2">${getPlantLine2(plant, species)}</div>
+    <div class="code-line2" style="font-style:italic">${getPlantLine3(plant, species)}</div>
+  `;
+
+  // Description
+  const landscape = db.landscapes.find(l => l.id === plant.landscapeId);
+  const pot = db.pots.find(p => p.id === plant.potId);
+  document.getElementById('plantDescriptionContent').innerHTML = `
+    <div class="form-group">
+      <label class="form-label">Синонимы</label>
+      <div style="font-size:13px;color:var(--stone)">${species.synonyms || '—'}</div>
+    </div>
+    <button class="add-btn" style="margin-bottom:12px" onclick="openAddPlant('${plant.speciesId}')">＋ Добавить существующий вид</button>
+    ${plant.variety ? `<div class="form-group"><label class="form-label">Сорт / Вариация</label><div style="font-size:13px">${plant.variety}</div></div>` : '<div class="form-group"><label class="form-label">Сорт / Вариация</label><div style="font-size:13px;color:var(--stone)">—</div></div>'}
+    <div class="form-group">
+      <label class="form-label">Способ получения</label>
+      <div style="font-size:13px">${plant.origin || '—'}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Стиль бонсай</label>
+      <div style="font-size:13px">${plant.bonsaiStyle || '—'}</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Дата начала</label>
+      <div style="font-size:13px">${plant.dateStart || '—'}</div>
+    </div>
+    ${landscape ? `<div class="link-row" onclick="switchToLandscape('${landscape.id}')">
+      <span class="link-label">Ландшафт</span>
+      <span class="link-value">${landscape.code} ${landscape.name} <span class="link-arrow">›</span></span>
+    </div>` : '<div class="form-group"><label class="form-label">Ландшафт</label><div style="font-size:13px;color:var(--stone)">—</div></div>'}
+    ${pot ? `<div class="link-row" onclick="switchToPot('${pot.id}')">
+      <span class="link-label">Горшок</span>
+      <span class="link-value">${pot.code} <span class="link-arrow">›</span></span>
+    </div>` : '<div class="form-group"><label class="form-label">Горшок</label><div style="font-size:13px;color:var(--stone)">—</div></div>'}
+    ${plant.country ? `<div class="form-group"><label class="form-label">Страна</label><div style="font-size:13px">${plant.country}</div></div>` : ''}
+    <div class="form-row">
+      ${plant.price ? `<div class="form-group"><label class="form-label">Цена</label><div style="font-size:13px">${plant.price}</div></div>` : ''}
+      ${plant.qty ? `<div class="form-group"><label class="form-label">Количество</label><div style="font-size:13px">${plant.qty}</div></div>` : ''}
+    </div>
+    ${plant.comment ? `<div class="form-group"><label class="form-label">Комментарий</label><div style="font-size:13px">${plant.comment}</div></div>` : ''}
+    <div class="divider"></div>
+    <button class="btn-secondary" onclick="openEditPlant('${plant.id}')">✏️ Редактировать</button>
+    <button class="btn-secondary" style="margin-top:8px" onclick="clonePlant('${plant.id}')">📋 Клонировать</button>
+    <button class="btn-danger" onclick="deletePlant('${plant.id}')">🗑 Удалить растение</button>
+  `;
+
+  // History
+  const history = (plant.history || []).slice().reverse();
+  const pending = db.tasks.filter(t => t.type==='plant' && t.targetId===plantId && !t.done);
+  document.getElementById('plantHistoryContent').innerHTML = `
+    ${pending.length > 0 ? `<div class="section-title" style="margin-bottom:8px">Дела</div>
+    ${pending.map(t => `<div class="deal-item">
+      <div class="deal-check" onclick="completeTask('${t.id}');renderPlantDetail('${plantId}')"></div>
+      <div class="deal-info"><div class="deal-title">${t.name}</div>${t.date?`<div class="deal-date">${t.date}</div>`:''}</div>
+    </div>`).join('')}
+    <div class="divider"></div>` : ''}
+    <div class="section-title" style="margin-bottom:8px">История</div>
+    ${history.length === 0 ? '<div style="color:var(--stone);font-size:13px">История пуста</div>' :
+      history.map(h => `<div class="history-item">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="history-date">${h.date}</div>
+          <button onclick="openEditHistory('${plantId}','${h.id}')" style="background:none;border:none;font-size:11px;color:var(--stone);cursor:pointer;padding:2px 6px">✏️</button>
+        </div>
+        <div class="history-title">${h.title}</div>
+        ${h.comment ? `<div class="history-comment">${h.comment}</div>` : ''}
+        ${h.photo ? `<img src="${h.photo}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px;border:1px solid var(--ash)">` : ''}
+      </div>`).join('')}
+    <div class="divider"></div>
+    <button class="add-btn" onclick="openAddHistory('${plantId}')">＋ Добавить запись</button>
+  `;
+
+  // Photos tab
+  const photos = plant.photos || [];
+  const mainPhotoId = plant.mainPhotoId || (photos[0]?.id);
+  document.getElementById('plantPhotosContent').innerHTML = `
+    ${photos.length === 0
+      ? '<div style="text-align:center;color:var(--stone);padding:24px;font-size:13px">Нет фотографий</div>'
+      : `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+          ${photos.map(ph => `
+            <div style="position:relative;border-radius:8px;overflow:hidden;border:2px solid ${ph.id===mainPhotoId?'var(--moss)':'var(--ash)'}">
+              <img src="${ph.data}" style="width:100%;height:120px;object-fit:cover;display:block">
+              <div style="padding:4px 6px;background:var(--parchment)">
+                <div style="font-size:10px;color:var(--stone)">${ph.date||''}</div>
+                ${ph.note?`<div style="font-size:11px">${ph.note}</div>`:''}
+              </div>
+              <div style="display:flex;gap:4px;padding:4px 6px;background:var(--parchment)">
+                <button onclick="setMainPhoto('${plantId}','${ph.id}')" style="flex:1;font-size:10px;padding:3px;border:1px solid var(--ash);border-radius:4px;background:${ph.id===mainPhotoId?'var(--moss)':'none'};color:${ph.id===mainPhotoId?'white':'var(--stone)'};cursor:pointer">
+                  ${ph.id===mainPhotoId?'★ Главное':'☆ Главным'}
+                </button>
+                <button onclick="deletePhoto('${plantId}','${ph.id}')" style="font-size:10px;padding:3px 6px;border:1px solid var(--danger);border-radius:4px;background:none;color:var(--danger);cursor:pointer">✕</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>`}
+    <button class="add-btn" onclick="openAddPhoto('${plantId}')">＋ Добавить фото</button>
+  `;
+}
+
+// ============ PHOTO UPLOAD HELPERS ============
+function handleDragOver(e, zoneId) {
+  e.preventDefault();
+  document.getElementById(zoneId).classList.add('drag-over');
+}
+function handleDragLeave(zoneId) {
+  document.getElementById(zoneId).classList.remove('drag-over');
+}
+function handleDrop(e, previewId, dataId) {
+  e.preventDefault();
+  const zoneId = e.currentTarget.id;
+  document.getElementById(zoneId).classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) readImageFile(file, previewId, dataId);
+}
+function handleFileInput(e, previewId, dataId) {
+  const file = e.target.files[0];
+  if (file) readImageFile(file, previewId, dataId);
+}
+function readImageFile(file, previewId, dataId) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById(previewId).innerHTML =
+      `<img src="${e.target.result}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--ash)">`;
+    document.getElementById(dataId).value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Listen for paste anywhere in photo modals
+document.addEventListener('paste', e => {
+  const modalOpen = document.getElementById('modal-add-photo')?.classList.contains('open');
+  const historyOpen = document.getElementById('modal-add-history')?.classList.contains('open');
+  if (!modalOpen && !historyOpen) return;
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (modalOpen) readImageFile(file, 'photoPreview', 'newPhotoData');
+      if (historyOpen) readImageFile(file, 'historyPhotoPreview', 'historyPhotoData');
+      break;
+    }
+  }
+});
+
+function openAddPhoto(plantId) {
+  currentPlantId = plantId;
+  document.getElementById('newPhotoDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('newPhotoNote').value = '';
+  document.getElementById('newPhotoData').value = '';
+  document.getElementById('photoPreview').innerHTML = '';
+  openModal('modal-add-photo');
+}
+
+function savePhoto() {
+  const data = document.getElementById('newPhotoData').value;
+  if (!data) return alert('Выберите или вставьте фото');
+  const plant = db.plants.find(p => p.id === currentPlantId);
+  if (!plant) return;
+  if (!plant.photos) plant.photos = [];
+  const photo = {
+    id: 'ph'+Date.now(),
+    data,  // stored in separate photo storage
+    date: document.getElementById('newPhotoDate').value,
+    note: document.getElementById('newPhotoNote').value.trim()
+  };
+  plant.photos.push(photo);
+  if (!plant.mainPhotoId) plant.mainPhotoId = photo.id;
+  // Save photos separately from main DB to avoid localStorage size limit
+  savePhotos();
+  autosave();
+  closeModal('modal-add-photo');
+  renderPlantDetail(currentPlantId);
+  switchInnerTabDirect('photos');
+}
+
+function savePhotos() {
+  // Collect all photos from all plants
+  const allPhotos = {};
+  db.plants.forEach(p => {
+    (p.photos||[]).forEach(ph => {
+      if (ph.data) allPhotos[ph.id] = ph.data;
+    });
+  });
+  try {
+    localStorage.setItem('gideonPhotos', JSON.stringify(allPhotos));
+  } catch(e) {
+    // localStorage full - photos too large
+    console.warn('Photo storage full:', e);
+  }
+}
+
+function loadPhotos() {
+  try {
+    const raw = localStorage.getItem('gideonPhotos');
+    if (!raw) return;
+    const allPhotos = JSON.parse(raw);
+    db.plants.forEach(p => {
+      (p.photos||[]).forEach(ph => {
+        if (!ph.data && allPhotos[ph.id]) ph.data = allPhotos[ph.id];
+      });
+    });
+  } catch(e) { console.warn('Error loading photos:', e); }
+}
+
+function setMainPhoto(plantId, photoId) {
+  const plant = db.plants.find(p => p.id === plantId);
+  if (plant) { plant.mainPhotoId = photoId; autosave(); renderPlantDetail(plantId); switchInnerTabDirect('photos'); }
+}
+
+function deletePhoto(plantId, photoId) {
+  const plant = db.plants.find(p => p.id === plantId);
+  if (!plant) return;
+  plant.photos = plant.photos.filter(ph => ph.id !== photoId);
+  if (plant.mainPhotoId === photoId) plant.mainPhotoId = plant.photos[0]?.id || null;
+  autosave();
+  renderPlantDetail(plantId);
+  switchInnerTabDirect('photos');
+}
+
+// ============ NAVIGATION ============
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${tab}`).classList.add('active');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('dealsFab').style.display = 'flex';
+}
+
+function switchInnerTab(tab) {
+  document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  ['description','photos','history'].forEach(t => {
+    document.getElementById(`innerTab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
+  });
+}
+
+// ============ MODALS ============
+
+// ============ BACK NAVIGATION ============
+const modalStack = [];
+
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  modalStack.push(id);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  const idx = modalStack.lastIndexOf(id);
+  if (idx !== -1) modalStack.splice(idx, 1);
+}
+function closeTopModal() {
+  if (modalStack.length === 0) return false;
+  const top = modalStack[modalStack.length - 1];
+  closeModal(top);
+  return true;
+}
+
+// Hardware back button (Android)
+window.addEventListener('popstate', e => {
+  if (closeTopModal()) {
+    history.pushState(null, '', window.location.href);
+  }
+});
+history.pushState(null, '', window.location.href);
+
+// Swipe right to close modal
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 80 && touchStartX < 40) closeTopModal();
+}, {passive:true});
+
+
+function openSpecies(speciesId) {
+  currentSpeciesId = speciesId;
+  const species = db.species.find(s => s.id === speciesId);
+  document.getElementById('modalSpeciesTitle').textContent = species.nameRu;
+  renderPlantsList(speciesId);
+  openModal('modal-species');
+}
+
+function openPlant(plantId) {
+  currentPlantId = plantId;
+  renderPlantDetail(plantId);
+  switchInnerTabDirect('description');
+  openModal('modal-plant');
+  document.getElementById('dealsFab').style.display = 'none';
+}
+
+function switchInnerTabDirect(tab) {
+  document.querySelectorAll('.inner-tab').forEach((t,i) => {
+    const tabs = ['description','photos','history'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  ['description','photos','history'].forEach(t => {
+    document.getElementById(`innerTab${t.charAt(0).toUpperCase()+t.slice(1)}`).classList.toggle('hidden', t !== tab);
+  });
+}
+
+function openDeals() {
+  renderDealsList();
+  openModal('modal-deals');
+}
+
+function openAddSpecies() {
+  openModal('modal-add-species');
+}
+
+function openAddPlant(speciesId) {
+  currentSpeciesId = speciesId;
+  const species = db.species.find(s => s.id === speciesId);
+  document.getElementById('addPlantTitle').textContent = `Добавить: ${species.nameRu}`;
+
+  // Populate selects
+  const lSelect = document.getElementById('newPlantLandscape');
+  lSelect.innerHTML = '<option value="">— выбрать —</option>' +
+    db.landscapes.map(l => `<option value="${l.id}">${l.name} (${l.code})</option>`).join('');
+
+  const pSelect = document.getElementById('newPlantPot');
+  pSelect.innerHTML = '<option value="">— выбрать —</option>' +
+    db.pots.map(p => `<option value="${p.id}">${p.code}</option>`).join('');
+
+  const nextNum = Math.max(0, ...db.plants.filter(p=>p.speciesId===speciesId).map(p=>p.number)) + 1;
+  document.getElementById('newPlantNumber').value = nextNum;
+  document.getElementById('newPlantCodePreview').textContent = `Код: ${species.code}${String(nextNum).padStart(2,'0')}`;
+
+  closeModal('modal-species');
+  openModal('modal-add-plant');
+}
+
+function openAddLandscape() {
+  openModal('modal-add-landscape');
+}
+
+function openAddLocation(landscapeId) {
+  const name = prompt('Название локации (например: Стеллаж 1):');
+  if (!name) return;
+  const code = prompt('Код локации (например: С¹):');
+  if (!code) return;
+  const landscape = db.landscapes.find(l => l.id === landscapeId);
+  if (!landscape.locations) landscape.locations = [];
+  landscape.locations.push({id:'loc'+Date.now(), name, code});
+  autosave();
+  renderLandscapes();
+}
+
+function openAddPot(defaultMat) {
+  if (defaultMat) {
+    document.querySelectorAll('#newPotMaterial .chip').forEach(c => {
+      c.classList.toggle('selected', c.dataset.val === defaultMat);
+    });
+  }
+  openModal('modal-add-pot');
+}
+
+function openAddTask() {
+  const select = document.getElementById('newTaskTarget');
+  select.innerHTML = '<option value="">— выбрать —</option>' +
+    db.species.map(s => `<option value="${s.id}">${s.nameRu} (${s.code})</option>`).join('');
+  openModal('modal-add-task');
+}
+
+function openAddHistory(plantId) {
+  currentPlantId = plantId;
+  currentEditHistoryId = null;
+  document.getElementById('historyDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('historyTitle').value = '';
+  document.getElementById('historyComment').value = '';
+  document.getElementById('historyPhotoData').value = '';
+  const preview = document.getElementById('historyPhotoPreview');
+  if (preview) preview.innerHTML = '';
+  document.getElementById('historyPhotoData').value = '';
+
+  // Reset button to add mode
+  const saveBtn = document.getElementById('historySaveBtn');
+  if (saveBtn) { saveBtn.textContent = 'Сохранить запись'; saveBtn.onclick = saveHistory; }
+  const delBtn = document.getElementById('historyDeleteBtn');
+  if (delBtn) delBtn.style.display = 'none';
+
+  // Show suggestions from existing history titles
+  const allTitles = [...new Set(db.plants.flatMap(p => (p.history||[]).map(h => h.title)))].filter(Boolean);
+  document.getElementById('historyTitleSuggestions').innerHTML = allTitles.slice(0,8).map(t =>
+    `<button class="chip" style="font-size:11px;padding:3px 10px" onclick="document.getElementById('historyTitle').value='${t}'">${t}</button>`
+  ).join('');
+
+  openModal('modal-add-history');
+}
+
+function previewHistoryPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const preview = document.getElementById('historyPhotoPreview');
+    if (preview) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:6px;border:1px solid var(--ash);margin-top:6px">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function deleteHistoryEntry() {
+  if (!confirm('Удалить запись из истории?')) return;
+  const plant = db.plants.find(p => p.id === currentPlantId);
+  if (plant) plant.history = plant.history.filter(h => h.id !== currentEditHistoryId);
+  autosave();
+  closeModal('modal-add-history');
+  renderPlantDetail(currentPlantId);
+  switchInnerTabDirect('history');
+  currentEditHistoryId = null;
+}
+
+function saveHistory() {
+  const title = document.getElementById('historyTitle').value.trim();
+  if (!title) return alert('Введите название действия');
+  const plant = db.plants.find(p => p.id === currentPlantId);
+  if (!plant) return;
+  if (!plant.history) plant.history = [];
+
+  const entry = {
+    id: 'h'+Date.now(),
+    date: document.getElementById('historyDate').value || new Date().toISOString().split('T')[0],
+    title,
+    comment: document.getElementById('historyComment').value.trim()
+  };
+
+  const finalize = () => {
+    plant.history.push(entry);
+    autosave();
+    closeModal('modal-add-history');
+    renderPlantDetail(currentPlantId);
+    switchInnerTabDirect('history');
+  };
+
+  const photoData = document.getElementById('historyPhotoData')?.value; const photoFile = null;
+  if (photoData) {
+    entry.photo = photoData;
+    if (!plant.photos) plant.photos = [];
+    plant.photos.push({id:'ph'+Date.now(), data:photoData, date:entry.date, note:title});
+  }
+  finalize();
+}
+
+// Edit history entry
+let currentEditHistoryId = null;
+function openEditHistory(plantId, historyId) {
+  currentPlantId = plantId;
+  currentEditHistoryId = historyId;
+  const plant = db.plants.find(p => p.id === plantId);
+  const entry = plant?.history?.find(h => h.id === historyId);
+  if (!entry) return;
+
+  document.getElementById('historyTitle').value = entry.title || '';
+  document.getElementById('historyDate').value = entry.date || '';
+  document.getElementById('historyComment').value = entry.comment || '';
+  document.getElementById('historyPhotoData').value = '';
+
+  // Show existing photo if any
+  const preview = document.getElementById('historyPhotoPreview');
+  if (entry.photo) {
+    document.getElementById('historyPhotoData').value = entry.photo;
+    if (preview) preview.innerHTML = `<img src="${entry.photo}" style="max-width:100%;max-height:120px;border-radius:6px;border:1px solid var(--ash);margin-top:6px">`;
+  } else {
+    document.getElementById('historyPhotoData').value = '';
+    if (preview) preview.innerHTML = '';
+  }
+
+  // Switch save button to update mode
+  const saveBtn = document.getElementById('historySaveBtn');
+  if (saveBtn) { saveBtn.textContent = '💾 Обновить запись'; saveBtn.onclick = updateHistory; }
+  const delBtn = document.getElementById('historyDeleteBtn');
+  if (delBtn) delBtn.style.display = 'block';
+
+  openModal('modal-add-history');
+}
+
+function updateHistory() {
+  const plant = db.plants.find(p => p.id === currentPlantId);
+  const entry = plant?.history?.find(h => h.id === currentEditHistoryId);
+  if (!entry) return;
+
+  entry.title = document.getElementById('historyTitle').value.trim() || entry.title;
+  entry.date = document.getElementById('historyDate').value || entry.date;
+  entry.comment = document.getElementById('historyComment').value.trim();
+
+  const finalize = () => {
+    autosave();
+    closeModal('modal-add-history');
+    renderPlantDetail(currentPlantId);
+    switchInnerTabDirect('history');
+    // Reset save button
+    const saveBtn = document.getElementById('historySaveBtn');
+    if (saveBtn) { saveBtn.textContent = 'Сохранить запись'; saveBtn.onclick = saveHistory; }
+    currentEditHistoryId = null;
+  };
+
+  const photoData = document.getElementById('historyPhotoData')?.value; const photoFile = null;
+  if (photoFile) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      entry.photo = e.target.result;
+      if (!plant.photos) plant.photos = [];
+      plant.photos.push({id:'ph'+Date.now(), data:e.target.result, date:entry.date, note:entry.title});
+      finalize();
+    };
+    reader.readAsDataURL(photoFile);
+  } else {
+    finalize();
+  }
+}
+
+function openEditPlant(plantId) {
+  currentPlantId = plantId;
+  const plant = db.plants.find(p => p.id === plantId);
+  const species = db.species.find(s => s.id === plant.speciesId);
+  if (!plant) return;
+
+  document.getElementById('editPlantTitle').textContent = `${species?.code||''}${String(plant.number).padStart(2,'0')}`;
+
+  // Status chips
+  document.querySelectorAll('#editPlantStatus .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === plant.status));
+
+  // Flag chips
+  const flags = plant.checkFlags || [];
+  document.querySelectorAll('#editPlantFlags .chip').forEach(c => c.classList.toggle('selected', flags.includes(c.dataset.val)));
+
+  document.getElementById('editPlantShortCare').value = plant.shortCare || '';
+
+  // Origin
+  document.querySelectorAll('#editPlantOrigin .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === plant.origin));
+
+  // Bonsai style
+  const styleSelect = document.getElementById('editPlantBonsaiStyle');
+  let styleFound = false;
+  for (let opt of styleSelect.options) { if (opt.value === plant.bonsaiStyle) { styleSelect.value = plant.bonsaiStyle; styleFound = true; break; } }
+  if (!styleFound && plant.bonsaiStyle) { styleSelect.value = 'Другой'; document.getElementById('editPlantBonsaiOther').value = plant.bonsaiStyle; document.getElementById('editBonsaiOtherWrap').style.display=''; }
+  else { document.getElementById('editBonsaiOtherWrap').style.display='none'; }
+
+  document.getElementById('editPlantDate').value = plant.dateStart || '';
+
+  const lSelect = document.getElementById('editPlantLandscape');
+  lSelect.innerHTML = '<option value="">— выбрать —</option>' + db.landscapes.map(l => `<option value="${l.id}" ${l.id===plant.landscapeId?'selected':''}>${l.name} (${l.code})</option>`).join('');
+
+  const pSelect = document.getElementById('editPlantPot');
+  pSelect.innerHTML = '<option value="">— выбрать —</option>' + db.pots.map(p => `<option value="${p.id}" ${p.id===plant.potId?'selected':''}>${p.code}</option>`).join('');
+
+  document.getElementById('editPlantVariety').value = plant.variety || '';
+  document.getElementById('editPlantCountry').value = plant.country || '';
+  document.getElementById('editPlantPrice').value = plant.price || '';
+  document.getElementById('editPlantQty').value = plant.qty || '';
+  document.getElementById('editPlantComment').value = plant.comment || '';
+
+  openModal('modal-edit-plant');
+}
+
+function toggleFlag(el, flag) {
+  el.classList.toggle('selected');
+}
+
+function saveEditPlant() {
+  const plant = db.plants.find(p => p.id === currentPlantId);
+  if (!plant) return;
+
+  plant.status = getSelected('editPlantStatus') || plant.status;
+  plant.checkFlags = [...document.querySelectorAll('#editPlantFlags .chip.selected')].map(c => c.dataset.val);
+  plant.shortCare = document.getElementById('editPlantShortCare').value.trim();
+  plant.origin = getSelected('editPlantOrigin') || plant.origin;
+
+  const styleVal = document.getElementById('editPlantBonsaiStyle').value;
+  plant.bonsaiStyle = styleVal === 'Другой' ? document.getElementById('editPlantBonsaiOther').value.trim() : styleVal;
+
+  plant.dateStart = document.getElementById('editPlantDate').value;
+  plant.landscapeId = document.getElementById('editPlantLandscape').value;
+  plant.potId = document.getElementById('editPlantPot').value;
+  plant.variety = document.getElementById('editPlantVariety').value.trim();
+  plant.country = document.getElementById('editPlantCountry').value.trim();
+  plant.price = parseFloat(document.getElementById('editPlantPrice').value) || 0;
+  plant.qty = parseInt(document.getElementById('editPlantQty').value) || 1;
+  plant.comment = document.getElementById('editPlantComment').value.trim();
+
+  autosave();
+  closeModal('modal-edit-plant');
+  renderPlantDetail(currentPlantId);
+  if (currentSpeciesId) renderPlantsList(currentSpeciesId);
+}
+
+// Show/hide "other bonsai style" field
+document.getElementById('editPlantBonsaiStyle')?.addEventListener('change', function() {
+  document.getElementById('editBonsaiOtherWrap').style.display = this.value === 'Другой' ? '' : 'none';
+});
+
+
+function saveNewSpecies() {
+  const nameRu = document.getElementById('newSpeciesRu').value.trim();
+  const nameLat = document.getElementById('newSpeciesLat').value.trim();
+  const code = document.getElementById('newSpeciesCode').value.trim();
+  if (!nameRu || !code) return alert('Заполните название и код');
+
+  const type = getSelected('newSpeciesType');
+  db.species.push({
+    id: 's'+Date.now(),
+    nameRu, nameLat, code, type,
+    synonyms: document.getElementById('newSpeciesSynonyms').value.trim(),
+    careCode: document.getElementById('newSpeciesCareCode').value.trim()
+  });
+  autosave();
+  renderSpecies();
+  closeModal('modal-add-species');
+  ['newSpeciesRu','newSpeciesLat','newSpeciesCode','newSpeciesSynonyms','newSpeciesCareCode'].forEach(id => document.getElementById(id).value='');
+}
+
+function saveNewPlant() {
+  const species = db.species.find(s => s.id === currentSpeciesId);
+  if (!species) return;
+  const num = parseInt(document.getElementById('newPlantNumber').value) || 1;
+
+  db.plants.push({
+    id: 'p'+Date.now(),
+    speciesId: currentSpeciesId,
+    number: num,
+    status: getSelected('newPlantStatus') || '°',
+    shortCare: document.getElementById('newPlantShortCare').value.trim(),
+    origin: getSelected('newPlantOrigin') || '',
+    bonsaiStyle: '',
+    dateStart: document.getElementById('newPlantDate').value,
+    landscapeId: document.getElementById('newPlantLandscape').value,
+    potId: document.getElementById('newPlantPot').value,
+    variety: document.getElementById('newPlantVariety').value.trim(),
+    country: document.getElementById('newPlantCountry').value.trim(),
+    price: parseFloat(document.getElementById('newPlantPrice').value) || 0,
+    qty: parseInt(document.getElementById('newPlantQty').value) || 1,
+    comment: document.getElementById('newPlantComment').value.trim(),
+    checkFlags: [],
+    photos: [],
+    history: []
+  });
+  autosave();
+  closeModal('modal-add-plant');
+  openSpecies(currentSpeciesId);
+}
+
+function saveNewLandscape() {
+  const name = document.getElementById('newLandscapeName').value.trim();
+  const code = document.getElementById('newLandscapeCode').value.trim();
+  if (!name || !code) return alert('Заполните название и код');
+  db.landscapes.push({
+    id: 'l'+Date.now(), name, code,
+    light: getSelected('newLandscapeLight') || '',
+    tempMin: document.getElementById('newLandscapeTempMin').value,
+    tempMax: document.getElementById('newLandscapeTempMax').value,
+    humidity: getSelected('newLandscapeHumidity') || '',
+    locations: []
+  });
+  autosave();
+  renderLandscapes();
+  closeModal('modal-add-landscape');
+}
+
+function saveNewPot() {
+  const mat = getSelected('newPotMaterial') || 'PL';
+  const num = String(parseInt(document.getElementById('newPotNumber').value)||1).padStart(3,'0');
+  const shape = getSelected('newPotShape') || 'RD';
+  const prop = getSelected('newPotProp') || '=';
+  const size = getSelected('newPotSize') || 'M';
+  const color = getSelected('newPotColor') || 'BK';
+  const pattern = getSelected('newPotPattern') || '';
+  const code = `POT.${mat}${num}.${shape}${prop}.${size}.${color}${pattern}`;
+  const matNames = {PL:'Пластик',CL:'Глина',CR:'Керамика',CN:'Бетон',FB:'Ткань',WD:'Дерево',MT:'Металл'};
+  db.pots.push({id:'pot'+Date.now(), material:mat, matName:matNames[mat]||mat, number:num, shape, prop, size, color, pattern, code});
+  autosave();
+  renderPots();
+  closeModal('modal-add-pot');
+}
+
+function saveNewTask() {
+  const name = document.getElementById('newTaskName').value.trim();
+  if (!name) return alert('Введите название задачи');
+  db.tasks.push({
+    id: 't'+Date.now(),
+    name,
+    type: getSelected('newTaskType') || 'species',
+    targetId: document.getElementById('newTaskTarget').value,
+    date: document.getElementById('newTaskDate').value,
+    comment: document.getElementById('newTaskComment').value.trim(),
+    done: false
+  });
+  autosave();
+  updateDealsBadge();
+  closeModal('modal-add-task');
+  renderDealsList();
+}
+
+function completeTask(taskId) {
+  const task = db.tasks.find(t => t.id === taskId);
+  if (!task) return;
+  if (task.type === 'plant') {
+    const plant = db.plants.find(p => p.id === task.targetId);
+    if (plant) {
+      if (!plant.history) plant.history = [];
+      plant.history.push({id:'h'+Date.now(), date:new Date().toISOString().split('T')[0], title:task.name, comment:task.comment||''});
+    }
+  }
+  task.done = true;
+  autosave();
+  updateDealsBadge();
+  renderDealsList();
+}
+
+function clonePlant(plantId) {
+  const plant = db.plants.find(p => p.id === plantId);
+  if (!plant) return;
+  const species = db.species.find(s => s.id === plant.speciesId);
+  const nextNum = Math.max(0, ...db.plants.filter(p=>p.speciesId===plant.speciesId).map(p=>p.number)) + 1;
+  const clone = JSON.parse(JSON.stringify(plant));
+  clone.id = 'p'+Date.now();
+  clone.number = nextNum;
+  clone.photos = [];
+  clone.status = '°';
+  db.plants.push(clone);
+  autosave();
+  closeModal('modal-plant');
+  openSpecies(plant.speciesId);
+}
+
+function deletePlant(plantId) {
+  if (!confirm('Удалить растение? Это действие необратимо.')) return;
+  db.plants = db.plants.filter(p => p.id !== plantId);
+  autosave();
+  closeModal('modal-plant');
+  if (currentSpeciesId) renderPlantsList(currentSpeciesId);
+  renderSpecies();
+}
+
+// ============ SEARCH ============
+function handleSearch() {
+  const val = document.getElementById('searchInput').value;
+  const activeTab = document.querySelector('.nav-tab.active')?.id?.replace('tab-','');
+  if (activeTab === 'plants') renderSpecies(val);
+  else if (activeTab === 'landscapes') renderLandscapes(val);
+  else if (activeTab === 'pots') renderPots(val);
+}
+
+function handleSpeciesSearch() {
+  const val = document.getElementById('speciesSearchInput').value;
+  renderPlantsList(currentSpeciesId, val);
+}
+
+// ============ HELPERS ============
+function selectChip(el, groupId) {
+  document.querySelectorAll(`#${groupId} .chip`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  if (groupId === 'newPotMaterial' || groupId === 'newPotShape' || groupId === 'newPotProp' || groupId === 'newPotSize' || groupId === 'newPotColor' || groupId === 'newPotPattern') {
+    updatePotCodePreview();
+  }
+}
+
+function getSelected(groupId) {
+  return document.querySelector(`#${groupId} .chip.selected`)?.dataset?.val || '';
+}
+
+function updatePotCodePreview() {
+  const mat = getSelected('newPotMaterial') || 'PL';
+  const num = String(parseInt(document.getElementById('newPotNumber')?.value)||1).padStart(3,'0');
+  const shape = getSelected('newPotShape') || '?';
+  const prop = getSelected('newPotProp') || '=';
+  const size = getSelected('newPotSize') || 'M';
+  const color = getSelected('newPotColor') || '?';
+  const pattern = getSelected('newPotPattern') || '';
+  const preview = document.getElementById('newPotCodePreview');
+  if (preview) preview.textContent = `Код: POT.${mat}${num}.${shape}${prop}.${size}.${color}${pattern}`;
+}
+
+function updateDealsBadge() {
+  const count = db.tasks.filter(t => !t.done).length;
+  document.getElementById('dealsBadge').textContent = count;
+}
+
+function showDataMenu() {
+  const bar = document.getElementById('dataBar');
+  bar.style.display = bar.style.display === 'none' ? 'flex' : 'none';
+}
+
+function updateStatus(msg) {
+  document.getElementById('dataStatus').textContent = msg;
+}
+
+
+// ============ EDIT SPECIES ============
+let currentEditSpeciesId = null;
+function openEditSpecies(speciesId) {
+  currentEditSpeciesId = speciesId;
+  const s = db.species.find(x => x.id === speciesId);
+  if (!s) return;
+  document.getElementById('editSpeciesRu').value = s.nameRu || '';
+  document.getElementById('editSpeciesLat').value = s.nameLat || '';
+  document.getElementById('editSpeciesCode').value = s.code || '';
+  document.getElementById('editSpeciesSynonyms').value = s.synonyms || '';
+  document.getElementById('editSpeciesCareCode').value = s.careCode || '';
+  document.querySelectorAll('#editSpeciesType .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === s.type));
+  openModal('modal-edit-species');
+}
+function saveEditSpecies() {
+  const s = db.species.find(x => x.id === currentEditSpeciesId);
+  if (!s) return;
+  s.nameRu = document.getElementById('editSpeciesRu').value.trim();
+  s.nameLat = document.getElementById('editSpeciesLat').value.trim();
+  s.code = document.getElementById('editSpeciesCode').value.trim();
+  s.synonyms = document.getElementById('editSpeciesSynonyms').value.trim();
+  s.careCode = document.getElementById('editSpeciesCareCode').value.trim();
+  s.type = getSelected('editSpeciesType') || s.type;
+  autosave();
+  renderSpecies();
+  closeModal('modal-edit-species');
+}
+function deleteSpecies() {
+  const count = db.plants.filter(p => p.speciesId === currentEditSpeciesId).length;
+  if (count > 0 && !confirm(`В этом виде ${count} растений. Удалить вид вместе с ними?`)) return;
+  db.plants = db.plants.filter(p => p.speciesId !== currentEditSpeciesId);
+  db.species = db.species.filter(s => s.id !== currentEditSpeciesId);
+  autosave();
+  renderSpecies();
+  closeModal('modal-edit-species');
+}
+
+// ============ EDIT LANDSCAPE ============
+let currentEditLandscapeId = null;
+function openEditLandscape(landscapeId) {
+  currentEditLandscapeId = landscapeId;
+  const l = db.landscapes.find(x => x.id === landscapeId);
+  if (!l) return;
+  document.getElementById('editLandscapeName').value = l.name || '';
+  document.getElementById('editLandscapeCode').value = l.code || '';
+  document.getElementById('editLandscapeTempMin').value = l.tempMin || '';
+  document.getElementById('editLandscapeTempMax').value = l.tempMax || '';
+  document.querySelectorAll('#editLandscapeLight .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === l.light));
+  document.querySelectorAll('#editLandscapeHumidity .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === l.humidity));
+  openModal('modal-edit-landscape');
+}
+function saveEditLandscape() {
+  const l = db.landscapes.find(x => x.id === currentEditLandscapeId);
+  if (!l) return;
+  l.name = document.getElementById('editLandscapeName').value.trim();
+  l.code = document.getElementById('editLandscapeCode').value.trim();
+  l.tempMin = document.getElementById('editLandscapeTempMin').value;
+  l.tempMax = document.getElementById('editLandscapeTempMax').value;
+  l.light = getSelected('editLandscapeLight') || l.light;
+  l.humidity = getSelected('editLandscapeHumidity') || l.humidity;
+  autosave();
+  renderLandscapes();
+  closeModal('modal-edit-landscape');
+}
+function deleteLandscape() {
+  if (!confirm('Удалить ландшафт?')) return;
+  db.landscapes = db.landscapes.filter(l => l.id !== currentEditLandscapeId);
+  autosave();
+  renderLandscapes();
+  closeModal('modal-edit-landscape');
+}
+
+// ============ EDIT POT ============
+let currentEditPotId = null;
+const matNamesGlobal = {PL:'Пластик',CL:'Глина',CR:'Керамика',CN:'Бетон',FB:'Ткань',WD:'Дерево',MT:'Металл'};
+function openEditPot(potId) {
+  currentEditPotId = potId;
+  const p = db.pots.find(x => x.id === potId);
+  if (!p) return;
+  document.getElementById('editPotCurrentCode').textContent = p.code;
+  document.querySelectorAll('#editPotMaterial .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.material));
+  document.querySelectorAll('#editPotShape .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.shape));
+  document.querySelectorAll('#editPotProp .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.prop));
+  document.querySelectorAll('#editPotSize .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.size));
+  document.querySelectorAll('#editPotColor .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.color));
+  document.querySelectorAll('#editPotPattern .chip').forEach(c => c.classList.toggle('selected', c.dataset.val === p.pattern));
+  updateEditPotCode();
+  openModal('modal-edit-pot');
+}
+function updateEditPotCode() {
+  const mat = getSelected('editPotMaterial') || '?';
+  const p = db.pots.find(x => x.id === currentEditPotId);
+  const num = p ? p.number : '001';
+  const shape = getSelected('editPotShape') || '?';
+  const prop = getSelected('editPotProp') || '=';
+  const size = getSelected('editPotSize') || '?';
+  const color = getSelected('editPotColor') || '?';
+  const pattern = getSelected('editPotPattern') || '';
+  const el = document.getElementById('editPotNewCode');
+  if (el) el.textContent = `Новый код: POT.${mat}${num}.${shape}${prop}.${size}.${color}${pattern}`;
+}
+function saveEditPot() {
+  const p = db.pots.find(x => x.id === currentEditPotId);
+  if (!p) return;
+  p.material = getSelected('editPotMaterial') || p.material;
+  p.matName = matNamesGlobal[p.material] || p.material;
+  p.shape = getSelected('editPotShape') || p.shape;
+  p.prop = getSelected('editPotProp') || p.prop;
+  p.size = getSelected('editPotSize') || p.size;
+  p.color = getSelected('editPotColor') || p.color;
+  p.pattern = getSelected('editPotPattern') !== undefined ? getSelected('editPotPattern') : p.pattern;
+  p.code = `POT.${p.material}${p.number}.${p.shape}${p.prop}.${p.size}.${p.color}${p.pattern}`;
+  autosave();
+  renderPots();
+  closeModal('modal-edit-pot');
+}
+function deletePot() {
+  if (!confirm('Удалить горшок?')) return;
+  db.pots = db.pots.filter(p => p.id !== currentEditPotId);
+  autosave();
+  renderPots();
+  closeModal('modal-edit-pot');
+}
+
+
+function switchToLandscape(landscapeId) {
+  closeModal('modal-plant');
+  document.getElementById('fab').style.display = 'flex';
+  switchTab('landscapes');
+  // highlight the landscape
+  setTimeout(() => {
+    const el = document.querySelector(`[data-ls-id="${landscapeId}"]`);
+    if (el) { el.scrollIntoView({behavior:'smooth'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),1500); }
+  }, 300);
+}
+
+function switchToPot(potId) {
+  closeModal('modal-plant');
+  document.getElementById('fab').style.display = 'flex';
+  switchTab('pots');
+  setTimeout(() => {
+    const el = document.querySelector(`[data-pot-id="${potId}"]`);
+    if (el) { el.scrollIntoView({behavior:'smooth'}); el.classList.add('highlight'); setTimeout(()=>el.classList.remove('highlight'),1500); }
+  }, 300);
+}
+
+// ============ SAVE/LOAD ============
+function autosave() {
+  try {
+    localStorage.setItem('gideonBonsaiDB', JSON.stringify(db));
+    updateStatus('сохранено ' + new Date().toLocaleTimeString('ru'));
+  } catch(e) {
+    updateStatus('ошибка сохранения');
+  }
+}
+
+function saveData() {
+  // Include photos in export
+  const allPhotos = {};
+  db.plants.forEach(p => { (p.photos||[]).forEach(ph => { if (ph.data) allPhotos[ph.id] = ph.data; }); });
+  const exportObj = { db, photos: allPhotos };
+  const json = JSON.stringify(exportObj, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `gideon-bonsai-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  updateStatus('файл сохранён');
+}
+
+function loadData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      // Support both old format (just db) and new format ({db, photos})
+      if (parsed.db) {
+        db = parsed.db;
+        if (parsed.photos) {
+          localStorage.setItem('gideonPhotos', JSON.stringify(parsed.photos));
+        }
+      } else {
+        db = parsed;
+      }
+      loadPhotos();
+      autosave();
+      render();
+      updateStatus('загружено из файла');
+    } catch(err) {
+      alert('Ошибка загрузки файла');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ============ START ============
+init();
+</script>
+</body>
+</html>
