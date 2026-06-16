@@ -241,6 +241,7 @@ export const SBPhotos = {
 
     // Save photo record
     const { data, error } = await sb().from('photos').insert({
+      user_id: user.id,
       plant_id: plantId,
       storage_path: path,
       date: meta.date || new Date().toISOString().split('T')[0],
@@ -306,15 +307,19 @@ function _fromDB_plant(r) {
   };
 }
 function _toDB_plant(o) {
+  const nullIfEmpty = v => (v === '' || v === undefined) ? null : v;
   return {
-    species_id: o.speciesId, number: o.number,
-    status: o.status, check_flags: o.checkFlags || [],
-    short_care: o.shortCare, origin: o.origin,
-    bonsai_style: o.bonsaiStyle, date_start: o.dateStart,
-    landscape_id: o.landscapeId, pot_id: o.potId,
-    variety: o.variety, country: o.country,
-    price: o.price, qty: o.qty, comment: o.comment,
-    main_photo_id: o.mainPhotoId,
+    species_id: o.speciesId, number: o.number || 1,
+    status: o.status || '°', check_flags: o.checkFlags || [],
+    short_care: nullIfEmpty(o.shortCare), origin: nullIfEmpty(o.origin),
+    bonsai_style: nullIfEmpty(o.bonsaiStyle),
+    date_start: nullIfEmpty(o.dateStart),
+    landscape_id: nullIfEmpty(o.landscapeId),
+    pot_id: nullIfEmpty(o.potId),
+    variety: nullIfEmpty(o.variety), country: nullIfEmpty(o.country),
+    price: o.price || null, qty: o.qty || 1,
+    comment: nullIfEmpty(o.comment),
+    main_photo_id: nullIfEmpty(o.mainPhotoId),
     photo_ids: o.photoIds || [],
     history: o.history || []
   };
@@ -324,7 +329,9 @@ function _fromDB_landscape(r) {
   return { id: r.id, name: r.name, code: r.code, light: r.light, tempMin: r.temp_min, tempMax: r.temp_max, humidity: r.humidity, locations: r.locations || [] };
 }
 function _toDB_landscape(o) {
-  return { name: o.name, code: o.code, light: o.light, temp_min: o.tempMin, temp_max: o.tempMax, humidity: o.humidity, locations: o.locations || [] };
+  return { name: o.name, code: o.code, light: o.light || null,
+    temp_min: o.tempMin || null, temp_max: o.tempMax || null,
+    humidity: o.humidity || null, locations: o.locations || [] };
 }
 
 // ── Image resize ──────────────────────────────────────────────────────────────
