@@ -224,13 +224,15 @@ export const SBPhotos = {
       contentType: 'image/jpeg', upsert: false
     });
     if (upErr) throw upErr;
+
+    const today = new Date().toISOString().split('T')[0];
     const { data, error } = await sb().from('photos').insert({
       user_id: user.id,
       plant_id: plantId,
       storage_path: path,
-      date: meta.date || new Date().toISOString().split('T')[0],
+      date: meta.date && meta.date !== '' ? meta.date : today,
       note: meta.note || ''
-    }).select();
+    }).select('id');
     if (error) throw error;
     if (!data || data.length === 0) throw new Error('Photo not saved');
     return data[0].id;
