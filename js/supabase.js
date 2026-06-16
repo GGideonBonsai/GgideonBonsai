@@ -1,8 +1,8 @@
 // supabase.js — Supabase backend for Gideon Bonsai
 // Replace the two constants below with your project values
 
-export const SUPABASE_URL = 'https://oyimrrwsbleuhdnhfsub.supabase.co';
-export const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95aW1ycndzYmxldWhkbmhmc3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MjQ3MzYsImV4cCI6MjA5NzIwMDczNn0.tJu6zTqDYFPZDhLh1tN2E0sfYxidRmzvdGxnfPwzkj8';
+export const SUPABASE_URL = 'ВСТАВЬТЕ_PROJECT_URL';
+export const SUPABASE_KEY = 'ВСТАВЬТЕ_ANON_KEY';
 
 const PHOTO_BUCKET = 'photos';
 
@@ -356,4 +356,3 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
-
