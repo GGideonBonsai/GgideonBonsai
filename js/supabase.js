@@ -30,6 +30,15 @@ function sb() {
   return _sb;
 }
 
+// ── Auth ──────────────────────────────────────────────────────────────────────
+export async function signInWithGoogle() {
+  const { error } = await sb().auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) throw error;
+}
+
 export async function signInWithEmail(email, password) {
   const { data, error } = await sb().auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -70,7 +79,8 @@ export const SBSpecies = {
     return _fromDB_species(data);
   },
   async save(obj) {
-    const row = _toDB_species(obj);
+    const user = await getUser();
+    const row = { ..._toDB_species(obj), user_id: user?.id };
     if (obj.id) {
       const { data, error } = await sb().from('species').update(row).eq('id', obj.id).select().single();
       if (error) throw error;
@@ -105,7 +115,8 @@ export const SBPlants = {
     return data.map(_fromDB_plant);
   },
   async save(obj) {
-    const row = _toDB_plant(obj);
+    const user = await getUser();
+    const row = { ..._toDB_plant(obj), user_id: user?.id };
     if (obj.id) {
       const { data, error } = await sb().from('plants').update(row).eq('id', obj.id).select().single();
       if (error) throw error;
@@ -135,7 +146,8 @@ export const SBLandscapes = {
     return _fromDB_landscape(data);
   },
   async save(obj) {
-    const row = _toDB_landscape(obj);
+    const user = await getUser();
+    const row = { ..._toDB_landscape(obj), user_id: user?.id };
     if (obj.id) {
       const { data, error } = await sb().from('landscapes').update(row).eq('id', obj.id).select().single();
       if (error) throw error;
@@ -165,12 +177,14 @@ export const SBPots = {
     return data;
   },
   async save(obj) {
+    const user = await getUser();
+    const row = { ...obj, user_id: user?.id };
     if (obj.id) {
-      const { data, error } = await sb().from('pots').update(obj).eq('id', obj.id).select().single();
+      const { data, error } = await sb().from('pots').update(row).eq('id', obj.id).select().single();
       if (error) throw error;
       return data;
     } else {
-      const { data, error } = await sb().from('pots').insert(obj).select().single();
+      const { data, error } = await sb().from('pots').insert(row).select().single();
       if (error) throw error;
       return data;
     }
@@ -199,7 +213,8 @@ export const SBTasks = {
     return data;
   },
   async save(obj) {
-    const row = { ...obj, target_id: obj.targetId };
+    const user = await getUser();
+    const row = { ...obj, target_id: obj.targetId, user_id: user?.id };
     delete row.targetId;
     if (obj.id) {
       const { data, error } = await sb().from('tasks').update(row).eq('id', obj.id).select().single();
@@ -341,3 +356,4 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
+
