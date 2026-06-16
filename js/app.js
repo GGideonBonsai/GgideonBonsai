@@ -59,7 +59,6 @@ Object.assign(window, {
   },
 
   // Auth
-  authSignInGoogle: () => signInWithGoogle(),
   authSignInEmail:  () => {
     const email = document.getElementById('auth-email')?.value;
     const pass  = document.getElementById('auth-pass')?.value;
