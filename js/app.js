@@ -9,7 +9,6 @@ import {
   openModal, closeModal, closeTop, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
   saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
-  editPhotoMeta, savePhotoMeta,
   editPhotoMeta, savePhotoMeta, handleSpeciesPhotoFile,
   saveAddPlant, saveEditPlant, deletePlant, clonePlant,
   savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
