@@ -6,10 +6,12 @@ export const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdX
 
 const PHOTO_BUCKET = 'photos';
 
+// ── Init ──────────────────────────────────────────────────────────────────────
 let _sb = null;
 
 export async function initSupabase() {
   if (_sb) return _sb;
+  // Load Supabase JS from CDN
   if (!window.supabase) {
     await new Promise((resolve, reject) => {
       const s = document.createElement('script');
@@ -24,9 +26,11 @@ export async function initSupabase() {
 }
 
 function sb() {
-  if (!_sb) throw new Error('Supabase not initialized');
+  if (!_sb) throw new Error('Supabase не инициализирован');
   return _sb;
 }
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
 
 export async function signInWithEmail(email, password) {
   const { data, error } = await sb().auth.signInWithPassword({ email, password });
@@ -221,6 +225,68 @@ export const SBTasks = {
   }
 };
 
+// ── Regular Actions ──────────────────────────────────────────────────────────
+export const SBRegularActions = {
+  async all() {
+    const { data, error } = await sb().from('regular_actions').select('*').order('next_date');
+    if (error) throw error;
+    return data;
+  },
+  async forPlant(plantId) {
+    const { data, error } = await sb().from('regular_actions').select('*').eq('plant_id', plantId).order('next_date');
+    if (error) throw error;
+    return data;
+  },
+  async pending() {
+    const { data, error } = await sb().from('regular_actions').select('*').order('next_date');
+    if (error) throw error;
+    return data;
+  },
+  async save(obj) {
+    const user = await getUser();
+    const row = {
+      user_id: user?.id,
+      plant_id: obj.plantId,
+      name: obj.name,
+      period_days: obj.periodDays || 7,
+      next_date: obj.nextDate || null,
+      last_done: obj.lastDone || null
+    };
+    if (obj.id) {
+      const { data, error } = await sb().from('regular_actions').update(row).eq('id', obj.id).select().single();
+      if (error) throw error;
+      return _fromDB_ra(data);
+    } else {
+      const { data, error } = await sb().from('regular_actions').insert(row).select().single();
+      if (error) throw error;
+      return _fromDB_ra(data);
+    }
+  },
+  async complete(id, doneDate) {
+    // Calculate next date from done date + period
+    const { data: ra } = await sb().from('regular_actions').select('*').eq('id', id).single();
+    if (!ra) return;
+    const done = new Date(doneDate);
+    const next = new Date(done);
+    next.setDate(next.getDate() + ra.period_days);
+    const nextStr = next.toISOString().split('T')[0];
+    const { error } = await sb().from('regular_actions').update({
+      last_done: doneDate,
+      next_date: nextStr
+    }).eq('id', id);
+    if (error) throw error;
+    return nextStr;
+  },
+  async delete(id) {
+    const { error } = await sb().from('regular_actions').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+
+function _fromDB_ra(r) {
+  return { id: r.id, plantId: r.plant_id, name: r.name, periodDays: r.period_days, nextDate: r.next_date, lastDone: r.last_done };
+}
+
 // ── Photos (Supabase Storage) ─────────────────────────────────────────────────
 export const SBPhotos = {
   async upload(file, plantId, meta = {}) {
@@ -302,33 +368,6 @@ export const SBPhotos = {
   }
 };
 
-export async function editPhotoMeta(photoId, plantId) {
-  const modal = document.getElementById('mo-edit-photo');
-  modal._photoId = photoId;
-  modal._plantId = plantId;
-  const ph = await DB().Photos.get(photoId);
-  if (ph) {
-    document.getElementById('ep-photo-date').value = ph.date || '';
-    document.getElementById('ep-photo-note').value = ph.note || '';
-  }
-  openModal('mo-edit-photo');
-}
-
-export async function savePhotoMeta() {
-  const modal = document.getElementById('mo-edit-photo');
-  const photoId = modal._photoId;
-  const plantId = modal._plantId;
-  await DB().Photos.update(photoId, {
-    date: document.getElementById('ep-photo-date').value,
-    note: document.getElementById('ep-photo-note').value.trim()
-  });
-  closeModal('mo-edit-photo');
-  const plant = await DB().Plants.get(plantId);
-  const { renderPhotosTab } = await import('./render.js');
-  await renderPhotosTab(plant);
-  switchItab(1);
-}
-
 // ── Field mappers ─────────────────────────────────────────────────────────────
 function _fromDB_species(r) {
   return { id: r.id, nameRu: r.name_ru, nameLat: r.name_lat, code: r.code, type: r.type, synonyms: r.synonyms, careCode: r.care_code, photoPath: r.photo_path || null };
@@ -400,4 +439,3 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
-
