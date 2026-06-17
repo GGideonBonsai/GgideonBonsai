@@ -46,6 +46,7 @@ export async function renderSpecies(filter = '') {
       <div class="card-actions">
         <button class="card-act-btn" onclick="openSpeciesList('${s.id}')">🌿 Открыть</button>
         <button class="card-act-btn" onclick="openModal('mo-edit-species','${s.id}')">✏️ Редактировать</button>
+        <button class="card-act-btn" onclick="openModal('mo-add-ra',null,'${s.id}')">🔄 Действие для всех</button>
       </div>
     </div>`;
   }).join('');
@@ -318,12 +319,13 @@ export async function renderDeals() {
     DB().Plants.all()
   ]);
 
-  // Helper to get plant name
+  // Helper to get plant display name
   const getPlantName = (plantId) => {
-    const p = allPlants.find(p => p.id === plantId);
+    const p = allPlants.find(pl => pl.id === plantId);
     if (!p) return '—';
-    const s = allSpecies.find(s => s.id === p.speciesId);
-    return s ? `${s.nameRu} ${s.code}${String(p.number).padStart(2,'0')}` : '—';
+    const s = allSpecies.find(sp => sp.id === p.speciesId);
+    if (!s) return `Растение #${p.number}`;
+    return `${s.nameRu} · ${s.code}${String(p.number).padStart(2,'0')}`;
   };
 
   // Build combined list with date for sorting
@@ -331,8 +333,8 @@ export async function renderDeals() {
     ...tasks.map(t => {
       let plantName = '—';
       if (t.type === 'species') {
-        const s = allSpecies.find(s => s.id === t.targetId);
-        plantName = s?.nameRu || '—';
+        const s = allSpecies.find(sp => sp.id === t.targetId);
+        plantName = s ? `Вид: ${s.nameRu}` : '—';
       } else {
         plantName = getPlantName(t.targetId);
       }
