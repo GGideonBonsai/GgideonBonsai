@@ -2,7 +2,7 @@
   "name": "Gideon Bonsai 義典",
   "short_name": "Gideon Bonsai",
   "description": "Менеджер коллекции бонсай",
-  "start_url": "/",
+  "start_url": "/GgideonBonsai/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#1a1a1a",
