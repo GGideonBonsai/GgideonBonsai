@@ -180,24 +180,55 @@ export async function renderPhotosTab(plant) {
 
 // ── History tab ───────────────────────────────────────────────────────────────
 export async function renderHistoryTab(plant) {
-  const pending = await DB().Tasks.forPlant(plant.id);
-  const history = (plant.history || []).slice().reverse();
-  let html = '';
+  const [tasks, regularActions, history] = await Promise.all([
+    DB().Tasks.forPlant(plant.id),
+    DB().RegularActions.forPlant(plant.id),
+    Promise.resolve((plant.history || []).slice().reverse())
+  ]);
 
-  if (pending.length > 0) {
-    html += '<div class="sec-title" style="margin-bottom:8px">Дела</div>';
-    html += pending.map(t => `
+  let html = `
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="hist-subtab on" id="hst-deals" onclick="switchHistSubtab('deals','${plant.id}')">📋 Дела</button>
+      <button class="hist-subtab" id="hst-history" onclick="switchHistSubtab('history','${plant.id}')">📜 История</button>
+    </div>
+    <div id="hst-deals-content">`;
+
+  // ── TASKS ──
+  html += `<div class="sec-title" style="margin-bottom:6px;margin-top:4px">Задачи</div>`;
+  html += tasks.length === 0
+    ? '<div class="empty-msg" style="padding:8px 0">Нет задач</div>'
+    : tasks.map(t => `
       <div class="deal-item">
         <div class="deal-check" onclick="completeTask('${t.id}','${plant.id}')"></div>
         <div class="deal-info">
           <div class="deal-title">${t.name}</div>
           ${t.date ? `<div class="deal-date">${t.date}</div>` : ''}
+          ${t.comment ? `<div class="hist-comment">${t.comment}</div>` : ''}
         </div>
       </div>`).join('');
-    html += '<div class="div"></div>';
-  }
+  html += `<button class="add-btn" style="margin-bottom:12px" onclick="openModal('mo-add-task','${plant.id}')">＋ Задача</button>`;
 
-  html += '<div class="sec-title" style="margin-bottom:8px">История</div>';
+  // ── REGULAR ACTIONS ──
+  html += `<div class="sec-title" style="margin-bottom:6px;margin-top:8px">Регулярные действия</div>`;
+  html += regularActions.length === 0
+    ? '<div class="empty-msg" style="padding:8px 0">Нет регулярных действий</div>'
+    : regularActions.map(ra => `
+      <div class="deal-item">
+        <div class="deal-check" onclick="completeRegularAction('${ra.id}','${plant.id}')"></div>
+        <div class="deal-info">
+          <div class="deal-title">${ra.name}</div>
+          <div class="deal-date">Следующее: ${ra.nextDate || '—'}</div>
+          <div style="font-size:11px;color:var(--stone)">Каждые ${ra.periodDays} дн.</div>
+          ${ra.lastDone ? `<div style="font-size:11px;color:var(--stone)">Последнее: ${ra.lastDone}</div>` : ''}
+        </div>
+        <button onclick="editRegularAction('${ra.id}','${plant.id}')" style="background:none;border:none;font-size:13px;color:var(--stone);cursor:pointer;padding:4px">✏️</button>
+      </div>`).join('');
+  html += `<button class="add-btn" onclick="openModal('mo-add-ra','${plant.id}')">＋ Регулярное действие</button>`;
+
+  html += `</div>`;
+
+  // ── HISTORY ──
+  html += `<div id="hst-history-content" style="display:none">`;
   html += history.length === 0
     ? '<div class="empty-msg">История пуста</div>'
     : history.map(h => `
@@ -208,10 +239,20 @@ export async function renderHistoryTab(plant) {
         </div>
         <div class="hist-title">${h.title}</div>
         ${h.comment ? `<div class="hist-comment">${h.comment}</div>` : ''}
+        ${h.type === 'regular' ? `<div style="font-size:10px;color:var(--moss);margin-top:2px">🔄 Регулярное</div>` : ''}
       </div>`).join('');
+  html += `<div class="div"></div>
+    <button class="add-btn" onclick="openModal('mo-history','${plant.id}')">＋ Добавить запись</button>
+  </div>`;
 
-  html += `<div class="div"></div><button class="add-btn" onclick="openModal('mo-history','${plant.id}')">＋ Добавить запись</button>`;
   el('itab2').innerHTML = html;
+}
+
+export function switchHistSubtab(tab, plantId) {
+  document.getElementById('hst-deals-content').style.display = tab === 'deals' ? '' : 'none';
+  document.getElementById('hst-history-content').style.display = tab === 'history' ? '' : 'none';
+  document.getElementById('hst-deals').classList.toggle('on', tab === 'deals');
+  document.getElementById('hst-history').classList.toggle('on', tab === 'history');
 }
 
 // ── Landscapes ────────────────────────────────────────────────────────────────
@@ -270,28 +311,79 @@ export async function renderPots(filter = '') {
 
 // ── Deals ────────────────────────────────────────────────────────────────────
 export async function renderDeals() {
-  const [tasks, allSpecies, allPlants] = await Promise.all([DB().Tasks.pending(), DB().Species.all(), DB().Plants.all()]);
-  el('fabBadge').textContent = tasks.length;
-  if (tasks.length === 0) { el('dealsList').innerHTML = '<div class="empty-msg">Нет активных дел 🌿</div>'; return; }
-  el('dealsList').innerHTML = tasks.map(t => {
-    let name = '—';
-    if (t.type === 'species') { const s = allSpecies.find(s => s.id === t.targetId); name = s?.nameRu || '—'; }
-    else { const p = allPlants.find(p => p.id === t.targetId); if (p) { const s = allSpecies.find(s => s.id === p.speciesId); name = s ? `${s.code}${String(p.number).padStart(2,'0')}` : '—'; } }
-    return `
-    <div class="deal-item">
-      <div class="deal-check" onclick="completeTask('${t.id}',null)"></div>
-      <div class="deal-info">
-        <div class="deal-title">${t.name}</div>
-        <div class="deal-sub">${name}</div>
-        ${t.date ? `<div class="deal-date">${t.date}</div>` : ''}
-        <span class="tag ${t.type==='species'?'tag-sp':'tag-pl'}">${t.type==='species'?'Для вида':'Для растения'}</span>
-      </div>
-    </div>`;
+  const [tasks, regularActions, allSpecies, allPlants] = await Promise.all([
+    DB().Tasks.pending(),
+    DB().RegularActions.pending(),
+    DB().Species.all(),
+    DB().Plants.all()
+  ]);
+
+  // Helper to get plant name
+  const getPlantName = (plantId) => {
+    const p = allPlants.find(p => p.id === plantId);
+    if (!p) return '—';
+    const s = allSpecies.find(s => s.id === p.speciesId);
+    return s ? `${s.nameRu} ${s.code}${String(p.number).padStart(2,'0')}` : '—';
+  };
+
+  // Build combined list with date for sorting
+  const items = [
+    ...tasks.map(t => {
+      let plantName = '—';
+      if (t.type === 'species') {
+        const s = allSpecies.find(s => s.id === t.targetId);
+        plantName = s?.nameRu || '—';
+      } else {
+        plantName = getPlantName(t.targetId);
+      }
+      return { date: t.date || '9999-99-99', type: 'task', obj: t, plantName };
+    }),
+    ...regularActions.map(ra => ({
+      date: ra.nextDate || '9999-99-99',
+      type: 'regular',
+      obj: ra,
+      plantName: getPlantName(ra.plantId)
+    }))
+  ].sort((a, b) => a.date.localeCompare(b.date));
+
+  el('fabBadge').textContent = items.length;
+
+  if (items.length === 0) {
+    el('dealsList').innerHTML = '<div class="empty-msg">Нет активных дел 🌿</div>';
+    return;
+  }
+
+  el('dealsList').innerHTML = items.map(item => {
+    if (item.type === 'task') {
+      const t = item.obj;
+      return `
+      <div class="deal-item">
+        <div class="deal-check" onclick="completeTask('${t.id}',null)"></div>
+        <div class="deal-info">
+          <div class="deal-title">${t.name}</div>
+          <div class="deal-sub">${item.plantName}</div>
+          ${t.date ? `<div class="deal-date">${t.date}</div>` : ''}
+          <span class="tag tag-pl">Задача</span>
+        </div>
+      </div>`;
+    } else {
+      const ra = item.obj;
+      return `
+      <div class="deal-item">
+        <div class="deal-check" onclick="completeRegularAction('${ra.id}',null)"></div>
+        <div class="deal-info">
+          <div class="deal-title">${ra.name}</div>
+          <div class="deal-sub">${item.plantName}</div>
+          ${ra.nextDate ? `<div class="deal-date">${ra.nextDate}</div>` : ''}
+          <div style="font-size:11px;color:var(--stone)">Каждые ${ra.periodDays} дн.</div>
+          <span class="tag tag-sp">Регулярное</span>
+        </div>
+      </div>`;
+    }
   }).join('');
 }
 
 export async function updateBadge() {
-  const pending = await DB().Tasks.pending();
-  el('fabBadge').textContent = pending.length;
+  const [tasks, ra] = await Promise.all([DB().Tasks.pending(), DB().RegularActions.pending()]);
+  el('fabBadge').textContent = tasks.length + ra.length;
 }
-
