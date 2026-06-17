@@ -302,6 +302,33 @@ export const SBPhotos = {
   }
 };
 
+export async function editPhotoMeta(photoId, plantId) {
+  const modal = document.getElementById('mo-edit-photo');
+  modal._photoId = photoId;
+  modal._plantId = plantId;
+  const ph = await DB().Photos.get(photoId);
+  if (ph) {
+    document.getElementById('ep-photo-date').value = ph.date || '';
+    document.getElementById('ep-photo-note').value = ph.note || '';
+  }
+  openModal('mo-edit-photo');
+}
+
+export async function savePhotoMeta() {
+  const modal = document.getElementById('mo-edit-photo');
+  const photoId = modal._photoId;
+  const plantId = modal._plantId;
+  await DB().Photos.update(photoId, {
+    date: document.getElementById('ep-photo-date').value,
+    note: document.getElementById('ep-photo-note').value.trim()
+  });
+  closeModal('mo-edit-photo');
+  const plant = await DB().Plants.get(plantId);
+  const { renderPhotosTab } = await import('./render.js');
+  await renderPhotosTab(plant);
+  switchItab(1);
+}
+
 // ── Field mappers ─────────────────────────────────────────────────────────────
 function _fromDB_species(r) {
   return { id: r.id, nameRu: r.name_ru, nameLat: r.name_lat, code: r.code, type: r.type, synonyms: r.synonyms, careCode: r.care_code, photoPath: r.photo_path || null };
