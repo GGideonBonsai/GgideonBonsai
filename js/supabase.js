@@ -40,7 +40,9 @@ export async function signUpWithEmail(email, password) {
   return data;
 }
 
-export async function signOut() { await sb().auth.signOut(); }
+export async function signOut() {
+  await sb().auth.signOut();
+}
 
 export async function getUser() {
   const { data: { user } } = await sb().auth.getUser();
@@ -53,6 +55,7 @@ export async function onAuthChange(callback) {
   });
 }
 
+// ── Species ───────────────────────────────────────────────────────────────────
 export const SBSpecies = {
   async all() {
     const { data, error } = await sb().from('species').select('*').order('name_ru');
@@ -83,6 +86,7 @@ export const SBSpecies = {
   }
 };
 
+// ── Plants ────────────────────────────────────────────────────────────────────
 export const SBPlants = {
   async all() {
     const { data, error } = await sb().from('plants').select('*');
@@ -118,6 +122,7 @@ export const SBPlants = {
   }
 };
 
+// ── Landscapes ────────────────────────────────────────────────────────────────
 export const SBLandscapes = {
   async all() {
     const { data, error } = await sb().from('landscapes').select('*').order('name');
@@ -148,6 +153,7 @@ export const SBLandscapes = {
   }
 };
 
+// ── Pots ─────────────────────────────────────────────────────────────────────
 export const SBPots = {
   async all() {
     const { data, error } = await sb().from('pots').select('*').order('code');
@@ -178,6 +184,7 @@ export const SBPots = {
   }
 };
 
+// ── Tasks ─────────────────────────────────────────────────────────────────────
 export const SBTasks = {
   async all() {
     const { data, error } = await sb().from('tasks').select('*').order('date');
@@ -214,71 +221,138 @@ export const SBTasks = {
   }
 };
 
+// ── Photos (Supabase Storage) ─────────────────────────────────────────────────
 export const SBPhotos = {
   async upload(file, plantId, meta = {}) {
     const user = await getUser();
-    if (!user) throw new Error('Not logged in');
+    if (!user) throw new Error('Не авторизован');
+
+    // Resize if > 2MB
     const blob = file.size > 2 * 1024 * 1024 ? await _resize(file, 1200) : file;
     const path = `${user.id}/${plantId}/${Date.now()}.jpg`;
+
     const { error: upErr } = await sb().storage.from(PHOTO_BUCKET).upload(path, blob, {
       contentType: 'image/jpeg', upsert: false
     });
     if (upErr) throw upErr;
 
-    const today = new Date().toISOString().split('T')[0];
+    // Save photo record
     const { data, error } = await sb().from('photos').insert({
       user_id: user.id,
       plant_id: plantId,
       storage_path: path,
-      date: meta.date && meta.date !== '' ? meta.date : today,
+      date: meta.date || new Date().toISOString().split('T')[0],
       note: meta.note || ''
-    }).select('id');
+    }).select();
     if (error) throw error;
-    if (!data || data.length === 0) throw new Error('Photo not saved');
+    if (!data || data.length === 0) throw new Error('Фото не сохранено');
+
     return data[0].id;
   },
+
   getURL(storagePath) {
     const { data } = sb().storage.from(PHOTO_BUCKET).getPublicUrl(storagePath);
     return data?.publicUrl || null;
   },
+
+  async getSignedURL(storagePath) {
+    const { data, error } = await sb().storage.from(PHOTO_BUCKET).createSignedUrl(storagePath, 3600);
+    if (error) return null;
+    return data.signedUrl;
+  },
+
   async get(photoId) {
     const { data, error } = await sb().from('photos').select('*').eq('id', photoId).single();
     if (error) return null;
     return data;
   },
+
   async forPlant(plantId) {
     const { data, error } = await sb().from('photos').select('*').eq('plant_id', plantId).order('date');
     if (error) return [];
     return data;
   },
+
+  async update(photoId, meta) {
+    const { error } = await sb().from('photos').update({
+      date: meta.date || null,
+      note: meta.note || ''
+    }).eq('id', photoId);
+    if (error) throw error;
+  },
+
   async delete(photoId) {
     const ph = await this.get(photoId);
     if (ph?.storage_path) {
       await sb().storage.from(PHOTO_BUCKET).remove([ph.storage_path]);
     }
     await sb().from('photos').delete().eq('id', photoId);
+  },
+
+  async uploadSpeciesPhoto(file, speciesId) {
+    const user = await getUser();
+    if (!user) throw new Error('Not logged in');
+    const blob = file.size > 2 * 1024 * 1024 ? await _resize(file, 1200) : file;
+    const path = `${user.id}/species/${speciesId}/${Date.now()}.jpg`;
+    const { error: upErr } = await sb().storage.from(PHOTO_BUCKET).upload(path, blob, {
+      contentType: 'image/jpeg', upsert: true
+    });
+    if (upErr) throw upErr;
+    return path;
   }
 };
 
+// ── Field mappers ─────────────────────────────────────────────────────────────
 function _fromDB_species(r) {
-  return { id: r.id, nameRu: r.name_ru, nameLat: r.name_lat, code: r.code, type: r.type, synonyms: r.synonyms, careCode: r.care_code };
+  return { id: r.id, nameRu: r.name_ru, nameLat: r.name_lat, code: r.code, type: r.type, synonyms: r.synonyms, careCode: r.care_code, photoPath: r.photo_path || null };
 }
 function _toDB_species(o) {
-  return { name_ru: o.nameRu, name_lat: o.nameLat, code: o.code, type: o.type, synonyms: o.synonyms, care_code: o.careCode };
+  return { name_ru: o.nameRu, name_lat: o.nameLat, code: o.code, type: o.type, synonyms: o.synonyms, care_code: o.careCode, photo_path: o.photoPath || null };
 }
+
 function _fromDB_plant(r) {
-  return { id: r.id, speciesId: r.species_id, number: r.number, status: r.status, checkFlags: r.check_flags || [], shortCare: r.short_care, origin: r.origin, bonsaiStyle: r.bonsai_style, dateStart: r.date_start, landscapeId: r.landscape_id, potId: r.pot_id, variety: r.variety, country: r.country, price: r.price, qty: r.qty, comment: r.comment, mainPhotoId: r.main_photo_id, photoIds: r.photo_ids || [], history: r.history || [] };
+  return {
+    id: r.id, speciesId: r.species_id, number: r.number,
+    status: r.status, checkFlags: r.check_flags || [],
+    shortCare: r.short_care, origin: r.origin,
+    bonsaiStyle: r.bonsai_style, dateStart: r.date_start,
+    landscapeId: r.landscape_id, potId: r.pot_id,
+    variety: r.variety, country: r.country,
+    price: r.price, qty: r.qty, comment: r.comment,
+    mainPhotoId: r.main_photo_id,
+    photoIds: r.photo_ids || [],
+    history: r.history || []
+  };
 }
 function _toDB_plant(o) {
-  const n = v => (v === '' || v === undefined) ? null : v;
-  return { species_id: o.speciesId, number: o.number || 1, status: o.status || '°', check_flags: o.checkFlags || [], short_care: n(o.shortCare), origin: n(o.origin), bonsai_style: n(o.bonsaiStyle), date_start: n(o.dateStart), landscape_id: n(o.landscapeId), pot_id: n(o.potId), variety: n(o.variety), country: n(o.country), price: o.price || null, qty: o.qty || 1, comment: n(o.comment), main_photo_id: n(o.mainPhotoId), photo_ids: o.photoIds || [], history: o.history || [] };
+  const nullIfEmpty = v => (v === '' || v === undefined) ? null : v;
+  return {
+    species_id: o.speciesId, number: o.number || 1,
+    status: o.status || '°', check_flags: o.checkFlags || [],
+    short_care: nullIfEmpty(o.shortCare), origin: nullIfEmpty(o.origin),
+    bonsai_style: nullIfEmpty(o.bonsaiStyle),
+    date_start: nullIfEmpty(o.dateStart),
+    landscape_id: nullIfEmpty(o.landscapeId),
+    pot_id: nullIfEmpty(o.potId),
+    variety: nullIfEmpty(o.variety), country: nullIfEmpty(o.country),
+    price: o.price || null, qty: o.qty || 1,
+    comment: nullIfEmpty(o.comment),
+    main_photo_id: nullIfEmpty(o.mainPhotoId),
+    photo_ids: o.photoIds || [],
+    history: o.history || []
+  };
 }
+
 function _fromDB_landscape(r) {
   return { id: r.id, name: r.name, code: r.code, light: r.light, tempMin: r.temp_min, tempMax: r.temp_max, humidity: r.humidity, locations: r.locations || [] };
 }
 function _toDB_landscape(o) {
-  return { name: o.name, code: o.code, light: o.light || null, temp_min: o.tempMin || null, temp_max: o.tempMax || null, humidity: o.humidity || null, locations: o.locations || [] };
+  return { name: o.name, code: o.code, light: o.light || null,
+    temp_min: o.tempMin || null, temp_max: o.tempMax || null,
+    humidity: o.humidity || null, locations: o.locations || [] };
 }
+
+// ── Image resize ──────────────────────────────────────────────────────────────
 function _resize(file, maxSize) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -299,3 +373,4 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
+
