@@ -2,7 +2,7 @@
 import {
   initSupabase, getUser, onAuthChange,
   signInWithEmail, signUpWithEmail, signOut,
-  SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos
+  SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos, editPhotoMeta, savePhotoMeta
 } from './supabase.js';
 
 import {
@@ -44,7 +44,7 @@ Object.assign(window, {
   saveAddTask, completeTask,
   saveAddLs, saveEditLs, deleteLs, addLocation,
   saveAddPot, saveEditPot, deletePot,
-  goToLandscape, goToPot, toggleLs,
+  goToLandscape, goToPot, toggleLs, editPhotoMeta, savePhotoMeta,
 
   // Photo UI
   openAddPhoto: (plantId) => openModal('mo-photo', plantId),
