@@ -33,8 +33,16 @@ async function _fill(id, args) {
     case 'mo-add-pot':      return _fillAddPot(args[0]);
     case 'mo-edit-pot':     return _fillEditPot(args[0]);
     case 'mo-deals':        return renderDeals();
-    case 'mo-add-task':     return _fillAddTask();
+    case 'mo-add-task':     return _fillAddTask(args[0]);
+    case 'mo-add-ra':       return _fillAddRa(args[0]);
   }
+}
+
+function _fillAddRa(plantId) {
+  document.getElementById('mo-add-ra')._plantId = plantId;
+  document.getElementById('ra-name').value = '';
+  document.getElementById('ra-period').value = '7';
+  document.getElementById('ra-next-date').value = new Date().toISOString().split('T')[0];
 }
 
 // ── Chip helpers ──────────────────────────────────────────────────────────────
@@ -281,11 +289,14 @@ export async function deleteHistory() {
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
-async function _fillAddTask() {
+async function _fillAddTask(plantId) {
   const [allS,allP]=await Promise.all([DB().Species.all(),DB().Plants.all()]);
-  document.getElementById('at-target').innerHTML='<option value="">— выбрать —</option>'+
+  const select = document.getElementById('at-target');
+  select.innerHTML='<option value="">— выбрать —</option>'+
     allS.map(s=>`<option value="${s.id}">[Вид] ${s.nameRu}</option>`).join('')+
     allP.map(p=>{const s=allS.find(x=>x.id===p.speciesId);return `<option value="${p.id}">[Растение] ${s?.code||''}${String(p.number).padStart(2,'0')}</option>`;}).join('');
+  // Pre-select plant if provided
+  if (plantId) select.value = plantId;
 }
 export async function saveAddTask() {
   const name=v('at-name').trim(); if(!name) return alert('Введите название');
@@ -405,6 +416,106 @@ export async function savePhotoMeta() {
   const { renderPhotosTab } = await import('./render.js');
   await renderPhotosTab(plant);
   switchItab(1);
+}
+
+// ── Regular Actions ──────────────────────────────────────────────────────────
+export async function saveAddRegularAction() {
+  const modal = document.getElementById('mo-add-ra');
+  const plantId = modal._plantId;
+  const name = document.getElementById('ra-name').value.trim();
+  const period = parseInt(document.getElementById('ra-period').value) || 7;
+  const nextDate = document.getElementById('ra-next-date').value;
+  if (!name) return alert('Введите название');
+  await DB().RegularActions.save({
+    plantId,
+    name,
+    periodDays: period,
+    nextDate: nextDate || null
+  });
+  closeModal('mo-add-ra');
+  const plant = await DB().Plants.get(plantId);
+  const { renderHistoryTab } = await import('./render.js');
+  await renderHistoryTab(plant);
+  const { renderDeals, updateBadge } = await import('./render.js');
+  await renderDeals();
+  await updateBadge();
+}
+
+export async function editRegularAction(raId, plantId) {
+  const modal = document.getElementById('mo-edit-ra');
+  modal._raId = raId;
+  modal._plantId = plantId;
+  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
+  if (ra) {
+    document.getElementById('era-name').value = ra.name || '';
+    document.getElementById('era-period').value = ra.periodDays || 7;
+    document.getElementById('era-next-date').value = ra.nextDate || '';
+  }
+  openModal('mo-edit-ra');
+}
+
+export async function saveEditRegularAction() {
+  const modal = document.getElementById('mo-edit-ra');
+  const raId = modal._raId;
+  const plantId = modal._plantId;
+  const name = document.getElementById('era-name').value.trim();
+  const period = parseInt(document.getElementById('era-period').value) || 7;
+  const nextDate = document.getElementById('era-next-date').value;
+  if (!name) return alert('Введите название');
+  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
+  await DB().RegularActions.save({ ...ra, name, periodDays: period, nextDate: nextDate || null });
+  closeModal('mo-edit-ra');
+  const plant = await DB().Plants.get(plantId);
+  const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
+  await renderHistoryTab(plant);
+  await renderDeals();
+  await updateBadge();
+}
+
+export async function deleteRegularAction() {
+  const modal = document.getElementById('mo-edit-ra');
+  if (!confirm('Удалить регулярное действие?')) return;
+  await DB().RegularActions.delete(modal._raId);
+  closeModal('mo-edit-ra');
+  const plant = await DB().Plants.get(modal._plantId);
+  const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
+  await renderHistoryTab(plant);
+  await renderDeals();
+  await updateBadge();
+}
+
+export async function completeRegularAction(raId, plantId) {
+  const today = new Date().toISOString().split('T')[0];
+  const nextDate = await DB().RegularActions.complete(raId, today);
+
+  // Add to plant history
+  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
+  if (ra && ra.plantId) {
+    const plant = await DB().Plants.get(ra.plantId);
+    if (plant) {
+      if (!plant.history) plant.history = [];
+      plant.history.push({
+        id: 'h_' + Date.now(),
+        date: today,
+        title: ra.name,
+        comment: `Регулярное действие. Следующее: ${nextDate}`,
+        type: 'regular'
+      });
+      await DB().Plants.save(plant);
+    }
+  }
+
+  const { renderDeals, updateBadge } = await import('./render.js');
+  await renderDeals();
+  await updateBadge();
+
+  // Refresh plant history if open
+  if (plantId || ra?.plantId) {
+    const pid = plantId || ra.plantId;
+    const plant = await DB().Plants.get(pid);
+    const { renderHistoryTab } = await import('./render.js');
+    await renderHistoryTab(plant);
+  }
 }
 
 export function goToLandscape(id) {
