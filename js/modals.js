@@ -34,15 +34,23 @@ async function _fill(id, args) {
     case 'mo-edit-pot':     return _fillEditPot(args[0]);
     case 'mo-deals':        return renderDeals();
     case 'mo-add-task':     return _fillAddTask(args[0]);
-    case 'mo-add-ra':       return _fillAddRa(args[0]);
+    case 'mo-add-ra':       return _fillAddRa(args);
   }
 }
 
-function _fillAddRa(plantId) {
-  document.getElementById('mo-add-ra')._plantId = plantId;
+function _fillAddRa(args) {
+  // args can be plantId string or [plantId, speciesId]
+  const plantId   = Array.isArray(args) ? args[0] : args;
+  const speciesId = Array.isArray(args) ? args[1] : null;
+  const modal = document.getElementById('mo-add-ra');
+  modal._plantId   = plantId   || null;
+  modal._speciesId = speciesId || null;
   document.getElementById('ra-name').value = '';
   document.getElementById('ra-period').value = '7';
   document.getElementById('ra-next-date').value = new Date().toISOString().split('T')[0];
+  // Show/hide species label
+  const speciesNote = document.getElementById('ra-species-note');
+  if (speciesNote) speciesNote.style.display = speciesId ? '' : 'none';
 }
 
 // ── Chip helpers ──────────────────────────────────────────────────────────────
@@ -421,55 +429,67 @@ export async function savePhotoMeta() {
 // ── Regular Actions ──────────────────────────────────────────────────────────
 export async function saveAddRegularAction() {
   const modal = document.getElementById('mo-add-ra');
-  const plantId = modal._plantId;
-  const name = document.getElementById('ra-name').value.trim();
-  const period = parseInt(document.getElementById('ra-period').value) || 7;
-  const nextDate = document.getElementById('ra-next-date').value;
+  const plantId   = modal._plantId;
+  const speciesId = modal._speciesId;
+  const name      = document.getElementById('ra-name').value.trim();
+  const period    = parseInt(document.getElementById('ra-period').value) || 7;
+  const nextDate  = document.getElementById('ra-next-date').value || new Date().toISOString().split('T')[0];
   if (!name) return alert('Введите название');
-  await DB().RegularActions.save({
-    plantId,
-    name,
-    periodDays: period,
-    nextDate: nextDate || null
-  });
+
+  if (speciesId) {
+    // Create regular action for ALL plants of this species
+    const plants = await DB().Plants.bySpecies(speciesId);
+    await Promise.all(plants.map(p => DB().RegularActions.save({
+      plantId: p.id,
+      name,
+      periodDays: period,
+      nextDate
+    })));
+  } else if (plantId) {
+    await DB().RegularActions.save({ plantId, name, periodDays: period, nextDate });
+  }
+
   closeModal('mo-add-ra');
-  const plant = await DB().Plants.get(plantId);
-  const { renderHistoryTab } = await import('./render.js');
-  await renderHistoryTab(plant);
-  const { renderDeals, updateBadge } = await import('./render.js');
+  const { renderDeals, updateBadge, renderHistoryTab } = await import('./render.js');
   await renderDeals();
   await updateBadge();
+  if (plantId) {
+    const plant = await DB().Plants.get(plantId);
+    if (plant) await renderHistoryTab(plant);
+  }
 }
 
 export async function editRegularAction(raId, plantId) {
   const modal = document.getElementById('mo-edit-ra');
-  modal._raId = raId;
+  modal._raId    = raId;
   modal._plantId = plantId;
-  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
+  const ra = await DB().RegularActions.get(raId);
   if (ra) {
-    document.getElementById('era-name').value = ra.name || '';
-    document.getElementById('era-period').value = ra.periodDays || 7;
-    document.getElementById('era-next-date').value = ra.nextDate || '';
+    document.getElementById('era-name').value      = ra.name       || '';
+    document.getElementById('era-period').value    = ra.periodDays || 7;
+    document.getElementById('era-next-date').value = ra.nextDate   || '';
   }
   openModal('mo-edit-ra');
 }
 
 export async function saveEditRegularAction() {
-  const modal = document.getElementById('mo-edit-ra');
-  const raId = modal._raId;
-  const plantId = modal._plantId;
-  const name = document.getElementById('era-name').value.trim();
-  const period = parseInt(document.getElementById('era-period').value) || 7;
-  const nextDate = document.getElementById('era-next-date').value;
+  const modal    = document.getElementById('mo-edit-ra');
+  const raId     = modal._raId;
+  const plantId  = modal._plantId;
+  const name     = document.getElementById('era-name').value.trim();
+  const period   = parseInt(document.getElementById('era-period').value) || 7;
+  const nextDate = document.getElementById('era-next-date').value || null;
   if (!name) return alert('Введите название');
-  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
-  await DB().RegularActions.save({ ...ra, name, periodDays: period, nextDate: nextDate || null });
+  const ra = await DB().RegularActions.get(raId);
+  await DB().RegularActions.save({ ...ra, name, periodDays: period, nextDate });
   closeModal('mo-edit-ra');
-  const plant = await DB().Plants.get(plantId);
   const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
-  await renderHistoryTab(plant);
   await renderDeals();
   await updateBadge();
+  if (plantId) {
+    const plant = await DB().Plants.get(plantId);
+    if (plant) await renderHistoryTab(plant);
+  }
 }
 
 export async function deleteRegularAction() {
@@ -489,7 +509,7 @@ export async function completeRegularAction(raId, plantId) {
   const nextDate = await DB().RegularActions.complete(raId, today);
 
   // Add to plant history
-  const ra = await DB().RegularActions.all().then(all => all.find(r => r.id === raId));
+  const ra = await DB().RegularActions.get(raId);
   if (ra && ra.plantId) {
     const plant = await DB().Plants.get(ra.plantId);
     if (plant) {
