@@ -30,8 +30,10 @@ function sb() {
   return _sb;
 }
 
-// ── Auth ─────────────────────────────────────────────────────────────────────
+// Expose for direct use in modals
+export function getSB() { return _sb; }
 
+// ── Auth ──────────────────────────────────────────────────────────────────────
 export async function signInWithEmail(email, password) {
   const { data, error } = await sb().auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -232,10 +234,15 @@ export const SBRegularActions = {
     if (error) throw error;
     return data;
   },
+  async get(id) {
+    const { data, error } = await sb().from('regular_actions').select('*').eq('id', id).single();
+    if (error) return null;
+    return _fromDB_ra(data);
+  },
   async forPlant(plantId) {
     const { data, error } = await sb().from('regular_actions').select('*').eq('plant_id', plantId).order('next_date');
     if (error) throw error;
-    return data;
+    return data.map(_fromDB_ra);
   },
   async pending() {
     const { data, error } = await sb().from('regular_actions').select('*').order('next_date');
@@ -439,3 +446,4 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
+
