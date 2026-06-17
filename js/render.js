@@ -294,3 +294,4 @@ export async function updateBadge() {
   const pending = await DB().Tasks.pending();
   el('fabBadge').textContent = pending.length;
 }
+
