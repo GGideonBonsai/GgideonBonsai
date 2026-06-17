@@ -2,14 +2,14 @@
 import {
   initSupabase, getUser, onAuthChange,
   signInWithEmail, signUpWithEmail, signOut,
-  SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos, editPhotoMeta, savePhotoMeta
+  SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos
 } from './supabase.js';
 
 import {
   openModal, closeModal, closeTop, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
   saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
-  editPhotoMeta, savePhotoMeta, handleSpeciesPhotoFile,
+  editPhotoMeta, savePhotoMeta,
   saveAddPlant, saveEditPlant, deletePlant, clonePlant,
   savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
   saveHistory, deleteHistory,
@@ -21,7 +21,6 @@ import {
 
 import { renderSpecies, renderLandscapes, renderPots, renderDeals, updateBadge, toggleLs } from './render.js';
 
-// ── Expose Supabase stores globally so modals.js can use them ─────────────────
 window.DB = {
   Species:    SBSpecies,
   Plants:     SBPlants,
@@ -31,21 +30,19 @@ window.DB = {
   Photos:     SBPhotos,
 };
 
-// ── Expose globals for inline onclick handlers ────────────────────────────────
 Object.assign(window, {
   openModal, closeModal, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
   saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
-  editPhotoMeta, savePhotoMeta, handleSpeciesPhotoFile,
+  editPhotoMeta, savePhotoMeta,
   saveAddPlant, saveEditPlant, deletePlant, clonePlant,
   savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
   saveHistory, deleteHistory,
   saveAddTask, completeTask,
   saveAddLs, saveEditLs, deleteLs, addLocation,
   saveAddPot, saveEditPot, deletePot,
-  goToLandscape, goToPot, toggleLs, editPhotoMeta, savePhotoMeta,
+  goToLandscape, goToPot, toggleLs,
 
-  // Photo UI
   openAddPhoto: (plantId) => openModal('mo-photo', plantId),
   setMainPhotoUI: (plantId, photoId) => setMainPhoto(plantId, photoId),
   deletePhotoUI:  (plantId, photoId) => deletePhoto(plantId, photoId),
@@ -60,8 +57,7 @@ Object.assign(window, {
     document.body.appendChild(ov);
   },
 
-  // Auth
-  authSignInEmail:  () => {
+  authSignInEmail: () => {
     const email = document.getElementById('auth-email')?.value;
     const pass  = document.getElementById('auth-pass')?.value;
     if (!email || !pass) return alert('Введите email и пароль');
@@ -78,7 +74,6 @@ Object.assign(window, {
   authSignOut: () => signOut(),
 });
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
 window.switchTab = function(tab) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
   document.getElementById(`ntab-${tab}`)?.classList.add('on');
@@ -88,7 +83,6 @@ window.switchTab = function(tab) {
   document.getElementById('fab').style.display = 'flex';
 };
 
-// ── Search ────────────────────────────────────────────────────────────────────
 window.doSearch = function() {
   const val = document.getElementById('srchInput').value;
   const tab = document.querySelector('.nav-btn.on')?.id?.replace('ntab-','');
@@ -97,10 +91,8 @@ window.doSearch = function() {
   if (tab === 'pots')       renderPots(val);
 };
 
-// ── Deals ─────────────────────────────────────────────────────────────────────
 window.openDeals = () => openModal('mo-deals');
 
-// ── Back navigation ───────────────────────────────────────────────────────────
 window.addEventListener('popstate', () => {
   if (closeTop()) history.pushState(null, '', location.href);
 });
@@ -119,19 +111,17 @@ document.addEventListener('change', e => {
   }
 });
 
-// ── Auth UI ───────────────────────────────────────────────────────────────────
 function showAuthScreen() {
-  document.getElementById('app-main').style.display  = 'none';
-  document.getElementById('app-auth').style.display  = 'flex';
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('app-auth').style.display = 'flex';
 }
 
 function showAppScreen(user) {
-  document.getElementById('app-auth').style.display  = 'none';
-  document.getElementById('app-main').style.display  = 'block';
-  document.getElementById('user-email').textContent  = user.email || 'Вы вошли';
+  document.getElementById('app-auth').style.display = 'none';
+  document.getElementById('app-main').style.display = 'block';
+  document.getElementById('user-email').textContent = user.email || 'Вы вошли';
 }
 
-// ── Service Worker ────────────────────────────────────────────────────────────
 function registerSW() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW:', e));
@@ -144,12 +134,10 @@ window.requestNotifications = async function() {
   document.getElementById('notifStatus').textContent = p === 'granted' ? '✅ Включены' : '❌ Отключены';
 };
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   await initSupabase();
   registerSW();
 
-  // Auth state
   onAuthChange(async (user) => {
     if (user) {
       showAppScreen(user);
@@ -159,7 +147,6 @@ async function init() {
     }
   });
 
-  // Check current session
   const user = await getUser();
   if (user) {
     showAppScreen(user);
