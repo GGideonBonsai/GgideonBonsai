@@ -28,10 +28,13 @@ export async function renderSpecies(filter = '') {
   el('speciesBadge').textContent = list.length;
   el('speciesList').innerHTML = list.map(s => {
     const count = allPlants.filter(p => p.speciesId === s.id).length;
+    const iconHtml = s.photoPath
+      ? `<div class="card-icon" style="overflow:hidden;padding:0"><img src="${DB().Photos.getURL(s.photoPath)}" style="width:100%;height:100%;object-fit:cover"></div>`
+      : `<div class="card-icon">${s.type || '🌱'}</div>`;
     return `
     <div class="card">
       <div class="card-row" onclick="openSpeciesList('${s.id}')">
-        <div class="card-icon">${s.type || '🌱'}</div>
+        ${iconHtml}
         <div class="card-info">
           <div class="card-name">${s.nameRu}</div>
           <div class="card-sub" style="font-style:italic">${s.nameLat || ''}</div>
@@ -163,7 +166,8 @@ export async function renderPhotosTab(plant) {
             ${ph.note ? `<div class="photo-meta-note">${ph.note}</div>` : ''}
           </div>
           <div class="photo-meta-btns">
-            <button class="${isMain?'active':''}" onclick="setMainPhotoUI('${plant.id}','${ph.id}')">${isMain?'★ Главное':'☆ Главным'}</button>
+            <button class="${isMain?'active':''}" onclick="setMainPhotoUI('${plant.id}','${ph.id}')">${isMain?'★':'☆'}</button>
+            <button onclick="editPhotoMeta('${ph.id}','${plant.id}')">✏️</button>
             <button onclick="deletePhotoUI('${plant.id}','${ph.id}')">✕</button>
           </div>
         </div>`;
