@@ -444,7 +444,42 @@
   text-align:center;transition:border-color .15s,color .15s;
 }
 .photo-btn:hover{border-color:var(--moss2);color:var(--moss)}
+.hist-subtab {
+  flex:1;padding:8px;background:none;border:1px solid var(--ash);
+  border-radius:var(--r);font-size:12px;font-family:'Inter',sans-serif;
+  color:var(--stone);cursor:pointer;transition:all .15s;
+}
+.hist-subtab.on { background:var(--ink);color:#fff;border-color:var(--ink); }
 </style>
+<!-- ADD REGULAR ACTION -->
+<div class="overlay" id="mo-add-ra">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Регулярное действие</span><button class="mclose" onclick="closeModal('mo-add-ra')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">Название</label><input class="fi" id="ra-name" placeholder="Полив, Удобрение, Обработка..."></div>
+      <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="ra-period" type="number" min="1" value="7" placeholder="7"></div>
+      <div class="fg"><label class="fl">Первая дата</label><input class="fi" id="ra-next-date" type="date"></div>
+      <button class="btn btn-p" onclick="saveAddRegularAction()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT REGULAR ACTION -->
+<div class="overlay" id="mo-edit-ra">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Редактировать действие</span><button class="mclose" onclick="closeModal('mo-edit-ra')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">Название</label><input class="fi" id="era-name"></div>
+      <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="era-period" type="number" min="1"></div>
+      <div class="fg"><label class="fl">Следующая дата</label><input class="fi" id="era-next-date" type="date"></div>
+      <button class="btn btn-p" onclick="saveEditRegularAction()">💾 Сохранить</button>
+      <button class="btn btn-d" onclick="deleteRegularAction()">🗑 Удалить</button>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT PHOTO META -->
 <div class="overlay" id="mo-edit-photo">
   <div class="modal">
@@ -458,22 +493,11 @@
   </div>
 </div>
 
-<div class="overlay" id="mo-edit-photo">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать фото</span><button class="mclose" onclick="closeModal('mo-edit-photo')">✕</button></div>
-    <div class="mbody">
-      <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ep-photo-date" type="date"></div>
-      <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ep-photo-note" placeholder="опционально"></div>
-      <button class="btn btn-p" onclick="savePhotoMeta()">💾 Сохранить</button>
-    </div>
-  </div>
-</div>
-  
 <script type="module" src="js/app.js"></script>
 <script type="module">
-  import { renderPlants } from './js/render.js';
+  import { renderPlants, switchHistSubtab } from './js/render.js';
   window.renderPlants = renderPlants;
+  window.switchHistSubtab = switchHistSubtab;
 </script>
 
 </body>
