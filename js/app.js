@@ -8,7 +8,9 @@ import {
 import {
   openModal, closeModal, closeTop, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
-  saveAddSpecies, saveEditSpecies, deleteSpecies,
+  saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
+  editPhotoMeta, savePhotoMeta,
+  editPhotoMeta, savePhotoMeta, handleSpeciesPhotoFile,
   saveAddPlant, saveEditPlant, deletePlant, clonePlant,
   savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
   saveHistory, deleteHistory,
@@ -34,7 +36,8 @@ window.DB = {
 Object.assign(window, {
   openModal, closeModal, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
-  saveAddSpecies, saveEditSpecies, deleteSpecies,
+  saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
+  editPhotoMeta, savePhotoMeta, handleSpeciesPhotoFile,
   saveAddPlant, saveEditPlant, deletePlant, clonePlant,
   savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
   saveHistory, deleteHistory,
