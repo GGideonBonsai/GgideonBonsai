@@ -62,11 +62,25 @@ async function _fillEditSpecies(id) {
   document.getElementById('mo-edit-species')._editId=id;
   sv('es-ru',s.nameRu);sv('es-lat',s.nameLat);sv('es-code',s.code);sv('es-syn',s.synonyms);sv('es-care',s.careCode);
   setChip('es-type',s.type||'🌳');
+  // Show current photo if exists
+  const prev=document.getElementById('es-photo-preview');
+  if(prev) prev.innerHTML = s.photoPath
+    ? `<img src="${DB().Photos.getURL(s.photoPath)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px">`
+    : '';
+  window._esSelectedFile=null;
 }
 export async function saveEditSpecies() {
   const id=document.getElementById('mo-edit-species')._editId;
   const s=await DB().Species.get(id);
   Object.assign(s,{nameRu:v('es-ru').trim(),nameLat:v('es-lat').trim(),code:v('es-code').trim(),synonyms:v('es-syn').trim(),careCode:v('es-care').trim(),type:getChip('es-type')||s.type});
+  // Upload photo if selected
+  if(window._esSelectedFile) {
+    try {
+      const path = await DB().Photos.uploadSpeciesPhoto(window._esSelectedFile, id);
+      s.photoPath = path;
+      window._esSelectedFile = null;
+    } catch(e) { console.warn('Species photo upload failed:', e); }
+  }
   await DB().Species.save(s); closeModal('mo-edit-species'); renderSpecies();
 }
 export async function deleteSpecies() {
@@ -178,6 +192,14 @@ function _fillPhoto(plantId) {
   _selectedFile=null;
   const btn=document.getElementById('ph-save-btn'); if(btn){btn.disabled=true;btn.style.opacity='.5';}
 }
+export function handleSpeciesPhotoFile(e) {
+  const file=e.target.files[0]; if(!file) return;
+  window._esSelectedFile=file;
+  const url=URL.createObjectURL(file);
+  const prev=document.getElementById('es-photo-preview');
+  if(prev) prev.innerHTML=`<img src="${url}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px" onload="URL.revokeObjectURL(this.src)">`;
+}
+
 export function handlePhotoFile(e, previewId) {
   const file=e.target.files[0]; if(!file) return;
   _selectedFile=file;
@@ -358,6 +380,33 @@ export async function deletePot() {
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
+export async function editPhotoMeta(photoId, plantId) {
+  const modal = document.getElementById('mo-edit-photo');
+  modal._photoId = photoId;
+  modal._plantId = plantId;
+  const ph = await DB().Photos.get(photoId);
+  if (ph) {
+    document.getElementById('ep-photo-date').value = ph.date || '';
+    document.getElementById('ep-photo-note').value = ph.note || '';
+  }
+  openModal('mo-edit-photo');
+}
+
+export async function savePhotoMeta() {
+  const modal = document.getElementById('mo-edit-photo');
+  const photoId = modal._photoId;
+  const plantId = modal._plantId;
+  await DB().Photos.update(photoId, {
+    date: document.getElementById('ep-photo-date').value,
+    note: document.getElementById('ep-photo-note').value.trim()
+  });
+  closeModal('mo-edit-photo');
+  const plant = await DB().Plants.get(plantId);
+  const { renderPhotosTab } = await import('./render.js');
+  await renderPhotosTab(plant);
+  switchItab(1);
+}
+
 export function goToLandscape(id) {
   closeModal('mo-plant'); document.getElementById('fab').style.display='flex';
   window.switchTab('landscapes');
