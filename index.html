@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a1a1a">
-  <title>Gideon Bonsai 義典</title>
+  <title>Gideon Bonsai<br>義典</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.json">
 </head>
@@ -457,6 +457,9 @@
     <div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Регулярное действие</span><button class="mclose" onclick="closeModal('mo-add-ra')">✕</button></div>
     <div class="mbody">
+      <div id="ra-species-note" style="display:none;background:rgba(90,107,74,.1);color:var(--moss);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px">
+        🌿 Будет добавлено для всех растений этого вида
+      </div>
       <div class="fg"><label class="fl">Название</label><input class="fi" id="ra-name" placeholder="Полив, Удобрение, Обработка..."></div>
       <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="ra-period" type="number" min="1" value="7" placeholder="7"></div>
       <div class="fg"><label class="fl">Первая дата</label><input class="fi" id="ra-next-date" type="date"></div>
