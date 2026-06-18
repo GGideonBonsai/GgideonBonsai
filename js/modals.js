@@ -1,549 +1,586 @@
-// app.js — Main entry point for Gideon Bonsai (Supabase version)
-import {
-  initSupabase, getUser, onAuthChange,
-  signInWithEmail, signUpWithEmail, signOut,
-  SBSpecies, SBPlants, SBLandscapes, SBPots, SBTasks, SBPhotos, SBRegularActions, SBTrash, getSB
-} from './supabase.js';
+// modals.js — Modal logic (Supabase version)
+import { renderSpecies, renderPlants, renderPlantDetail, renderLandscapes, renderPots, renderDeals, renderHistoryTab, renderPhotosTab, updateBadge } from './render.js';
 
-import {
-  openModal, closeModal, closeTop, openSpeciesList, openPlantDetail, switchItab,
-  selChip, togChip,
-  saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
-  editPhotoMeta, savePhotoMeta,
-  saveAddPlant, saveEditPlant, deletePlant, clonePlant,
-  savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
-  saveHistory, deleteHistory,
-  saveAddTask, completeTask,
-  saveAddRegularAction, editRegularAction, saveEditRegularAction, deleteRegularAction, completeRegularAction,
-  saveAddLs, saveEditLs, deleteLs, addLocation,
-  saveAddPot, saveEditPot, deletePot,
-  goToLandscape, goToPot
-} from './modals.js';
 
-import {
-  renderSpecies, renderLandscapes, renderPots, renderDeals,
-  updateBadge, toggleLs, switchHistSubtab,
-  renderStats, renderTrash, renderLocationPlants
-} from './render.js';
 
-// ── DB global ─────────────────────────────────────────────────────────────────
-window.DB = {
-  Species:        SBSpecies,
-  Plants:         SBPlants,
-  Landscapes:     SBLandscapes,
-  Pots:           SBPots,
-  Tasks:          SBTasks,
-  Photos:         SBPhotos,
-  RegularActions: SBRegularActions,
-  Trash:          SBTrash,
-};
-window._sbClient = getSB;
+// ── Modal stack ───────────────────────────────────────────────────────────────
+const stack = [];
+export function openModal(id, ...args) {
+  const ov = document.getElementById(id);
+  if (!ov) return;
+  ov._args = args;
+  ov.classList.add('open');
+  stack.push(id);
+  _fill(id, args);
+}
+export function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+  const i = stack.lastIndexOf(id); if (i !== -1) stack.splice(i,1);
+}
+export function closeTop() {
+  if (!stack.length) return false;
+  closeModal(stack[stack.length-1]); return true;
+}
 
-// ── Custom dialogs ────────────────────────────────────────────────────────────
-window._confirmResolve = null;
-window._alertResolve = null;
-
-window.showConfirm = function(msg, title='Подтвердите', icon='⚠️', yesText='Да', yesColor='var(--danger)') {
-  return new Promise(resolve => {
-    document.getElementById('confirm-icon').textContent = icon;
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-    const yesBtn = document.getElementById('confirm-yes-btn');
-    yesBtn.textContent = yesText;
-    yesBtn.style.color = yesColor;
-    const modal = document.getElementById('mo-confirm');
-    modal.classList.add('open');
-    modal.querySelector('.modal').style.transform = 'scale(1)';
-    window._confirmResolve = (result) => {
-      modal.classList.remove('open');
-      modal.querySelector('.modal').style.transform = 'scale(.9)';
-      resolve(result);
-    };
-  });
-};
-
-window.showPrompt = function(label, placeholder='') {
-  return new Promise(resolve => {
-    // Use a simple inline input modal
-    const existing = document.getElementById('mo-prompt');
-    if (existing) existing.remove();
-    const div = document.createElement('div');
-    div.id = 'mo-prompt';
-    div.className = 'overlay open';
-    div.style.cssText = 'align-items:center;justify-content:center;padding:0 16px;z-index:999';
-    div.innerHTML = `
-      <div class="modal" style="border-radius:16px;max-width:320px;padding-bottom:0;transform:scale(1);max-height:none">
-        <div style="padding:20px 16px 8px">
-          <div style="font-size:13px;color:var(--stone);margin-bottom:8px">${label}</div>
-          <input class="fi" id="prompt-input" placeholder="${placeholder}" style="font-size:15px" autofocus>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ash);margin-top:12px">
-          <button onclick="document.getElementById('mo-prompt').remove();window._promptResolve(null)" style="padding:14px;background:none;border:none;border-right:1px solid var(--ash);font-size:15px;color:var(--stone);cursor:pointer">Отмена</button>
-          <button onclick="const v=document.getElementById('prompt-input').value.trim();document.getElementById('mo-prompt').remove();window._promptResolve(v||null)" style="padding:14px;background:none;border:none;font-size:15px;font-weight:600;color:var(--moss);cursor:pointer">OK</button>
-        </div>
-      </div>`;
-    document.body.appendChild(div);
-    window._promptResolve = resolve;
-    setTimeout(() => div.querySelector('#prompt-input')?.focus(), 100);
-  });
-};
-
-window.showAlert = function(msg, title='', icon='ℹ️') {
-  return new Promise(resolve => {
-    document.getElementById('alert-icon').textContent = icon;
-    document.getElementById('alert-title').textContent = title;
-    document.getElementById('alert-msg').textContent = msg;
-    const modal = document.getElementById('mo-alert');
-    modal.classList.add('open');
-    modal.querySelector('.modal').style.transform = 'scale(1)';
-    window._alertResolve = () => {
-      modal.classList.remove('open');
-      modal.querySelector('.modal').style.transform = 'scale(.9)';
-      resolve();
-    };
-  });
-};
-
-// ── Navigation stack ──────────────────────────────────────────────────────────
-const screenStack = [];
-
-window.showScreen = function(id, title, renderFn) {
-  const screen = document.getElementById(id);
-  if (!screen) return;
-  screenStack.push(id);
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  screen.classList.add('on');
-  if (renderFn) renderFn();
-};
-
-window.goBack = function() {
-  if (screenStack.length <= 1) return false;
-  screenStack.pop();
-  const prev = screenStack[screenStack.length - 1];
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.getElementById(prev)?.classList.add('on');
-  return true;
-};
-
-window.goHome = function() {
-  screenStack.length = 0;
-  screenStack.push('screen-home');
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
-  document.getElementById('screen-home')?.classList.add('on');
-  document.getElementById('fab')?.style && (document.getElementById('fab').style.display = 'none');
-};
-
-// ── Home navigation buttons ───────────────────────────────────────────────────
-window.navTo = function(section) {
-  switch(section) {
-    case 'plants':
-      showScreen('screen-plants', 'Растения', () => renderSpecies());
-      document.getElementById('fab').style.display = 'flex';
-      break;
-    case 'landscapes':
-      showScreen('screen-landscapes', 'Ландшафты', () => renderLandscapes());
-      document.getElementById('fab').style.display = 'none';
-      break;
-    case 'pots':
-      showScreen('screen-pots', 'Горшки', () => renderPots());
-      document.getElementById('fab').style.display = 'none';
-      break;
-    case 'deals':
-      showScreen('screen-deals', 'Дела', () => renderDeals());
-      document.getElementById('fab').style.display = 'none';
-      break;
-    case 'stats':
-      showScreen('screen-stats', 'Статистика', () => renderStats());
-      document.getElementById('fab').style.display = 'none';
-      break;
-    case 'trash':
-      showScreen('screen-trash', 'Корзина', () => renderTrash());
-      document.getElementById('fab').style.display = 'none';
-      break;
+async function _fill(id, args) {
+  switch(id) {
+    case 'mo-edit-species': return _fillEditSpecies(args[0]);
+    case 'mo-add-plant':    return _fillAddPlant(args[0]);
+    case 'mo-edit-plant':   return _fillEditPlant(args[0]);
+    case 'mo-history':      return _fillHistory(args[0], args[1]);
+    case 'mo-photo':        return _fillPhoto(args[0]);
+    case 'mo-edit-ls':      return _fillEditLs(args[0]);
+    case 'mo-add-pot':      return _fillAddPot(args[0]);
+    case 'mo-edit-pot':     return _fillEditPot(args[0]);
+    case 'mo-deals':        return renderDeals();
+    case 'mo-add-task':     return _fillAddTask(args[0]);
+    case 'mo-add-ra':       return _fillAddRa(args);
   }
-};
+}
 
-// ── Expose globals ────────────────────────────────────────────────────────────
-Object.assign(window, {
-  openModal, closeModal, openSpeciesList, openPlantDetail, switchItab,
-  selChip, togChip,
-  saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
-  editPhotoMeta, savePhotoMeta,
-  saveAddPlant, saveEditPlant, deletePlant, clonePlant,
-  savePhoto, setMainPhoto, deletePhoto, handlePhotoFile,
-  saveHistory, deleteHistory,
-  saveAddTask, completeTask,
-  saveAddRegularAction, editRegularAction, saveEditRegularAction, deleteRegularAction, completeRegularAction,
-  saveAddLs, saveEditLs, deleteLs, addLocation,
-  saveAddPot, saveEditPot, deletePot,
-  goToLandscape, goToPot, toggleLs, switchHistSubtab, renderLocationPlants,
+function _fillAddRa(args) {
+  // args can be plantId string or [plantId, speciesId]
+  const plantId   = Array.isArray(args) ? args[0] : args;
+  const speciesId = Array.isArray(args) ? args[1] : null;
+  const modal = document.getElementById('mo-add-ra');
+  modal._plantId   = plantId   || null;
+  modal._speciesId = speciesId || null;
+  document.getElementById('ra-name').value = '';
+  document.getElementById('ra-period').value = '7';
+  document.getElementById('ra-next-date').value = new Date().toISOString().split('T')[0];
+  // Show/hide species label
+  const speciesNote = document.getElementById('ra-species-note');
+  if (speciesNote) speciesNote.style.display = speciesId ? '' : 'none';
+}
 
-  openAddPhoto: (plantId) => openModal('mo-photo', plantId),
-  setMainPhotoUI: (plantId, photoId) => setMainPhoto(plantId, photoId),
-  deletePhotoUI: (plantId, photoId) => deletePhoto(plantId, photoId),
-  viewPhoto: (url) => {
-    const ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
-    const img = document.createElement('img');
-    img.src = url;
-    img.style.cssText = 'max-width:95vw;max-height:95vh;object-fit:contain;border-radius:8px';
-    ov.appendChild(img);
-    ov.onclick = () => document.body.removeChild(ov);
-    document.body.appendChild(ov);
-  },
+// ── Chip helpers ──────────────────────────────────────────────────────────────
+export function selChip(el, g) { document.querySelectorAll(`#${g} .chip`).forEach(c=>c.classList.remove('on')); el.classList.add('on'); }
+export function togChip(el) { el.classList.toggle('on'); }
+function getChip(g) { return document.querySelector(`#${g} .chip.on`)?.dataset?.v || ''; }
+function getChips(g) { return [...document.querySelectorAll(`#${g} .chip.on`)].map(c=>c.dataset.v); }
+function setChip(g,v) { document.querySelectorAll(`#${g} .chip`).forEach(c=>c.classList.toggle('on',c.dataset.v===v)); }
+function setChips(g,vs) { document.querySelectorAll(`#${g} .chip`).forEach(c=>c.classList.toggle('on',vs.includes(c.dataset.v))); }
+function v(id) { return document.getElementById(id)?.value||''; }
+function sv(id,val) { const e=document.getElementById(id); if(e) e.value=val||''; }
 
-  // Trash
-  restoreFromTrash: async (id) => {
-    const db = window.DB;
-    const item = await db.Trash.restore(id);
-    if (!item) return;
-    const { type, data } = item;
+const STYLES = ['Чоккан — формальный прямой','Мёги — неформальный прямой','Шакан — склонный','Кенгай — каскадный','Хан-Кенгай — полукаскадный','Фукинанагаши — подветренный','Бунжинги — литерат','Хокидачи — веничный','Сокан — двойной ствол','Санкан — три ствола','Кабудачи — многоствольный','Икадабуки — плот','Неагари — обнажённые корни','Сэкиддзёдзю — корни на камне','Ишитцуки — корень на камне','Пенцзин-Сайкэй — миниатюрный пейзаж','Недзикан — крученый ствол','Банкан — изогнутый','Такодзукури — осьминог','Сабамики — выдалбливаемый ствол','Шаримики — мёртвая древесина','Канжо — петля/кольцо','Ёса-Уэ — лесная/групповая посадка','Бёртон-Космический','Другой'];
+function styleOpts(sel='') { return STYLES.map(s=>`<option ${s===sel?'selected':''}>${s}</option>`).join(''); }
 
-    if (type === 'species') {
-      // Restore species
-      await db.Species.save(data);
-      // Also restore all plants that belonged to this species (from trash)
-      const allTrash = await db.Trash.all();
-      const plantItems = allTrash.filter(t => t.type === 'plant' && t.data?.species_id === data.id);
-      for (const pi of plantItems) {
-        await db.Plants.save(pi.data);
-        await db.Trash.delete(pi.id);
-      }
-      if (plantItems.length > 0) {
-        window.showAlert(`Восстановлен вид и ${plantItems.length} растений`, 'Восстановлено', '✅');
-      }
-    } else if (type === 'plant') {
-      await db.Plants.save(data);
-    } else if (type === 'landscape') {
-      await db.Landscapes.save(data);
-    } else if (type === 'pot') {
-      await db.Pots.save(data);
-    }
-
-    await db.Trash.delete(id);
-    await renderTrash();
-  },
-  deleteFromTrash: async (id) => {
-    if (!await window.showConfirm('Удалить навсегда?','Подтвердите','⚠️','Да')) return;
-    await window.DB.Trash.delete(id);
-    renderTrash();
-  },
-  clearTrash: async () => {
-    if (!await window.showConfirm('Очистить всю корзину?','Подтвердите','⚠️','Да')) return;
-    await window.DB.Trash.clear();
-    renderTrash();
-  },
-
-  // Auth (только email)
-  authSignInEmail: () => {
-    const email = document.getElementById('auth-email')?.value;
-    const pass  = document.getElementById('auth-pass')?.value;
-    if (!email || !pass) return window.showAlert('Введите email и пароль','Ошибка','❌');
-    signInWithEmail(email, pass).catch(e => alert('Ошибка входа: ' + e.message));
-  },
-  authSignUp: () => {
-    const email = document.getElementById('auth-email')?.value;
-    const pass  = document.getElementById('auth-pass')?.value;
-    if (!email || !pass) return window.showAlert('Введите email и пароль','Ошибка','❌');
-    signUpWithEmail(email, pass)
-      .then(() => window.showAlert('Проверьте вашу почту для подтверждения регистрации','Регистрация','✅'))
-      .catch(e => alert('Ошибка регистрации: ' + e.message));
-  },
-  authSignOut: () => { signOut(); showAuthScreen(); },
-});
-
-// ── Search ────────────────────────────────────────────────────────────────────
-window.doSearch = function() {
-  const val = document.getElementById('srchInput')?.value || '';
-  const active = document.querySelector('.screen.on')?.id;
-  if (active === 'screen-plants')     renderSpecies(val);
-  if (active === 'screen-landscapes') renderLandscapes(val);
-  if (active === 'screen-pots')       renderPots(val);
-  if (active === 'screen-deals')      renderDeals(val);
-};
-
-// ── Back navigation ───────────────────────────────────────────────────────────
-let lastBackTime = 0;
-window.addEventListener('popstate', () => {
-  const now = Date.now();
-  const activeId = screenStack[screenStack.length - 1];
-  if (activeId === 'screen-home') {
-    if (now - lastBackTime < 2000) {
-      // Double back on home = exit (mobile)
-      if (navigator.app?.exitApp) navigator.app.exitApp();
+// ── Species ───────────────────────────────────────────────────────────────────
+export async function saveAddSpecies() {
+  const nameRu=v('as-ru').trim(), code=v('as-code').trim();
+  if(!nameRu||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
+  await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
+  closeModal('mo-add-species');
+  await renderSpecies(); // instant update
+}
+async function _fillEditSpecies(id) {
+  const s=await window.DB.Species.get(id);
+  if (!s) return;
+  document.getElementById('mo-edit-species')._editId=id;
+  sv('es-ru',s.nameRu);sv('es-lat',s.nameLat);sv('es-code',s.code);sv('es-syn',s.synonyms);sv('es-care',s.careCode);
+  setChip('es-type',s.type||'🌳');
+  // Show current photo if exists
+  const prev=document.getElementById('es-photo-preview');
+  if(prev) prev.innerHTML = s.photoPath
+    ? `<img src="${window.DB.Photos.getURL(s.photoPath)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px">`
+    : '';
+  window._esSelectedFile=null;
+  // Update preview fields
+  const pName = document.getElementById('es-preview-name');
+  const pLat  = document.getElementById('es-preview-lat');
+  const pCode = document.getElementById('es-preview-code');
+  const pImg  = document.getElementById('es-preview-img');
+  if(pName) pName.textContent = s.nameRu || '—';
+  if(pLat)  pLat.textContent  = s.nameLat || '';
+  if(pCode) pCode.textContent = s.code || '—';
+  if(pImg) {
+    if(s.photoPath) {
+      pImg.innerHTML = `<img src="${window.DB.Photos.getURL(s.photoPath)}" style="width:100%;height:100%;object-fit:cover">`;
     } else {
-      lastBackTime = now;
-      // Show toast
-      const t = document.createElement('div');
-      t.textContent = 'Нажмите ещё раз для выхода';
-      t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:999';
-      document.body.appendChild(t);
-      setTimeout(() => t.remove(), 2000);
+      pImg.textContent = s.type || '🌱';
     }
+  }
+}
+export async function saveEditSpecies() {
+  const id=document.getElementById('mo-edit-species')._editId;
+  const s=await window.DB.Species.get(id);
+  Object.assign(s,{nameRu:v('es-ru').trim(),nameLat:v('es-lat').trim(),code:v('es-code').trim(),synonyms:v('es-syn').trim(),careCode:v('es-care').trim(),type:getChip('es-type')||s.type});
+  // Upload photo if selected
+  if(window._esSelectedFile) {
+    try {
+      const path = await window.DB.Photos.uploadSpeciesPhoto(window._esSelectedFile, id);
+      s.photoPath = path;
+      window._esSelectedFile = null;
+    } catch(e) { console.warn('Species photo upload failed:', e); }
+  }
+  await window.DB.Species.save(s); closeModal('mo-edit-species'); await renderSpecies();
+}
+export async function deleteSpecies() {
+  const id=document.getElementById('mo-edit-species')._editId;
+  const plants=await window.DB.Plants.bySpecies(id);
+  if(plants.length>0&&!await window.showConfirm(`В этом виде ${plants.length} растений. Все будут удалены.`,'Удалить вид?','⚠️','Удалить')) return;
+  await Promise.all(plants.map(p=>window.DB.Plants.delete(p.id)));
+  await window.DB.Species.delete(id); closeModal('mo-edit-species'); renderSpecies();
+}
+
+// ── Species list ──────────────────────────────────────────────────────────────
+export async function openSpeciesList(speciesId) {
+  const s=await window.DB.Species.get(speciesId);
+  document.getElementById('mo-species-title').textContent=s?.nameRu||'';
+  document.getElementById('mo-species')._speciesId=speciesId;
+  document.getElementById('mo-species').classList.add('open');
+  stack.push('mo-species');
+  renderPlants(speciesId);
+}
+
+// ── Plants ────────────────────────────────────────────────────────────────────
+async function _lsOpts(sel='') {
+  const all=await window.DB.Landscapes.all();
+  return `<option value="">— выбрать —</option>`+all.map(l=>`<option value="${l.id}" ${l.id===sel?'selected':''}>${l.name} (${l.code})</option>`).join('');
+}
+async function _potOpts(sel='') {
+  const all=await window.DB.Pots.all();
+  return `<option value="">— выбрать —</option>`+all.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.code}</option>`).join('');
+}
+
+async function _fillAddPlant(speciesId) {
+  const s=await window.DB.Species.get(speciesId);
+  const ex=await window.DB.Plants.bySpecies(speciesId);
+  const next=ex.length>0?Math.max(...ex.map(p=>p.number))+1:1;
+  document.getElementById('mo-add-plant')._speciesId=speciesId;
+  document.getElementById('ap-title').textContent=`Добавить: ${s?.nameRu||''}`;
+  sv('ap-num',next);
+  document.getElementById('ap-preview').textContent=`Код: ${s?.code||''}${String(next).padStart(2,'0')}`;
+  document.getElementById('ap-num').oninput=()=>{document.getElementById('ap-preview').textContent=`Код: ${s?.code||''}${String(v('ap-num')).padStart(2,'0')}`;};
+  setChip('ap-status','°'); setChips('ap-flags',[]);
+  sv('ap-care','');sv('ap-date','');sv('ap-variety','');sv('ap-country','');sv('ap-price','');sv('ap-qty','1');sv('ap-comment','');
+  document.getElementById('ap-ls').innerHTML=await _lsOpts();
+  document.getElementById('ap-pot').innerHTML=await _potOpts();
+  document.getElementById('ap-style').innerHTML=`<option value="">— не выбран —</option>${styleOpts()}`;
+}
+export async function saveAddPlant() {
+  const sid=document.getElementById('mo-add-plant')._speciesId;
+  const style=v('ap-style')==='Другой'?v('ap-style-other'):v('ap-style');
+  await window.DB.Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
+  closeModal('mo-add-plant'); await renderPlants(sid); await renderSpecies(); // instant
+}
+async function _fillEditPlant(plantId) {
+  const p=await window.DB.Plants.get(plantId);
+  document.getElementById('mo-edit-plant')._plantId=plantId;
+  setChip('ep-status',p.status||'°'); setChips('ep-flags',p.checkFlags||[]);
+  sv('ep-care',p.shortCare);sv('ep-date',p.dateStart);sv('ep-variety',p.variety);sv('ep-country',p.country);sv('ep-price',p.price);sv('ep-qty',p.qty);sv('ep-comment',p.comment);
+  setChip('ep-origin',p.origin||'');
+  document.getElementById('ep-ls').innerHTML=await _lsOpts(p.landscapeId);
+  document.getElementById('ep-pot').innerHTML=await _potOpts(p.potId);
+  document.getElementById('ep-style').innerHTML=`<option value="">— не выбран —</option>${styleOpts(p.bonsaiStyle)}`;
+  document.getElementById('ep-style-other-wrap').style.display=p.bonsaiStyle==='Другой'?'':'none';
+}
+export async function saveEditPlant() {
+  const id=document.getElementById('mo-edit-plant')._plantId;
+  const p=await window.DB.Plants.get(id);
+  const style=v('ep-style')==='Другой'?v('ep-style-other'):v('ep-style');
+  Object.assign(p,{status:getChip('ep-status')||p.status,checkFlags:getChips('ep-flags'),shortCare:v('ep-care'),origin:getChip('ep-origin')||p.origin,bonsaiStyle:style,dateStart:v('ep-date'),landscapeId:v('ep-ls'),potId:v('ep-pot'),variety:v('ep-variety'),country:v('ep-country'),price:parseFloat(v('ep-price'))||0,qty:parseInt(v('ep-qty'))||1,comment:v('ep-comment')});
+  await window.DB.Plants.save(p); closeModal('mo-edit-plant'); await renderPlantDetail(id);
+  const sid=document.getElementById('mo-species')._speciesId; if(sid) await renderPlants(sid); // instant
+}
+export async function deletePlant(plantId) {
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить растение?','🗑','Удалить')) return;
+  await window.DB.Plants.delete(plantId); closeModal('mo-plant');
+  document.getElementById('fab').style.display='flex';
+  const sid=document.getElementById('mo-species')._speciesId; if(sid) renderPlants(sid);
+  renderSpecies();
+}
+export async function clonePlant(plantId) {
+  const p=await window.DB.Plants.get(plantId);
+  const ex=await window.DB.Plants.bySpecies(p.speciesId);
+  const next=Math.max(...ex.map(x=>x.number))+1;
+  const clone=JSON.parse(JSON.stringify(p));
+  delete clone.id; clone.number=next; clone.photoIds=[]; clone.mainPhotoId=null; clone.status='°';
+  await window.DB.Plants.save(clone); closeModal('mo-plant');
+  document.getElementById('fab').style.display='flex'; renderPlants(p.speciesId);
+}
+
+// ── Plant detail ──────────────────────────────────────────────────────────────
+export async function openPlantDetail(plantId) {
+  document.getElementById('mo-plant')._plantId = plantId;
+  document.getElementById('mo-plant').classList.add('open');
+  stack.push('mo-plant');
+  document.querySelectorAll('.itab').forEach((t,i) => t.classList.toggle('on', i===0));
+  document.querySelectorAll('.itab-body').forEach((b,i) => b.classList.toggle('on', i===0));
+  await renderPlantDetail(plantId);
+}
+export function switchItab(idx) {
+  document.querySelectorAll('.itab').forEach((t,i)=>t.classList.toggle('on',i===idx));
+  document.querySelectorAll('.itab-body').forEach((b,i)=>b.classList.toggle('on',i===idx));
+}
+
+// ── Photos ────────────────────────────────────────────────────────────────────
+let _selectedFile = null;
+function _fillPhoto(plantId) {
+  document.getElementById('mo-photo')._plantId=plantId;
+  sv('ph-date',new Date().toISOString().split('T')[0]); sv('ph-note','');
+  document.getElementById('ph-preview').innerHTML='';
+  _selectedFile=null;
+  const btn=document.getElementById('ph-save-btn'); if(btn){btn.disabled=true;btn.style.opacity='.5';}
+}
+export function handleSpeciesPhotoFile(e) {
+  const file=e.target.files[0]; if(!file) return;
+  window._esSelectedFile=file;
+  const url=URL.createObjectURL(file);
+  const prev=document.getElementById('es-photo-preview');
+  if(prev) prev.innerHTML=`<img src="${url}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px" onload="URL.revokeObjectURL(this.src)">`;
+}
+
+export function handlePhotoFile(e, previewId) {
+  const file=e.target.files[0]; if(!file) return;
+  _selectedFile=file;
+  const url=URL.createObjectURL(file);
+  const prev=document.getElementById(previewId);
+  if(prev) prev.innerHTML=`<img src="${url}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--ash);margin-top:8px" onload="URL.revokeObjectURL(this.src)">`;
+  const btn=document.getElementById('ph-save-btn'); if(btn){btn.disabled=false;btn.style.opacity='1';}
+}
+export async function savePhoto() {
+  const plantId=document.getElementById('mo-photo')._plantId;
+  if(!_selectedFile) return window.showAlert('Выберите или сделайте фото','Нет фото','📷');
+  try {
+    const photoId=await window.DB.Photos.upload(_selectedFile,plantId,{date:v('ph-date'),note:v('ph-note')});
+    const plant=await window.DB.Plants.get(plantId);
+    plant.photoIds=plant.photoIds||[];
+    plant.photoIds.push(photoId);
+    if(!plant.mainPhotoId) plant.mainPhotoId=photoId;
+    await window.DB.Plants.save(plant);
+    _selectedFile=null;
+    closeModal('mo-photo');
+    renderPlantDetail(plantId);
+    switchItab(1);
+  } catch(err) { window.showAlert('Ошибка загрузки: '+err.message,'Ошибка','❌'); }
+}
+export async function setMainPhoto(plantId, photoId) {
+  const p=await window.DB.Plants.get(plantId); p.mainPhotoId=photoId;
+  await window.DB.Plants.save(p); renderPlantDetail(plantId); switchItab(1);
+}
+export async function deletePhoto(plantId, photoId) {
+  if(!await window.showConfirm('Фото будет удалено навсегда.','Удалить фото?','🗑','Удалить')) return;
+  await window.DB.Photos.delete(photoId);
+  const p=await window.DB.Plants.get(plantId);
+  p.photoIds=(p.photoIds||[]).filter(id=>id!==photoId);
+  if(p.mainPhotoId===photoId) p.mainPhotoId=p.photoIds[0]||null;
+  await window.DB.Plants.save(p); renderPlantDetail(plantId); switchItab(1);
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+async function _fillHistory(plantId, histId) {
+  const modal=document.getElementById('mo-history');
+  modal._plantId=plantId; modal._histId=histId||null;
+  const isEdit=!!histId;
+  document.getElementById('mo-history-title').textContent=isEdit?'Редактировать запись':'Запись в историю';
+  document.getElementById('h-delete-btn').style.display=isEdit?'':'none';
+  document.getElementById('h-save-btn').textContent=isEdit?'💾 Обновить':'Сохранить';
+  _selectedFile=null;
+  document.getElementById('h-preview').innerHTML='';
+  if(isEdit) {
+    const plant=await window.DB.Plants.get(plantId);
+    const entry=(plant.history||[]).find(h=>h.id===histId);
+    if(entry){sv('h-title',entry.title);sv('h-date',entry.date);sv('h-comment',entry.comment);}
   } else {
-    goBack();
+    sv('h-title','');sv('h-date',new Date().toISOString().split('T')[0]);sv('h-comment','');
   }
-  history.pushState(null, '', location.href);
-});
-history.pushState(null, '', location.href);
-
-// Swipe right
-let touchStartX = 0;
-document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
-document.addEventListener('touchend', e => {
-  if (e.changedTouches[0].clientX - touchStartX > 70 && touchStartX < 35) {
-    const active = document.querySelector('.overlay.open');
-    if (active) { closeTop(); return; }
-    goBack();
+  const all=await window.DB.Plants.all();
+  const titles=[...new Set(all.flatMap(p=>(p.history||[]).map(h=>h.title)))].filter(Boolean);
+  document.getElementById('h-suggestions').innerHTML=titles.slice(0,8).map(t=>`<button class="chip chip-sm" onclick="document.getElementById('h-title').value='${t}'">${t}</button>`).join('');
+}
+export async function saveHistory() {
+  const modal=document.getElementById('mo-history');
+  const plantId=modal._plantId, histId=modal._histId;
+  const title=v('h-title').trim(); if(!title) return window.showAlert('Введите название действия','Ошибка','❌');
+  const plant=await window.DB.Plants.get(plantId);
+  if(!plant.history) plant.history=[];
+  const entry={id:histId||'h_'+Date.now(),date:v('h-date'),title,comment:v('h-comment').trim()};
+  if(_selectedFile) {
+    try { await window.DB.Photos.upload(_selectedFile,plantId,{date:v('h-date'),note:title}); _selectedFile=null; } catch(e){}
   }
-}, {passive:true});
-
-document.addEventListener('change', e => {
-  if (e.target.id === 'ap-style' || e.target.id === 'ep-style') {
-    const wrap = e.target.id === 'ap-style' ? 'ap-style-other-wrap' : 'ep-style-other-wrap';
-    document.getElementById(wrap).style.display = e.target.value === 'Другой' ? '' : 'none';
-  }
-});
-
-// ── Auth UI ───────────────────────────────────────────────────────────────────
-function showAuthScreen() {
-  document.getElementById('app-auth').style.display = 'flex';
-  document.getElementById('app-main').style.display = 'none';
+  if(histId) { const i=plant.history.findIndex(h=>h.id===histId); if(i!==-1) plant.history[i]=entry; }
+  else plant.history.push(entry);
+  await window.DB.Plants.save(plant); closeModal('mo-history'); renderPlantDetail(plantId); switchItab(2);
+}
+export async function deleteHistory() {
+  const modal=document.getElementById('mo-history');
+  if(!await window.showConfirm('Запись будет удалена из истории.','Удалить запись?','🗑','Удалить')) return;
+  const plant=await window.DB.Plants.get(modal._plantId);
+  plant.history=(plant.history||[]).filter(h=>h.id!==modal._histId);
+  await window.DB.Plants.save(plant); closeModal('mo-history'); renderPlantDetail(modal._plantId); switchItab(2);
 }
 
-function showAppScreen(user) {
-  document.getElementById('app-auth').style.display = 'none';
-  document.getElementById('app-main').style.display = 'block';
-  const emailEl = document.getElementById('user-email');
-  if (emailEl) emailEl.textContent = user.email || '';
-  goHome();
+// ── Tasks ─────────────────────────────────────────────────────────────────────
+async function _fillAddTask(plantId) {
+  const [allS,allP]=await Promise.all([window.DB.Species.all(),window.DB.Plants.all()]);
+  const select = document.getElementById('at-target');
+  select.innerHTML='<option value="">— выбрать —</option>'+
+    allS.map(s=>`<option value="${s.id}">[Вид] ${s.nameRu}</option>`).join('')+
+    allP.map(p=>{const s=allS.find(x=>x.id===p.speciesId);return `<option value="${p.id}">[Растение] ${s?.code||''}${String(p.number).padStart(2,'0')}</option>`;}).join('');
+  // Pre-select plant if provided
+  if (plantId) select.value = plantId;
+}
+export async function saveAddTask() {
+  const name=v('at-name').trim(); if(!name) return window.showAlert('Введите название действия','Ошибка','❌');
+  const targetId=v('at-target');
+  const allS=await window.DB.Species.all();
+  const type=allS.find(s=>s.id===targetId)?'species':'plant';
+  await window.DB.Tasks.save({name,type,targetId,date:v('at-date'),comment:v('at-comment').trim(),done:false});
+  closeModal('mo-add-task'); renderDeals(); updateBadge();
+}
+export async function completeTask(taskId, plantId) {
+  const task = await window.DB.Tasks.get(taskId);
+  if (!task) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  // Add to plant history only if it's a plant task
+  if (task.type === 'plant' && task.targetId) {
+    const p = await window.DB.Plants.get(task.targetId);
+    if (p) {
+      if (!p.history) p.history = [];
+      p.history.push({
+        id: 'h_' + Date.now(),
+        date: today,
+        title: task.name,
+        comment: task.comment || ''
+      });
+      await window.DB.Plants.save(p);
+    }
+  }
+
+  // Mark done (do NOT add species tasks to any plant history)
+  task.done = true;
+  await window.DB.Tasks.save(task);
+
+  const { updateBadge, renderDeals, renderPlantDetail } = await import('./render.js');
+  await updateBadge();
+  await renderDeals();
+  if (plantId) await renderPlantDetail(plantId);
 }
 
-// ── Bottom nav ────────────────────────────────────────────────────────────────
-window.bottomNav = function(tab) {
-  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('on'));
-  document.getElementById(`bnav-${tab}`)?.classList.add('on');
-  if (tab === 'home') goHome();
-  if (tab === 'profile') showScreen('screen-profile', 'Профиль', renderProfile);
-};
-
-function renderProfile() {
-  const user = window._currentUser;
-  const profileEl = document.getElementById('screen-profile-content');
-  if (!profileEl) return;
-  const savedTime = localStorage.getItem('notif_time') || '09:00';
-  const granted = Notification.permission === 'granted';
-  profileEl.innerHTML = `
-    <div class="profile-section">
-      <div class="profile-row">
-        <span class="profile-label">👤 Email</span>
-        <span class="profile-value">${user?.email || '—'}</span>
-      </div>
-
-      <div style="background:var(--white);border-radius:14px;border:1px solid var(--ash);overflow:hidden;margin-bottom:10px">
-        <div style="padding:14px;border-bottom:1px solid var(--ash);display:flex;align-items:center;justify-content:space-between">
-          <div>
-            <div style="font-size:14px;font-weight:500">🔔 Уведомления</div>
-            <div style="font-size:11px;color:var(--stone);margin-top:2px">${granted ? '✅ Включены' : '❌ Выключены'}</div>
-          </div>
-          ${granted
-            ? `<button onclick="disableNotifications()" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer">Отключить</button>`
-            : `<button onclick="requestNotifications()" style="background:var(--moss);border:none;color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer">Включить</button>`
-          }
-        </div>
-        <div style="padding:14px">
-          <div style="font-size:11px;color:var(--stone);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Время напоминания</div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <input type="time" id="notif-time-input" value="${savedTime}" class="fi" style="flex:1;font-size:18px;font-family:monospace;text-align:center">
-            <button onclick="saveNotifTime()" class="btn btn-p" style="width:auto;padding:10px 18px;font-size:13px;border-radius:10px">💾</button>
-          </div>
-          <div style="font-size:11px;color:var(--stone);margin-top:6px;line-height:1.4">Ежедневное напоминание о делах в выбранное время</div>
-        </div>
-      </div>
-
-      <button class="btn btn-d" onclick="authSignOut()">🚪 Выйти из аккаунта</button>
-    </div>`;
+// ── Landscapes ────────────────────────────────────────────────────────────────
+export async function saveAddLs() {
+  const name=v('al-name').trim(),code=v('al-code').trim(); if(!name||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
+  await window.DB.Landscapes.save({name,code,light:getChip('al-light')||'☀️',tempMin:v('al-tmin'),tempMax:v('al-tmax'),humidity:getChip('al-hum')||'≈',locations:[]});
+  closeModal('mo-add-ls'); await renderLandscapes(); // instant
+}
+async function _fillEditLs(id) {
+  const l=await window.DB.Landscapes.get(id);
+  document.getElementById('mo-edit-ls')._editId=id;
+  sv('el-name',l.name);sv('el-code',l.code);sv('el-tmin',l.tempMin);sv('el-tmax',l.tempMax);
+  setChip('el-light',l.light||'☀️'); setChip('el-hum',l.humidity||'≈');
+}
+export async function saveEditLs() {
+  const id=document.getElementById('mo-edit-ls')._editId;
+  const l=await window.DB.Landscapes.get(id);
+  Object.assign(l,{name:v('el-name').trim(),code:v('el-code').trim(),light:getChip('el-light')||l.light,tempMin:v('el-tmin'),tempMax:v('el-tmax'),humidity:getChip('el-hum')||l.humidity});
+  await window.DB.Landscapes.save(l); closeModal('mo-edit-ls'); await renderLandscapes(); // instant
+}
+export async function deleteLs() {
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить ландшафт?','🗑','Удалить')) return;
+  await window.DB.Landscapes.delete(document.getElementById('mo-edit-ls')._editId);
+  closeModal('mo-edit-ls'); renderLandscapes();
+}
+export async function addLocation(lsId) {
+  const name = await window.showPrompt('Название локации:',''); if(!name) return;
+  const code = await window.showPrompt('Код локации:',''); if(!code) return;
+  const l=await window.DB.Landscapes.get(lsId);
+  l.locations=l.locations||[]; l.locations.push({id:'loc_'+Date.now(),name,code});
+  await window.DB.Landscapes.save(l); renderLandscapes();
 }
 
-window.toggleDataBar = function() {
-  document.getElementById('dataBar').classList.toggle('open');
-};
+// ── Pots ─────────────────────────────────────────────────────────────────────
+const MAT={PL:'Пластик',CL:'Глина',CR:'Керамика',CN:'Бетон',FB:'Ткань',WD:'Дерево',MT:'Металл'};
+const potCode=(m,n,sh,pr,sz,c,p)=>`POT.${m}${String(n).padStart(3,'0')}.${sh}${pr}.${sz}.${c}${p}`;
 
-window.requestNotifications = async function() {
-  if (!('Notification' in window)) return window.showAlert('Ваш браузер не поддерживает уведомления','Недоступно','ℹ️');
-  const p = await Notification.requestPermission();
-  document.getElementById('notifStatus').textContent = p === 'granted' ? '✅ Включены' : '❌ Отключены';
+function _fillAddPot(mat='PL') {
+  setChip('ap2-mat',mat); setChip('ap2-prop','='); setChip('ap2-size','M'); setChip('ap2-pattern','');
+  sv('ap2-num','001'); window._updateAddPotCode();
+}
+window._updateAddPotCode=()=>{
+  const el=document.getElementById('ap2-code-preview');
+  if(el) el.textContent=`Код: ${potCode(getChip('ap2-mat')||'PL',v('ap2-num')||'001',getChip('ap2-shape')||'RD',getChip('ap2-prop')||'=',getChip('ap2-size')||'M',getChip('ap2-color')||'BK',getChip('ap2-pattern')||'')}`;
 };
-
-// ── Service Worker ────────────────────────────────────────────────────────────
-function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/GgideonBonsai/sw.js')
-      .then(reg => {
-        window._swReg = reg;
-        // Schedule notifications after SW ready
-        scheduleNotifications();
-      })
-      .catch(() => {});
-  }
+export async function saveAddPot() {
+  const m=getChip('ap2-mat')||'PL',n=v('ap2-num')||'001',sh=getChip('ap2-shape'),pr=getChip('ap2-prop')||'=',sz=getChip('ap2-size')||'M',c=getChip('ap2-color'),p=getChip('ap2-pattern')||'';
+  if(!sh||!c) return window.showAlert('Выберите форму и цвет','','ℹ️');
+  await window.DB.Pots.save({material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:p,code:potCode(m,n,sh,pr,sz,c,p)});
+  closeModal('mo-add-pot'); await renderPots(); // instant
+}
+async function _fillEditPot(id) {
+  const p=await window.DB.Pots.get(id);
+  document.getElementById('mo-edit-pot')._editId=id;
+  document.getElementById('ep2-current').textContent=p.code;
+  setChip('ep2-mat',p.material);setChip('ep2-shape',p.shape);setChip('ep2-prop',p.prop||'=');
+  setChip('ep2-size',p.size);setChip('ep2-color',p.color);setChip('ep2-pattern',p.pattern||'');
+  sv('ep2-num',p.number); window._updateEditPotCode();
+}
+window._updateEditPotCode=()=>{
+  const el=document.getElementById('ep2-new-code');
+  if(el) el.textContent=`Новый код: ${potCode(getChip('ep2-mat')||'PL',v('ep2-num')||'001',getChip('ep2-shape')||'RD',getChip('ep2-prop')||'=',getChip('ep2-size')||'M',getChip('ep2-color')||'BK',getChip('ep2-pattern')||'')}`;
+};
+export async function saveEditPot() {
+  const id=document.getElementById('mo-edit-pot')._editId;
+  const p=await window.DB.Pots.get(id);
+  const m=getChip('ep2-mat')||p.material,n=v('ep2-num')||p.number,sh=getChip('ep2-shape')||p.shape,pr=getChip('ep2-prop')||p.prop,sz=getChip('ep2-size')||p.size,c=getChip('ep2-color')||p.color,pt=getChip('ep2-pattern')!==''?getChip('ep2-pattern'):p.pattern;
+  Object.assign(p,{material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:pt,code:potCode(m,n,sh,pr,sz,c,pt)});
+  await window.DB.Pots.save(p); closeModal('mo-edit-pot'); await renderPots(); // instant
+}
+export async function deletePot() {
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить горшок?','🗑','Удалить')) return;
+  await window.DB.Pots.delete(document.getElementById('mo-edit-pot')._editId);
+  closeModal('mo-edit-pot'); renderPots();
 }
 
-// ── Notification scheduling ───────────────────────────────────────────────────
-window.scheduleNotifications = async function() {
-  if (Notification.permission !== 'granted') return;
-  if (!window._swReg?.active) return;
-
-  const time = localStorage.getItem('notif_time') || '09:00';
-  const [h, m] = time.split(':').map(Number);
-
-  // Get pending tasks and RAs
-  const db = window.DB;
-  if (!db) return;
-  const [tasks, ras] = await Promise.all([db.Tasks.pending(), db.RegularActions.pending()]);
-
-  // Calculate next notification time
-  const now = new Date();
-  const next = new Date();
-  next.setHours(h, m, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1); // Tomorrow if already passed
-
-  const msUntil = next - now;
-  const totalItems = tasks.length + ras.length;
-
-  if (totalItems === 0) return;
-
-  // Schedule via SW
-  if (window._swReg?.active) {
-    window._swReg.active.postMessage({
-      type: 'SCHEDULE_ALARM',
-      id: 'daily_reminder',
-      title: '🌿 Gideon Bonsai',
-      body: `У вас ${totalItems} ${totalItems === 1 ? 'дело' : 'дел'} ожидает выполнения`,
-      timestamp: next.getTime()
-    });
+// ── Navigation ────────────────────────────────────────────────────────────────
+export async function editPhotoMeta(photoId, plantId) {
+  const modal = document.getElementById('mo-edit-photo');
+  modal._photoId = photoId;
+  modal._plantId = plantId;
+  const ph = await window.DB.Photos.get(photoId);
+  if (ph) {
+    document.getElementById('ep-photo-date').value = ph.date || '';
+    document.getElementById('ep-photo-note').value = ph.note || '';
   }
-};
+  openModal('mo-edit-photo');
+}
 
-window.saveNotifTime = function() {
-  const time = document.getElementById('notif-time-input')?.value;
-  if (!time) return;
-  localStorage.setItem('notif_time', time);
-  window.showAlert(`Уведомления настроены на ${time}`, 'Сохранено', '✅');
-  scheduleNotifications();
-};
-
-// ── Care Code Decoder ────────────────────────────────────────────────────────
-window.openCareDecoder = function(code) {
-  if (!code) return;
-  document.getElementById('care-decode-code').textContent = code;
-
-  const parts = code.split('.');
-  const items = [];
-
-  const LIGHT = { D:'Яркий прямой свет, солнце', E:'Яркий рассеянный, возможно утреннее солнце', S:'Умеренный рассеянный', H:'Тень или глубокая тень' };
-  const SEASON = { EV:'Вечнозелёное', DE:'Листопадное', SE:'Полулистопадное' };
-
-  for (const part of parts) {
-    if (!part) continue;
-    // Season
-    if (/^(EV|DE|SE)$/.test(part)) {
-      items.push({ icon:'🍃', title:'Листопадность', val: SEASON[part] || part });
-    }
-    // Light: starts with D,E,S,H optionally followed by letter
-    else if (/^[DESH]/.test(part) && part.length <= 3) {
-      const lightKey = part[0];
-      items.push({ icon:'☀️', title:'Освещение', val: LIGHT[lightKey] || part });
-    }
-    // Temperature: T3-5, T18-35 etc
-    else if (/^T[\d]/.test(part)) {
-      const range = part.slice(1);
-      items.push({ icon:'🌡️', title:'Температура', val: `${range} — оптимальный диапазон °C` });
-    }
-    // Winter/cold: Z1-3
-    else if (/^Z[\d]/.test(part)) {
-      const zone = part.slice(1);
-      const zones = { '1':'Холодная зимовка 0–5°C', '2':'Прохладная 5–10°C', '3':'Умеренная 10–15°C', '4':'Тёплая 15–20°C', '5':'Комнатная 18–25°C' };
-      const zoneNum = zone.split('-')[0];
-      items.push({ icon:'❄️', title:'Зимовка', val: zones[zoneNum] || `Зона ${zone}` });
-    }
-    // Watering: W2-3
-    else if (/^W[\d]/.test(part)) {
-      const lvl = part.slice(1);
-      const vals = { '1':'Редкий полив, просушка между поливами', '2':'Умеренный, между просыханием верхнего слоя', '3':'Регулярный, почва слегка влажная', '4':'Обильный, почва постоянно умеренно влажная', '5':'Очень обильный' };
-      const lvlNum = lvl.split('-')[0];
-      items.push({ icon:'💧', title:'Полив', val: vals[lvlNum] || `Уровень ${lvl}` });
-    }
-    // Humidity: L4-5
-    else if (/^L[\d]/.test(part)) {
-      const lvl = part.slice(1);
-      const vals = { '1':'Низкая', '2':'Умеренная', '3':'Средняя 50–60%', '4':'Повышенная 60–70%', '5':'Высокая 70–80%, опрыскивание' };
-      const lvlNum = lvl.split('-')[0];
-      items.push({ icon:'🌫️', title:'Влажность воздуха', val: vals[lvlNum] || `Уровень ${lvl}` });
-    }
-    // Feeding: S234
-    else if (/^S[\d]/.test(part)) {
-      const months = part.slice(1);
-      const monthNames = { '1':'янв','2':'фев','3':'мар','4':'апр','5':'май','6':'июн','7':'июл','8':'авг','9':'сен','10':'окт','11':'ноя','12':'дек' };
-      const mList = months.split('').map(m => monthNames[m] || m).join(', ');
-      items.push({ icon:'🌿', title:'Подкормки', val: `Месяцы: ${mList}` });
-    }
-    // Pruning: P2-3
-    else if (/^P[\d]/.test(part)) {
-      const cnt = part.slice(1);
-      items.push({ icon:'✂️', title:'Обрезка', val: `${cnt} раз в сезон — формирующая обрезка` });
-    }
-    // Repotting: R2, R3a, R4a
-    else if (/^R[\d]/.test(part)) {
-      const freq = part.slice(1);
-      const freqMap = { '1':'Ежегодно', '2':'Раз в 2–3 года', '3':'Раз в 3 года', '4':'Раз в 3–5 лет', '5':'Редко, раз в 5+ лет' };
-      const freqNum = freq.replace(/[a-z]/g,'');
-      const spring = part.includes('a') ? ', ранней весной' : '';
-      items.push({ icon:'🪴', title:'Пересадка', val: (freqMap[freqNum] || `Раз в ${freqNum} года`) + spring });
-    }
-  }
-
-  const list = document.getElementById('care-decode-list');
-  if (items.length === 0) {
-    list.innerHTML = '<div class="empty-msg">Код не распознан</div>';
-  } else {
-    list.innerHTML = items.map(i => `
-      <div class="care-decode-item">
-        <div class="care-decode-icon">${i.icon}</div>
-        <div>
-          <div class="care-decode-title">${i.title}</div>
-          <div class="care-decode-val">${i.val}</div>
-        </div>
-      </div>`).join('');
-  }
-
-  // Open as bottom sheet
-  const modal = document.getElementById('mo-care-decode');
-  modal.classList.add('open');
-};
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-async function init() {
-  await initSupabase();
-  registerSW();
-
-  onAuthChange(async (user) => {
-    window._currentUser = user;
-    if (user) {
-      showAppScreen(user);
-      await updateBadge();
-    } else {
-      showAuthScreen();
-    }
+export async function savePhotoMeta() {
+  const modal = document.getElementById('mo-edit-photo');
+  const photoId = modal._photoId;
+  const plantId = modal._plantId;
+  await window.DB.Photos.update(photoId, {
+    date: document.getElementById('ep-photo-date').value,
+    note: document.getElementById('ep-photo-note').value.trim()
   });
+  closeModal('mo-edit-photo');
+  const plant = await window.DB.Plants.get(plantId);
+  const { renderPhotosTab } = await import('./render.js');
+  await renderPhotosTab(plant);
+  switchItab(1);
+}
 
-  const user = await getUser();
-  window._currentUser = user;
-  if (user) {
-    showAppScreen(user);
-    await updateBadge();
-  } else {
-    showAuthScreen();
+// ── Regular Actions ──────────────────────────────────────────────────────────
+export async function saveAddRegularAction() {
+  const modal = document.getElementById('mo-add-ra');
+  const plantId   = modal._plantId;
+  const speciesId = modal._speciesId;
+  const name      = document.getElementById('ra-name').value.trim();
+  const period    = parseInt(document.getElementById('ra-period').value) || 7;
+  const nextDate  = document.getElementById('ra-next-date').value || new Date().toISOString().split('T')[0];
+  if (!name) return window.showAlert('Введите название действия','Ошибка','❌');
+
+  if (speciesId) {
+    // Create regular action for ALL plants of this species
+    const plants = await window.DB.Plants.bySpecies(speciesId);
+    await Promise.all(plants.map(p => window.DB.RegularActions.save({
+      plantId: p.id,
+      name,
+      periodDays: period,
+      nextDate
+    })));
+  } else if (plantId) {
+    await window.DB.RegularActions.save({ plantId, name, periodDays: period, nextDate });
+  }
+
+  closeModal('mo-add-ra');
+  const { renderDeals, updateBadge, renderHistoryTab } = await import('./render.js');
+  await renderDeals();
+  await updateBadge();
+  if (plantId) {
+    const plant = await window.DB.Plants.get(plantId);
+    if (plant) await renderHistoryTab(plant);
   }
 }
 
-init();
+export async function editRegularAction(raId, plantId) {
+  const modal = document.getElementById('mo-edit-ra');
+  modal._raId    = raId;
+  modal._plantId = plantId;
+  const ra = await window.DB.RegularActions.get(raId);
+  if (ra) {
+    document.getElementById('era-name').value      = ra.name       || '';
+    document.getElementById('era-period').value    = ra.periodDays || 7;
+    document.getElementById('era-next-date').value = ra.nextDate   || '';
+  }
+  openModal('mo-edit-ra');
+}
+
+export async function saveEditRegularAction() {
+  const modal    = document.getElementById('mo-edit-ra');
+  const raId     = modal._raId;
+  const plantId  = modal._plantId;
+  const name     = document.getElementById('era-name').value.trim();
+  const period   = parseInt(document.getElementById('era-period').value) || 7;
+  const nextDate = document.getElementById('era-next-date').value || null;
+  if (!name) return window.showAlert('Введите название действия','Ошибка','❌');
+  const ra = await window.DB.RegularActions.get(raId);
+  await window.DB.RegularActions.save({ ...ra, name, periodDays: period, nextDate });
+  closeModal('mo-edit-ra');
+  const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
+  await renderDeals();
+  await updateBadge();
+  if (plantId) {
+    const plant = await window.DB.Plants.get(plantId);
+    if (plant) await renderHistoryTab(plant);
+  }
+}
+
+export async function deleteRegularAction() {
+  const modal = document.getElementById('mo-edit-ra');
+  if (!await window.showConfirm('Удалить регулярное действие?','Подтвердите','⚠️','Да')) return;
+  await window.DB.RegularActions.delete(modal._raId);
+  closeModal('mo-edit-ra');
+  const plant = await window.DB.Plants.get(modal._plantId);
+  const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
+  await renderHistoryTab(plant);
+  await renderDeals();
+  await updateBadge();
+}
+
+export async function completeRegularAction(raId, plantId) {
+  const today = new Date().toISOString().split('T')[0];
+  const nextDate = await window.DB.RegularActions.complete(raId, today);
+
+  // Add to plant history
+  const ra = await window.DB.RegularActions.get(raId);
+  if (ra && ra.plantId) {
+    const plant = await window.DB.Plants.get(ra.plantId);
+    if (plant) {
+      if (!plant.history) plant.history = [];
+      plant.history.push({
+        id: 'h_' + Date.now(),
+        date: today,
+        title: ra.name,
+        comment: `Регулярное действие. Следующее: ${nextDate}`,
+        type: 'regular'
+      });
+      await window.DB.Plants.save(plant);
+    }
+  }
+
+  const { renderDeals, updateBadge } = await import('./render.js');
+  await renderDeals();
+  await updateBadge();
+
+  // Refresh plant history if open
+  if (plantId || ra?.plantId) {
+    const pid = plantId || ra.plantId;
+    const plant = await window.DB.Plants.get(pid);
+    const { renderHistoryTab } = await import('./render.js');
+    await renderHistoryTab(plant);
+  }
+}
+
+export function goToLandscape(id) {
+  closeModal('mo-plant');
+  window.navTo('landscapes');
+  setTimeout(()=>document.querySelector(`[data-ls-id="${id}"]`)?.scrollIntoView({behavior:'smooth'}),300);
+}
+export function goToPot(id) {
+  closeModal('mo-plant');
+  window.navTo('pots');
+  setTimeout(()=>document.querySelector(`[data-pot-id="${id}"]`)?.scrollIntoView({behavior:'smooth'}),300);
+}
