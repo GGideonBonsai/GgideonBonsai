@@ -245,10 +245,13 @@
 </div>
 
 <!-- ADD SPECIES -->
-<div class="overlay" id="mo-add-species">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новый вид</span><button class="mclose" onclick="closeModal('mo-add-species')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:80vh">
+<div class="overlay" id="mo-add-species" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-species')">← Назад</button>
+      <span class="topbar-title">🌿 Новый вид</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Русское название</label><input class="fi" id="as-ru" placeholder="Фикус Бенджамина"></div>
       <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="as-lat" placeholder="Ficus benjamina" style="font-style:italic"></div>
       <div class="fg"><label class="fl">Код (3 буквы)</label><input class="fi fi-mono" id="as-code" placeholder="ФБе"></div>
@@ -264,15 +267,18 @@
       </div></div>
       <div class="fg"><label class="fl">Полный код ухода</label><input class="fi fi-mono" id="as-care" placeholder="EV.T18-35.Z15.W3.L4"></div>
       <button class="btn btn-p" onclick="saveAddSpecies()">Добавить вид</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT SPECIES -->
-<div class="overlay" id="mo-edit-species">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать вид</span><button class="mclose" onclick="closeModal('mo-edit-species')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:80vh">
+<div class="overlay" id="mo-edit-species" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-species')">← Назад</button>
+      <span class="topbar-title">✏️ Редактировать вид</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Русское название</label><input class="fi" id="es-ru"></div>
       <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="es-lat" style="font-style:italic"></div>
       <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="es-code"></div>
@@ -294,15 +300,18 @@
       </div>
       <button class="btn btn-p" onclick="saveEditSpecies()">💾 Сохранить</button>
       <button class="btn btn-d" onclick="deleteSpecies()">🗑 Удалить вид</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD PLANT -->
-<div class="overlay" id="mo-add-plant">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle" id="ap-title">Новое растение</span><button class="mclose" onclick="closeModal('mo-add-plant')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+<div class="overlay" id="mo-add-plant" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-plant')">← Назад</button>
+      <span class="topbar-title" id="ap-title">🌱 Новое растение</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Номер</label><input class="fi" id="ap-num" type="number" min="1"><div style="font-size:11px;color:var(--stone);margin-top:3px" id="ap-preview"></div></div>
       <div class="fg"><label class="fl">Статус</label><div class="chips" id="ap-status">
         <button class="chip on" data-v="°" onclick="selChip(this,'ap-status')">° В работе</button>
@@ -350,15 +359,18 @@
       </div>
       <div class="fg"><label class="fl">Комментарий</label><textarea class="fi fi-ta" id="ap-comment"></textarea></div>
       <button class="btn btn-p" onclick="saveAddPlant()">Сохранить растение</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT PLANT -->
-<div class="overlay" id="mo-edit-plant">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать</span><button class="mclose" onclick="closeModal('mo-edit-plant')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+<div class="overlay" id="mo-edit-plant" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-plant')">← Назад</button>
+      <span class="topbar-title">✏️ Редактировать растение</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Статус</label><div class="chips" id="ep-status">
         <button class="chip" data-v="°" onclick="selChip(this,'ep-status')">° В работе</button>
         <button class="chip" data-v="+" onclick="selChip(this,'ep-status')">+ Добавляется</button>
@@ -407,15 +419,18 @@
       <button class="btn btn-p" onclick="saveEditPlant()">💾 Сохранить</button>
       <button class="btn btn-s" onclick="clonePlant(document.getElementById('mo-edit-plant')._plantId)">📋 Клонировать</button>
       <button class="btn btn-d" onclick="deletePlant(document.getElementById('mo-edit-plant')._plantId)">🗑 Удалить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD/EDIT HISTORY -->
-<div class="overlay" id="mo-history">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle" id="mo-history-title">Запись в историю</span><button class="mclose" onclick="closeModal('mo-history')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-history" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-history')">← Назад</button>
+      <span class="topbar-title" id="mo-history-title">📜 Запись в историю</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Действие</label>
         <input class="fi" id="h-title" placeholder="Пересадка, Обрезка...">
         <div id="h-suggestions" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>
@@ -431,15 +446,18 @@
       </div>
       <button class="btn btn-p" id="h-save-btn" onclick="saveHistory()">Сохранить запись</button>
       <button class="btn btn-d" id="h-delete-btn" style="display:none" onclick="deleteHistory()">🗑 Удалить запись</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD PHOTO -->
-<div class="overlay" id="mo-photo">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Добавить фото</span><button class="mclose" onclick="closeModal('mo-photo')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-photo" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-photo')">← Назад</button>
+      <span class="topbar-title">📷 Добавить фото</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Фото</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <label class="photo-btn"><input type="file" accept="image/*" onchange="handlePhotoFile(event,'ph-preview')" style="display:none">🖼 Галерея</label>
@@ -450,69 +468,84 @@
       <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ph-date" type="date"></div>
       <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ph-note" placeholder="опционально"></div>
       <button class="btn btn-p" id="ph-save-btn" onclick="savePhoto()" disabled style="opacity:.5">Добавить фото</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT PHOTO META -->
-<div class="overlay" id="mo-edit-photo">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать фото</span><button class="mclose" onclick="closeModal('mo-edit-photo')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-edit-photo" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-photo')">← Назад</button>
+      <span class="topbar-title">✏️ Редактировать фото</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ep-photo-date" type="date"></div>
       <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ep-photo-note"></div>
       <button class="btn btn-p" onclick="savePhotoMeta()">💾 Сохранить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD TASK -->
-<div class="overlay" id="mo-add-task">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новая задача</span><button class="mclose" onclick="closeModal('mo-add-task')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-add-task" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-task')">← Назад</button>
+      <span class="topbar-title">📋 Новая задача</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Название задачи</label><input class="fi" id="at-name" placeholder="Перенести на зимовку"></div>
       <div class="fg"><label class="fl">Вид или растение</label><select class="fi" id="at-target"></select></div>
       <div class="fg"><label class="fl">Дата</label><input class="fi" id="at-date" type="date"></div>
       <div class="fg"><label class="fl">Комментарий</label><textarea class="fi fi-ta" id="at-comment" style="min-height:50px"></textarea></div>
       <button class="btn btn-p" onclick="saveAddTask()">Сохранить задачу</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD REGULAR ACTION -->
-<div class="overlay" id="mo-add-ra">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Регулярное действие</span><button class="mclose" onclick="closeModal('mo-add-ra')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-add-ra" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-ra')">← Назад</button>
+      <span class="topbar-title">🔄 Регулярное действие</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div id="ra-species-note" style="display:none;background:rgba(90,107,74,.1);color:var(--moss);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px">🌿 Будет добавлено для всех растений этого вида</div>
       <div class="fg"><label class="fl">Название</label><input class="fi" id="ra-name" placeholder="Полив, Удобрение, Обработка..."></div>
       <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="ra-period" type="number" min="1" value="7"></div>
       <div class="fg"><label class="fl">Первая дата</label><input class="fi" id="ra-next-date" type="date"></div>
       <button class="btn btn-p" onclick="saveAddRegularAction()">Сохранить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT REGULAR ACTION -->
-<div class="overlay" id="mo-edit-ra">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать действие</span><button class="mclose" onclick="closeModal('mo-edit-ra')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-edit-ra" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-ra')">← Назад</button>
+      <span class="topbar-title">✏️ Регулярное действие</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Название</label><input class="fi" id="era-name"></div>
       <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="era-period" type="number" min="1"></div>
       <div class="fg"><label class="fl">Следующая дата</label><input class="fi" id="era-next-date" type="date"></div>
       <button class="btn btn-p" onclick="saveEditRegularAction()">💾 Сохранить</button>
       <button class="btn btn-d" onclick="deleteRegularAction()">🗑 Удалить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- ADD LANDSCAPE -->
-<div class="overlay" id="mo-add-ls">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новый ландшафт</span><button class="mclose" onclick="closeModal('mo-add-ls')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-add-ls" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-ls')">← Назад</button>
+      <span class="topbar-title">🌍 Новый ландшафт</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Название</label><input class="fi" id="al-name" placeholder="Теплица 1"></div>
       <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="al-code" placeholder="Т¹"></div>
       <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="al-light">
@@ -530,15 +563,18 @@
         <button class="chip" data-v="≋" onclick="selChip(this,'al-hum')">≋ Высокая</button>
       </div></div>
       <button class="btn btn-p" onclick="saveAddLs()">Сохранить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT LANDSCAPE -->
-<div class="overlay" id="mo-edit-ls">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать ландшафт</span><button class="mclose" onclick="closeModal('mo-edit-ls')">✕</button></div>
-    <div class="mbody">
+<div class="overlay" id="mo-edit-ls" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-ls')">← Назад</button>
+      <span class="topbar-title">✏️ Редактировать ландшафт</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Название</label><input class="fi" id="el-name"></div>
       <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="el-code"></div>
       <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="el-light">
@@ -557,7 +593,7 @@
       </div></div>
       <button class="btn btn-p" onclick="saveEditLs()">💾 Сохранить</button>
       <button class="btn btn-d" onclick="deleteLs()">🗑 Удалить</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
@@ -579,10 +615,13 @@
 </div>
 
 <!-- ADD POT -->
-<div class="overlay" id="mo-add-pot">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новый горшок</span><button class="mclose" onclick="closeModal('mo-add-pot')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+<div class="overlay" id="mo-add-pot" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-add-pot')">← Назад</button>
+      <span class="topbar-title">🪴 Новый горшок</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div class="fg"><label class="fl">Материал</label><div class="chips" id="ap2-mat">
         <button class="chip on" data-v="PL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🪣 Пластик</button>
         <button class="chip" data-v="CL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🏺 Глина</button>
@@ -634,15 +673,18 @@
         <button class="chip" data-v=".P" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">🎨 С узором/рисунком</button>
       </div></div>
       <button class="btn btn-p" onclick="saveAddPot()">Сохранить горшок</button>
-    </div>
+    </div></div>
   </div>
 </div>
 
 <!-- EDIT POT -->
-<div class="overlay" id="mo-edit-pot">
-  <div class="modal"><div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать горшок</span><button class="mclose" onclick="closeModal('mo-edit-pot')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+<div class="overlay" id="mo-edit-pot" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0;overflow:hidden">
+    <div class="topbar" style="flex-shrink:0">
+      <button class="topbar-back" onclick="closeModal('mo-edit-pot')">← Назад</button>
+      <span class="topbar-title">✏️ Редактировать горшок</span>
+    </div>
+    <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
       <div style="font-size:11px;color:var(--stone);padding:4px 0 10px;font-family:monospace" id="ep2-current"></div>
       <div class="fg"><label class="fl">Материал</label><div class="chips" id="ep2-mat">
         <button class="chip" data-v="PL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🪣 Пластик</button>
