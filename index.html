@@ -54,12 +54,14 @@
     <div class="home-page">
       <div class="home-hero">
         <div class="home-title">Gideon Bonsai</div>
-        <div class="home-kanji-sub">義 典</div>
-        <div class="home-logo-circle">
-          <span class="home-kanji">義典</span>
+        <div class="home-kanji-row">義 典</div>
+        <div class="home-logo-wrap">
+          <div class="home-logo-ring"></div>
+          <span class="home-kanji-big">義典</span>
         </div>
         <div class="home-subtitle">Искусство в гармонии с природой</div>
         <div class="home-divider"></div>
+        <span class="home-leaf">🍃</span>
       </div>
       <div class="home-grid">
         <button class="home-btn" onclick="navTo('plants')">
@@ -192,13 +194,16 @@
 
 <!-- ═══ MODALS ════════════════════════════════════════════════════════════════ -->
 
-<!-- SPECIES LIST -->
-<div class="overlay" id="mo-species">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle" id="mo-species-title">Вид</span><button class="mclose" onclick="closeModal('mo-species')">✕</button></div>
-    <div class="mbody">
-      <div class="srch-inner" style="margin-bottom:10px"><span class="srch-icon">🔍</span><input class="srch-input" type="search" placeholder="Поиск..." oninput="renderPlants(document.getElementById('mo-species')._speciesId,this.value)"></div>
+<!-- SPECIES LIST — full screen -->
+<div class="overlay" id="mo-species" style="align-items:stretch">
+  <div class="modal full" style="display:flex;flex-direction:column;border-radius:0">
+    <div class="topbar" style="position:sticky;top:0">
+      <button class="topbar-back" onclick="closeModal('mo-species')">← Назад</button>
+      <span class="topbar-title" id="mo-species-title">Вид</span>
+      <button class="topbar-action" onclick="openModal('mo-add-plant',document.getElementById('mo-species')._speciesId)">＋</button>
+    </div>
+    <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" type="search" placeholder="Поиск..." oninput="renderPlants(document.getElementById('mo-species')._speciesId,this.value)"></div></div>
+    <div style="overflow-y:auto;flex:1;padding:10px 12px 80px">
       <div id="plantsList"></div>
       <button class="add-btn" onclick="openModal('mo-add-plant',document.getElementById('mo-species')._speciesId)">＋ Добавить растение</button>
     </div>
