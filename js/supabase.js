@@ -98,11 +98,13 @@ export const SBSpecies = {
     }
   },
   async delete(id) {
+    const user = await getUser();
+    if (!user?.id) throw new Error('Не авторизован');
     // Move to trash first
-    const { data } = await sb().from('species').select('*').eq('id', id).single();
+    const { data } = await sb().from('species').select('*').eq('id', id).maybeSingle();
     if (data) {
-      const user = await getUser();
-      await sb().from('trash').insert({ user_id: user?.id, type: 'species', data });
+      const { error: trashErr } = await sb().from('trash').insert({ user_id: user.id, type: 'species', data });
+      if (trashErr) console.warn('Trash insert error:', trashErr);
     }
     const { error } = await sb().from('species').delete().eq('id', id);
     if (error) throw error;
@@ -354,7 +356,8 @@ export const SBTrash = {
   },
   async clear() {
     const user = await getUser();
-    const { error } = await sb().from('trash').delete().eq('user_id', user?.id);
+    if (!user?.id) throw new Error('Не авторизован');
+    const { error } = await sb().from('trash').delete().neq('id', '00000000-0000-0000-0000-000000000000').eq('user_id', user.id);
     if (error) throw error;
   }
 };
