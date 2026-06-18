@@ -399,19 +399,24 @@ export async function renderDeals(filter='') {
   el('dealsList').innerHTML = items.map(item => {
     const isTask = item.type==='task';
     const obj = item.obj;
+    const dateStr = obj.date || obj.nextDate;
     return `
     <div class="deal-item">
-      <div class="deal-check" onclick="${isTask ? `completeTask('${obj.id}',null)` : `completeRegularAction('${obj.id}',null)`}">
-        <span style="font-size:10px;color:var(--stone);pointer-events:none">✓</span>
+      <div class="deal-check" onclick="${isTask
+        ? `completeTask('${obj.id}','${item.targetId||''}')`
+        : `completeRegularAction('${obj.id}','${item.targetId||''}')`}">
+        <span style="font-size:14px;color:var(--moss);pointer-events:none;font-weight:700">✓</span>
       </div>
       <div class="deal-info">
         <div class="deal-title">${obj.name}</div>
-        ${item.plantName ? `<div class="deal-plant">${item.plantName}</div>` : ''}
-        ${obj.date||obj.nextDate ? `
-          <div class="deal-date">${formatDate(obj.date||obj.nextDate)}</div>
-          <div class="deal-countdown">${daysUntil(obj.date||obj.nextDate)}</div>` : ''}
+        ${item.plantName
+          ? `<div class="deal-plant">🌿 ${item.plantName}</div>`
+          : '<div class="deal-plant" style="color:var(--stone)">🌿 Все растения вида</div>'}
+        ${dateStr ? `
+          <div class="deal-date">📅 ${formatDate(dateStr)}</div>
+          <div class="deal-countdown">⏱ ${daysUntil(dateStr)}</div>` : ''}
         ${obj.comment ? `<div class="hist-comment">${obj.comment}</div>` : ''}
-        <span class="tag ${isTask?'tag-pl':'tag-ra'}">${isTask?'Задача':'Регулярное'}</span>
+        <span class="tag ${isTask?'tag-pl':'tag-ra'}">${isTask?'Задача':'🔄 Регулярное'}</span>
       </div>
     </div>`;
   }).join('');
