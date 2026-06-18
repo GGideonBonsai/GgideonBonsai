@@ -3,112 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#1a1a1a">
-  <title>Gideon Bonsai<br>義典</title>
+  <title>Gideon Bonsai 義典</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
-<!-- ═══ AUTH SCREEN ══════════════════════════════════════════════════════════ -->
+<!-- ═══ AUTH ══════════════════════════════════════════════════════════════════ -->
 <div id="app-auth" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--ink)">
-  <div style="text-align:center;margin-bottom:32px">
-    <div style="font-family:'Noto Serif JP',serif;font-size:28px;color:#fff;margin-bottom:4px">義典</div>
-    <div style="font-family:'Noto Serif JP',serif;font-size:20px;color:var(--earth2);font-weight:300">Gideon Bonsai</div>
-    <div style="font-size:11px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Коллекция растений</div>
+  <div class="auth-logo">
+    <div class="kanji">義典</div>
+    <div class="name">Gideon Bonsai</div>
+    <div class="sub">Коллекция растений</div>
   </div>
-  <div style="background:#fff;border-radius:12px;padding:24px;width:100%;max-width:360px">
-    <div class="fg"><label class="fl" style="color:var(--stone)">Email</label><input class="fi" id="auth-email" type="email" placeholder="your@email.com" autocomplete="email"></div>
-    <div class="fg"><label class="fl" style="color:var(--stone)">Пароль</label><input class="fi" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+  <div class="auth-box">
+    <div class="fg"><label class="fl">Email</label><input class="fi" id="auth-email" type="email" placeholder="your@email.com" autocomplete="email"></div>
+    <div class="fg"><label class="fl">Пароль</label><input class="fi" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn btn-p" onclick="authSignInEmail()" style="margin-bottom:8px">Войти</button>
     <button class="btn btn-s" onclick="authSignUp()">Зарегистрироваться</button>
-
   </div>
-  <div style="font-size:11px;color:rgba(255,255,255,.2);margin-top:20px;text-align:center">Данные хранятся в Supabase<br>Фото сохраняются в облаке</div>
 </div>
 
-<!-- ═══ APP (показывается после входа) ══════════════════════════════════════ -->
+<!-- ═══ APP ═══════════════════════════════════════════════════════════════════ -->
 <div id="app-main" style="display:none">
 
-<!-- ═══ HEADER ═══════════════════════════════════════════════════════════════ -->
-<header class="hdr">
-  <div class="logo">
-    <div class="logo-circle">義典</div>
-    <div class="logo-text">
-      <div class="t1">Gideon Bonsai</div>
-      <div class="t2">Коллекция растений</div>
+  <!-- DATA BAR -->
+  <div class="data-bar" id="dataBar">
+    <button class="d-btn" onclick="requestNotifications()">🔔 Уведомления</button>
+    <span id="notifStatus" style="font-size:10px;color:rgba(255,255,255,.35)"></span>
+  </div>
+
+  <!-- ── HOME SCREEN ──────────────────────────────────────────────────────── -->
+  <div class="screen on" id="screen-home">
+    <div class="home-page">
+      <div class="home-hero">
+        <div class="home-logo-circle">
+          <span class="home-kanji">義典</span>
+        </div>
+        <div class="home-title">Gideon Bonsai</div>
+        <div class="home-subtitle">Искусство в гармонии с природой</div>
+        <div class="home-divider"></div>
+      </div>
+      <div class="home-grid">
+        <button class="home-btn" onclick="navTo('plants')">
+          <div class="home-btn-icon">🌿</div>
+          <div class="home-btn-label">Растения</div>
+        </button>
+        <button class="home-btn" onclick="navTo('landscapes')">
+          <div class="home-btn-icon">🌍</div>
+          <div class="home-btn-label">Ландшафты</div>
+        </button>
+        <button class="home-btn" onclick="navTo('pots')">
+          <div class="home-btn-icon">🪴</div>
+          <div class="home-btn-label">Горшки</div>
+        </button>
+        <button class="home-btn" onclick="navTo('deals')">
+          <div class="home-btn-icon">📋</div>
+          <div class="home-btn-label">Дела / Задачи</div>
+          <div class="home-btn-sub"><span id="dealsBadge" style="background:var(--earth);color:#fff;padding:1px 8px;border-radius:10px;font-size:11px">0</span></div>
+        </button>
+        <button class="home-btn" onclick="navTo('stats')">
+          <div class="home-btn-icon">📊</div>
+          <div class="home-btn-label">Статистика</div>
+        </button>
+        <button class="home-btn" onclick="navTo('trash')">
+          <div class="home-btn-icon">🗑</div>
+          <div class="home-btn-label">Корзина</div>
+        </button>
+      </div>
     </div>
   </div>
-  <div style="display:flex;gap:6px;align-items:center">
-    <span id="user-email" style="font-size:10px;color:rgba(255,255,255,.4);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
-    <button class="hdr-btn" onclick="toggleDataBar()">💾</button>
-    <button class="hdr-btn" onclick="authSignOut()" title="Выйти">🚪</button>
-  </div>
-</header>
 
-<!-- DATA BAR -->
-<div class="data-bar" id="dataBar">
-  <button class="d-btn" onclick="saveJSON()">⬇ Сохранить JSON</button>
-  <button class="d-btn" onclick="document.getElementById('loadFile').click()">⬆ Загрузить JSON</button>
-  <input type="file" id="loadFile" accept=".json" style="display:none" onchange="loadJSON(event)">
-  <button class="d-btn" onclick="requestNotifications()">🔔 Уведомления</button>
-  <span class="d-status" id="dataStatus">—</span>
-  <span id="notifStatus" style="font-size:10px;color:rgba(255,255,255,.35);width:100%"></span>
-</div>
-
-<!-- ═══ NAV ══════════════════════════════════════════════════════════════════ -->
-<nav class="nav">
-  <button class="nav-btn on" id="ntab-plants"     onclick="switchTab('plants')">    <span class="ni">🌿</span>Растения</button>
-  <button class="nav-btn"    id="ntab-landscapes" onclick="switchTab('landscapes')"><span class="ni">🌍</span>Ландшафты</button>
-  <button class="nav-btn"    id="ntab-pots"       onclick="switchTab('pots')">      <span class="ni">🪴</span>Горшки</button>
-</nav>
-
-<!-- SEARCH -->
-<div class="srch">
-  <div class="srch-inner">
-    <span class="srch-icon">🔍</span>
-    <input class="srch-input" id="srchInput" type="search" placeholder="Поиск..." oninput="doSearch()">
-  </div>
-</div>
-
-<!-- ═══ PAGES ════════════════════════════════════════════════════════════════ -->
-<div class="content">
-
-  <!-- PLANTS -->
-  <div class="page on" id="page-plants">
-    <div class="sec-hdr">
-      <span class="sec-title">Виды</span>
-      <span class="badge" id="speciesBadge">0</span>
+  <!-- ── PLANTS SCREEN ────────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-plants">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">🌿 Растения</span>
+      <button class="topbar-action" onclick="openModal('mo-add-species')">＋</button>
     </div>
-    <div id="speciesList"></div>
-    <button class="add-btn" onclick="openModal('mo-add-species')">＋ Добавить вид</button>
-    <div style="height:80px"></div>
-  </div>
-
-  <!-- LANDSCAPES -->
-  <div class="page" id="page-landscapes">
-    <div class="sec-hdr">
-      <span class="sec-title">Ландшафты</span>
-      <span class="badge" id="lsBadge">0</span>
+    <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" id="srchInput" type="search" placeholder="Поиск..." oninput="doSearch()"></div></div>
+    <div class="content" style="padding-bottom:80px">
+      <div class="sec-hdr"><span class="sec-title">Виды</span><span class="badge" id="speciesBadge">0</span></div>
+      <div id="speciesList"></div>
+      <button class="add-btn" onclick="openModal('mo-add-species')">＋ Добавить вид</button>
     </div>
-    <div id="lsList"></div>
-    <button class="add-btn" onclick="openModal('mo-add-ls')">＋ Добавить ландшафт</button>
+    <button class="fab" id="fab" onclick="openModal('mo-deals-fab')" style="display:none">
+      ✅ Дела <span class="fab-badge" id="fabBadge">0</span>
+    </button>
   </div>
 
-  <!-- POTS -->
-  <div class="page" id="page-pots">
-    <div class="sec-hdr"><span class="sec-title">Горшки</span></div>
-    <div id="potsList"></div>
-    <button class="add-btn" onclick="openModal('mo-add-pot')">＋ Добавить горшок</button>
+  <!-- ── LANDSCAPES SCREEN ────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-landscapes">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">🌍 Ландшафты</span>
+    </div>
+    <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" id="srchLs" type="search" placeholder="Поиск..." oninput="renderLandscapes(this.value)"></div></div>
+    <div class="content">
+      <div class="sec-hdr"><span class="sec-title">Ландшафты</span><span class="badge" id="lsBadge">0</span></div>
+      <div id="lsList"></div>
+      <button class="add-btn" onclick="openModal('mo-add-ls')">＋ Добавить ландшафт</button>
+    </div>
   </div>
 
-</div>
+  <!-- ── POTS SCREEN ──────────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-pots">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">🪴 Горшки</span>
+    </div>
+    <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" id="srchPots" type="search" placeholder="Поиск..." oninput="renderPots(this.value)"></div></div>
+    <div class="content">
+      <div id="potsList"></div>
+      <button class="add-btn" onclick="openModal('mo-add-pot')">＋ Добавить горшок</button>
+    </div>
+  </div>
 
-<!-- FAB: Дела -->
-<button class="fab" id="fab" onclick="openDeals()">
-  ✅ Дела <span class="fab-badge" id="fabBadge">0</span>
-</button>
+  <!-- ── DEALS SCREEN ─────────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-deals">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">📋 Дела / Задачи</span>
+    </div>
+    <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" id="srchDeals" type="search" placeholder="Поиск..." oninput="renderDeals(this.value)"></div></div>
+    <div class="content">
+      <button class="add-btn" style="margin-bottom:10px" onclick="openModal('mo-add-task')">＋ Добавить задачу</button>
+      <div id="dealsList"></div>
+    </div>
+  </div>
+
+  <!-- ── STATS SCREEN ─────────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-stats">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">📊 Статистика</span>
+    </div>
+    <div id="stats-content"></div>
+  </div>
+
+  <!-- ── TRASH SCREEN ─────────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-trash">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">🗑 Корзина</span>
+    </div>
+    <div class="content">
+      <div id="trash-list"></div>
+    </div>
+  </div>
+
+  <!-- ── PROFILE SCREEN ───────────────────────────────────────────────────── -->
+  <div class="screen" id="screen-profile">
+    <div class="topbar">
+      <button class="topbar-back" onclick="goBack()">← Назад</button>
+      <span class="topbar-title">👤 Профиль</span>
+    </div>
+    <div id="screen-profile-content"></div>
+  </div>
+
+  <!-- ── BOTTOM NAV ───────────────────────────────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn on" id="bnav-home" onclick="bottomNav('home')">
+      <span class="bni">🏠</span>Главная
+    </button>
+    <button class="bottom-nav-btn" id="bnav-profile" onclick="bottomNav('profile')">
+      <span class="bni">👤</span>Профиль
+    </button>
+  </nav>
+
+</div><!-- end app-main -->
 
 <!-- ═══ MODALS ════════════════════════════════════════════════════════════════ -->
 
@@ -116,17 +182,11 @@
 <div class="overlay" id="mo-species">
   <div class="modal">
     <div class="mhandle"></div>
-    <div class="mhdr">
-      <span class="mtitle" id="mo-species-title">Вид</span>
-      <button class="mclose" onclick="closeModal('mo-species')">✕</button>
-    </div>
+    <div class="mhdr"><span class="mtitle" id="mo-species-title">Вид</span><button class="mclose" onclick="closeModal('mo-species')">✕</button></div>
     <div class="mbody">
-      <div class="srch-inner" style="margin-bottom:10px">
-        <span class="srch-icon">🔍</span>
-        <input class="srch-input" id="speciesSrch" type="search" placeholder="Поиск..." oninput="renderPlants(document.getElementById('mo-species')._speciesId, this.value)">
-      </div>
+      <div class="srch-inner" style="margin-bottom:10px"><span class="srch-icon">🔍</span><input class="srch-input" type="search" placeholder="Поиск..." oninput="renderPlants(document.getElementById('mo-species')._speciesId,this.value)"></div>
       <div id="plantsList"></div>
-      <button class="add-btn" onclick="openModal('mo-add-plant', document.getElementById('mo-species')._speciesId)">＋ Добавить растение</button>
+      <button class="add-btn" onclick="openModal('mo-add-plant',document.getElementById('mo-species')._speciesId)">＋ Добавить растение</button>
     </div>
   </div>
 </div>
@@ -134,48 +194,56 @@
 <!-- PLANT DETAIL -->
 <div class="overlay" id="mo-plant">
   <div class="modal full">
-    <div class="det-scroll" id="plantDetailScroll">
+    <div class="det-scroll">
       <div class="det-hdr">
-        <button class="back-btn" onclick="closeModal('mo-plant');document.getElementById('fab').style.display='flex'">← Назад</button>
+        <button class="back-btn" onclick="closeModal('mo-plant')">← Назад</button>
         <span class="det-title" id="detTitle">—</span>
-        <button class="hdr-btn" onclick="openModal('mo-edit-plant', document.getElementById('mo-plant')._plantId)">✏️</button>
+        <button class="topbar-action" onclick="openModal('mo-edit-plant',document.getElementById('mo-plant')._plantId)">✏️</button>
       </div>
       <div class="det-thumb" id="detThumb">🌱</div>
       <div class="det-codes" id="detCodes"></div>
       <div class="inner-tabs">
         <button class="itab on" onclick="switchItab(0)">📋 Описание</button>
-        <button class="itab"    onclick="switchItab(1)">📷 Фото</button>
-        <button class="itab"    onclick="switchItab(2)">📜 История</button>
+        <button class="itab" onclick="switchItab(1)">📷 Фото</button>
+        <button class="itab" onclick="switchItab(2)">📜 История</button>
       </div>
       <div class="itab-body on" id="itab0"></div>
-      <div class="itab-body"    id="itab1"></div>
-      <div class="itab-body"    id="itab2"></div>
+      <div class="itab-body" id="itab1"></div>
+      <div class="itab-body" id="itab2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LOCATION PLANTS -->
+<div class="overlay" id="mo-location-plants">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle" id="location-plants-title">Локация</span><button class="mclose" onclick="closeModal('mo-location-plants')">✕</button></div>
+    <div class="mbody">
+      <div id="location-plants-list"></div>
     </div>
   </div>
 </div>
 
 <!-- ADD SPECIES -->
 <div class="overlay" id="mo-add-species">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Новый вид</span><button class="mclose" onclick="closeModal('mo-add-species')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:80vh">
       <div class="fg"><label class="fl">Русское название</label><input class="fi" id="as-ru" placeholder="Фикус Бенджамина"></div>
       <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="as-lat" placeholder="Ficus benjamina" style="font-style:italic"></div>
       <div class="fg"><label class="fl">Код (3 буквы)</label><input class="fi fi-mono" id="as-code" placeholder="ФБе"></div>
-      <div class="fg"><label class="fl">Синонимы</label><input class="fi" id="as-syn" placeholder="Фикус плакучий..."></div>
-      <div class="fg"><label class="fl">Тип</label>
-        <div class="chips" id="as-type">
-          <button class="chip on" data-v="🌳" onclick="selChip(this,'as-type')">🌳 Дерево</button>
-          <button class="chip" data-v="🌵" onclick="selChip(this,'as-type')">🌵 Суккулент</button>
-          <button class="chip" data-v="🪴" onclick="selChip(this,'as-type')">🪴 Травянистое</button>
-          <button class="chip" data-v="盆" onclick="selChip(this,'as-type')">盆 Бонсай</button>
-          <button class="chip" data-v="🌲" onclick="selChip(this,'as-type')">🌲 Лес/группа</button>
-          <button class="chip" data-v="🌱" onclick="selChip(this,'as-type')">🌱 Всходы</button>
-          <button class="chip" data-v="✾" onclick="selChip(this,'as-type')">✾ Семена</button>
-        </div>
-      </div>
-      <div class="fg"><label class="fl">Полный код ухода</label><input class="fi fi-mono" id="as-care" placeholder="EV.T18-35.Z15.W3.L4.S23.P6.R2"></div>
+      <div class="fg"><label class="fl">Синонимы</label><input class="fi" id="as-syn"></div>
+      <div class="fg"><label class="fl">Тип</label><div class="chips" id="as-type">
+        <button class="chip on" data-v="🌳" onclick="selChip(this,'as-type')">🌳 Дерево</button>
+        <button class="chip" data-v="🌵" onclick="selChip(this,'as-type')">🌵 Суккулент</button>
+        <button class="chip" data-v="🪴" onclick="selChip(this,'as-type')">🪴 Травянистое</button>
+        <button class="chip" data-v="盆" onclick="selChip(this,'as-type')">盆 Бонсай</button>
+        <button class="chip" data-v="🌲" onclick="selChip(this,'as-type')">🌲 Лес/группа</button>
+        <button class="chip" data-v="🌱" onclick="selChip(this,'as-type')">🌱 Всходы</button>
+        <button class="chip" data-v="✾" onclick="selChip(this,'as-type')">✾ Семена</button>
+      </div></div>
+      <div class="fg"><label class="fl">Полный код ухода</label><input class="fi fi-mono" id="as-care" placeholder="EV.T18-35.Z15.W3.L4"></div>
       <button class="btn btn-p" onclick="saveAddSpecies()">Добавить вид</button>
     </div>
   </div>
@@ -183,33 +251,26 @@
 
 <!-- EDIT SPECIES -->
 <div class="overlay" id="mo-edit-species">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Редактировать вид</span><button class="mclose" onclick="closeModal('mo-edit-species')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:80vh">
       <div class="fg"><label class="fl">Русское название</label><input class="fi" id="es-ru"></div>
       <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="es-lat" style="font-style:italic"></div>
       <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="es-code"></div>
       <div class="fg"><label class="fl">Синонимы</label><input class="fi" id="es-syn"></div>
-      <div class="fg"><label class="fl">Тип</label>
-        <div class="chips" id="es-type">
-          <button class="chip" data-v="🌳" onclick="selChip(this,'es-type')">🌳</button>
-          <button class="chip" data-v="🌵" onclick="selChip(this,'es-type')">🌵</button>
-          <button class="chip" data-v="🪴" onclick="selChip(this,'es-type')">🪴</button>
-          <button class="chip" data-v="盆" onclick="selChip(this,'es-type')">盆</button>
-          <button class="chip" data-v="🌲" onclick="selChip(this,'es-type')">🌲</button>
-          <button class="chip" data-v="🌱" onclick="selChip(this,'es-type')">🌱</button>
-          <button class="chip" data-v="✾" onclick="selChip(this,'es-type')">✾</button>
-        </div>
-      </div>
+      <div class="fg"><label class="fl">Тип</label><div class="chips" id="es-type">
+        <button class="chip" data-v="🌳" onclick="selChip(this,'es-type')">🌳</button>
+        <button class="chip" data-v="🌵" onclick="selChip(this,'es-type')">🌵</button>
+        <button class="chip" data-v="🪴" onclick="selChip(this,'es-type')">🪴</button>
+        <button class="chip" data-v="盆" onclick="selChip(this,'es-type')">盆</button>
+        <button class="chip" data-v="🌲" onclick="selChip(this,'es-type')">🌲</button>
+        <button class="chip" data-v="🌱" onclick="selChip(this,'es-type')">🌱</button>
+        <button class="chip" data-v="✾" onclick="selChip(this,'es-type')">✾</button>
+      </div></div>
       <div class="fg"><label class="fl">Полный код ухода</label><input class="fi fi-mono" id="es-care"></div>
       <div class="fg">
         <label class="fl">Фото вида</label>
-        <div class="photo-zone">
-          <input type="file" accept="image/*" onchange="handleSpeciesPhotoFile(event)">
-          <div class="photo-zone-icon">📷</div>
-          <div class="photo-zone-text">Нажмите для выбора фото</div>
-        </div>
+        <div class="photo-zone"><input type="file" accept="image/*" onchange="handleSpeciesPhotoFile(event)"><div class="photo-zone-icon">📷</div><div class="photo-zone-text">Нажмите для выбора</div></div>
         <div id="es-photo-preview"></div>
       </div>
       <button class="btn btn-p" onclick="saveEditSpecies()">💾 Сохранить</button>
@@ -220,23 +281,54 @@
 
 <!-- ADD PLANT -->
 <div class="overlay" id="mo-add-plant">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle" id="ap-title">Новое растение</span><button class="mclose" onclick="closeModal('mo-add-plant')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:85vh">
       <div class="fg"><label class="fl">Номер</label><input class="fi" id="ap-num" type="number" min="1"><div style="font-size:11px;color:var(--stone);margin-top:3px" id="ap-preview"></div></div>
-      <div class="fg"><label class="fl">Статус</label><div class="chips" id="ap-status"><button class="chip on" data-v="°" onclick="selChip(this,'ap-status')">° В работе</button><button class="chip" data-v="+" onclick="selChip(this,'ap-status')">+ Добавляется</button><button class="chip" data-v="✓" onclick="selChip(this,'ap-status')">✓ Закрыто</button></div></div>
-      <div class="fg"><label class="fl">Флаги</label><div class="chips" id="ap-flags"><button class="chip" data-v="#" onclick="togChip(this)"># Физ.действия</button><button class="chip" data-v="§" onclick="togChip(this)">§ Приложения</button><button class="chip" data-v="∆" onclick="togChip(this)">∆ Таблицы</button><button class="chip" data-v="©" onclick="togChip(this)">© QR-код</button></div></div>
+      <div class="fg"><label class="fl">Статус</label><div class="chips" id="ap-status">
+        <button class="chip on" data-v="°" onclick="selChip(this,'ap-status')">° В работе</button>
+        <button class="chip" data-v="+" onclick="selChip(this,'ap-status')">+ Добавляется</button>
+        <button class="chip" data-v="✓" onclick="selChip(this,'ap-status')">✓ Закрыто</button>
+      </div></div>
+      <div class="fg"><label class="fl">Флаги</label><div class="chips" id="ap-flags">
+        <button class="chip" data-v="#" onclick="togChip(this)"># Физ.действия</button>
+        <button class="chip" data-v="§" onclick="togChip(this)">§ Приложения</button>
+        <button class="chip" data-v="∆" onclick="togChip(this)">∆ Таблицы</button>
+        <button class="chip" data-v="©" onclick="togChip(this)">© QR-код</button>
+      </div></div>
       <div class="fg"><label class="fl">Короткий код ухода</label><input class="fi" id="ap-care" placeholder="≈○⌂◇" style="font-size:16px"></div>
-      <div class="fg"><label class="fl">Способ получения</label><div class="chips" id="ap-origin"><button class="chip" data-v="черенок" onclick="selChip(this,'ap-origin')">🌿 Черенок</button><button class="chip" data-v="семя" onclick="selChip(this,'ap-origin')">🌱 Семя</button><button class="chip" data-v="ямадори" onclick="selChip(this,'ap-origin')">⛰️ Ямадори</button><button class="chip" data-v="куплено" onclick="selChip(this,'ap-origin')">🛒 Куплено</button></div></div>
-      <div class="fg"><label class="fl">Стиль бонсай</label><select class="fi" id="ap-style"><option value="">— не выбран —</option><option>Чоккан — формальный прямой</option><option>Мёги — неформальный прямой</option><option>Шакан — склонный</option><option>Кенгай — каскадный</option><option>Хан-Кенгай — полукаскадный</option><option>Фукинанагаши — подветренный</option><option>Бунжинги — литерат</option><option>Хокидачи — веничный</option><option>Сокан — двойной ствол</option><option>Санкан — три ствола</option><option>Кабудачи — многоствольный</option><option>Икадабуки — плот</option><option>Неагари — обнажённые корни</option><option>Сэкиддзёдзю — корни на камне</option><option>Ишитцуки — корень на камне</option><option>Пенцзин-Сайкэй — миниатюрный пейзаж</option><option>Недзикан — крученый ствол</option><option>Банкан — изогнутый</option><option>Такодзукури — осьминог</option><option>Сабамики — выдалбливаемый ствол</option><option>Шаримики — мёртвая древесина</option><option>Канжо — петля/кольцо</option><option>Ёса-Уэ — лесная/групповая посадка</option><option>Бёртон-Космический</option><option>Другой</option></select></div>
+      <div class="fg"><label class="fl">Способ получения</label><div class="chips" id="ap-origin">
+        <button class="chip" data-v="черенок" onclick="selChip(this,'ap-origin')">🌿 Черенок</button>
+        <button class="chip" data-v="семя" onclick="selChip(this,'ap-origin')">🌱 Семя</button>
+        <button class="chip" data-v="ямадори" onclick="selChip(this,'ap-origin')">⛰️ Ямадори</button>
+        <button class="chip" data-v="куплено" onclick="selChip(this,'ap-origin')">🛒 Куплено</button>
+      </div></div>
+      <div class="fg"><label class="fl">Стиль бонсай</label><select class="fi" id="ap-style">
+        <option value="">— не выбран —</option>
+        <option>Чоккан — формальный прямой</option><option>Мёги — неформальный прямой</option>
+        <option>Шакан — склонный</option><option>Кенгай — каскадный</option>
+        <option>Хан-Кенгай — полукаскадный</option><option>Фукинанагаши — подветренный</option>
+        <option>Бунжинги — литерат</option><option>Хокидачи — веничный</option>
+        <option>Сокан — двойной ствол</option><option>Санкан — три ствола</option>
+        <option>Кабудачи — многоствольный</option><option>Икадабуки — плот</option>
+        <option>Неагари — обнажённые корни</option><option>Сэкиддзёдзю — корни на камне</option>
+        <option>Ишитцуки — корень на камне</option><option>Пенцзин-Сайкэй — миниатюрный пейзаж</option>
+        <option>Недзикан — крученый ствол</option><option>Банкан — изогнутый</option>
+        <option>Такодзукури — осьминог</option><option>Сабамики — выдалбливаемый ствол</option>
+        <option>Шаримики — мёртвая древесина</option><option>Канжо — петля/кольцо</option>
+        <option>Ёса-Уэ — лесная/групповая посадка</option><option>Бёртон-Космический</option>
+        <option>Другой</option>
+      </select></div>
       <div class="fg" id="ap-style-other-wrap" style="display:none"><label class="fl">Другой стиль</label><input class="fi" id="ap-style-other"></div>
       <div class="fg"><label class="fl">Дата начала</label><input class="fi" id="ap-date" type="date"></div>
       <div class="fg"><label class="fl">Ландшафт</label><select class="fi" id="ap-ls"></select></div>
       <div class="fg"><label class="fl">Горшок</label><select class="fi" id="ap-pot"></select></div>
       <div class="fg"><label class="fl">Сорт / Вариация</label><input class="fi" id="ap-variety"></div>
       <div class="fg"><label class="fl">Страна</label><input class="fi" id="ap-country" placeholder="Израиль"></div>
-      <div class="f2"><div class="fg"><label class="fl">Цена</label><input class="fi" id="ap-price" type="number"></div><div class="fg"><label class="fl">Количество</label><input class="fi" id="ap-qty" type="number" value="1"></div></div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Цена</label><input class="fi" id="ap-price" type="number"></div>
+        <div class="fg"><label class="fl">Количество</label><input class="fi" id="ap-qty" type="number" value="1"></div>
+      </div>
       <div class="fg"><label class="fl">Комментарий</label><textarea class="fi fi-ta" id="ap-comment"></textarea></div>
       <button class="btn btn-p" onclick="saveAddPlant()">Сохранить растение</button>
     </div>
@@ -245,56 +337,78 @@
 
 <!-- EDIT PLANT -->
 <div class="overlay" id="mo-edit-plant">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Редактировать</span><button class="mclose" onclick="closeModal('mo-edit-plant')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:85vh">
-      <div class="fg"><label class="fl">Статус</label><div class="chips" id="ep-status"><button class="chip" data-v="°" onclick="selChip(this,'ep-status')">° В работе</button><button class="chip" data-v="+" onclick="selChip(this,'ep-status')">+ Добавляется</button><button class="chip" data-v="✓" onclick="selChip(this,'ep-status')">✓ Закрыто</button></div></div>
-      <div class="fg"><label class="fl">Флаги</label><div class="chips" id="ep-flags"><button class="chip" data-v="#" onclick="togChip(this)"># Физ.действия</button><button class="chip" data-v="§" onclick="togChip(this)">§ Приложения</button><button class="chip" data-v="∆" onclick="togChip(this)">∆ Таблицы</button><button class="chip" data-v="©" onclick="togChip(this)">© QR-код</button></div></div>
+      <div class="fg"><label class="fl">Статус</label><div class="chips" id="ep-status">
+        <button class="chip" data-v="°" onclick="selChip(this,'ep-status')">° В работе</button>
+        <button class="chip" data-v="+" onclick="selChip(this,'ep-status')">+ Добавляется</button>
+        <button class="chip" data-v="✓" onclick="selChip(this,'ep-status')">✓ Закрыто</button>
+      </div></div>
+      <div class="fg"><label class="fl">Флаги</label><div class="chips" id="ep-flags">
+        <button class="chip" data-v="#" onclick="togChip(this)"># Физ.действия</button>
+        <button class="chip" data-v="§" onclick="togChip(this)">§ Приложения</button>
+        <button class="chip" data-v="∆" onclick="togChip(this)">∆ Таблицы</button>
+        <button class="chip" data-v="©" onclick="togChip(this)">© QR-код</button>
+      </div></div>
       <div class="fg"><label class="fl">Короткий код ухода</label><input class="fi" id="ep-care" style="font-size:16px"></div>
-      <div class="fg"><label class="fl">Способ получения</label><div class="chips" id="ep-origin"><button class="chip" data-v="черенок" onclick="selChip(this,'ep-origin')">🌿 Черенок</button><button class="chip" data-v="семя" onclick="selChip(this,'ep-origin')">🌱 Семя</button><button class="chip" data-v="ямадори" onclick="selChip(this,'ep-origin')">⛰️ Ямадори</button><button class="chip" data-v="куплено" onclick="selChip(this,'ep-origin')">🛒 Куплено</button></div></div>
-      <div class="fg"><label class="fl">Стиль бонсай</label><select class="fi" id="ep-style"><option value="">— не выбран —</option><option>Чоккан — формальный прямой</option><option>Мёги — неформальный прямой</option><option>Шакан — склонный</option><option>Кенгай — каскадный</option><option>Хан-Кенгай — полукаскадный</option><option>Фукинанагаши — подветренный</option><option>Бунжинги — литерат</option><option>Хокидачи — веничный</option><option>Сокан — двойной ствол</option><option>Санкан — три ствола</option><option>Кабудачи — многоствольный</option><option>Икадабуки — плот</option><option>Неагари — обнажённые корни</option><option>Сэкиддзёдзю — корни на камне</option><option>Ишитцуки — корень на камне</option><option>Пенцзин-Сайкэй — миниатюрный пейзаж</option><option>Недзикан — крученый ствол</option><option>Банкан — изогнутый</option><option>Такодзукури — осьминог</option><option>Сабамики — выдалбливаемый ствол</option><option>Шаримики — мёртвая древесина</option><option>Канжо — петля/кольцо</option><option>Ёса-Уэ — лесная/групповая посадка</option><option>Бёртон-Космический</option><option>Другой</option></select></div>
+      <div class="fg"><label class="fl">Способ получения</label><div class="chips" id="ep-origin">
+        <button class="chip" data-v="черенок" onclick="selChip(this,'ep-origin')">🌿 Черенок</button>
+        <button class="chip" data-v="семя" onclick="selChip(this,'ep-origin')">🌱 Семя</button>
+        <button class="chip" data-v="ямадори" onclick="selChip(this,'ep-origin')">⛰️ Ямадори</button>
+        <button class="chip" data-v="куплено" onclick="selChip(this,'ep-origin')">🛒 Куплено</button>
+      </div></div>
+      <div class="fg"><label class="fl">Стиль бонсай</label><select class="fi" id="ep-style">
+        <option value="">— не выбран —</option>
+        <option>Чоккан — формальный прямой</option><option>Мёги — неформальный прямой</option>
+        <option>Шакан — склонный</option><option>Кенгай — каскадный</option>
+        <option>Хан-Кенгай — полукаскадный</option><option>Фукинанагаши — подветренный</option>
+        <option>Бунжинги — литерат</option><option>Хокидачи — веничный</option>
+        <option>Сокан — двойной ствол</option><option>Санкан — три ствола</option>
+        <option>Кабудачи — многоствольный</option><option>Икадабуки — плот</option>
+        <option>Неагари — обнажённые корни</option><option>Сэкиддзёдзю — корни на камне</option>
+        <option>Ишитцуки — корень на камне</option><option>Пенцзин-Сайкэй — миниатюрный пейзаж</option>
+        <option>Недзикан — крученый ствол</option><option>Банкан — изогнутый</option>
+        <option>Такодзукури — осьминог</option><option>Сабамики — выдалбливаемый ствол</option>
+        <option>Шаримики — мёртвая древесина</option><option>Канжо — петля/кольцо</option>
+        <option>Ёса-Уэ — лесная/групповая посадка</option><option>Бёртон-Космический</option>
+        <option>Другой</option>
+      </select></div>
       <div class="fg" id="ep-style-other-wrap" style="display:none"><label class="fl">Другой стиль</label><input class="fi" id="ep-style-other"></div>
       <div class="fg"><label class="fl">Дата начала</label><input class="fi" id="ep-date" type="date"></div>
       <div class="fg"><label class="fl">Ландшафт</label><select class="fi" id="ep-ls"></select></div>
       <div class="fg"><label class="fl">Горшок</label><select class="fi" id="ep-pot"></select></div>
       <div class="fg"><label class="fl">Сорт / Вариация</label><input class="fi" id="ep-variety"></div>
       <div class="fg"><label class="fl">Страна</label><input class="fi" id="ep-country"></div>
-      <div class="f2"><div class="fg"><label class="fl">Цена</label><input class="fi" id="ep-price" type="number"></div><div class="fg"><label class="fl">Количество</label><input class="fi" id="ep-qty" type="number"></div></div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Цена</label><input class="fi" id="ep-price" type="number"></div>
+        <div class="fg"><label class="fl">Количество</label><input class="fi" id="ep-qty" type="number"></div>
+      </div>
       <div class="fg"><label class="fl">Комментарий</label><textarea class="fi fi-ta" id="ep-comment"></textarea></div>
       <button class="btn btn-p" onclick="saveEditPlant()">💾 Сохранить</button>
       <button class="btn btn-s" onclick="clonePlant(document.getElementById('mo-edit-plant')._plantId)">📋 Клонировать</button>
-      <button class="btn btn-d" onclick="deletePlant(document.getElementById('mo-edit-plant')._plantId)">🗑 Удалить растение</button>
+      <button class="btn btn-d" onclick="deletePlant(document.getElementById('mo-edit-plant')._plantId)">🗑 Удалить</button>
     </div>
   </div>
 </div>
 
 <!-- ADD/EDIT HISTORY -->
 <div class="overlay" id="mo-history">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle" id="mo-history-title">Запись в историю</span><button class="mclose" onclick="closeModal('mo-history')">✕</button></div>
     <div class="mbody">
-      <div class="fg">
-        <label class="fl">Действие</label>
+      <div class="fg"><label class="fl">Действие</label>
         <input class="fi" id="h-title" placeholder="Пересадка, Обрезка...">
         <div id="h-suggestions" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px"></div>
       </div>
       <div class="fg"><label class="fl">Дата</label><input class="fi" id="h-date" type="date"></div>
       <div class="fg"><label class="fl">Комментарий</label><textarea class="fi fi-ta" id="h-comment" style="min-height:55px"></textarea></div>
-      <div class="fg">
-        <label class="fl">Фото (опционально)</label>
+      <div class="fg"><label class="fl">Фото (опционально)</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <label class="photo-btn">
-            <input type="file" accept="image/*" onchange="handlePhotoFile(event,'h-preview')" style="display:none">
-            🖼 Галерея
-          </label>
-          <label class="photo-btn">
-            <input type="file" accept="image/*" capture="environment" onchange="handlePhotoFile(event,'h-preview')" style="display:none">
-            📷 Камера
-          </label>
+          <label class="photo-btn"><input type="file" accept="image/*" onchange="handlePhotoFile(event,'h-preview')" style="display:none">🖼 Галерея</label>
+          <label class="photo-btn"><input type="file" accept="image/*" capture="environment" onchange="handlePhotoFile(event,'h-preview')" style="display:none">📷 Камера</label>
         </div>
-        <div id="h-preview" style="text-align:center;margin-top:8px"></div>
+        <div id="h-preview" style="margin-top:8px"></div>
       </div>
       <button class="btn btn-p" id="h-save-btn" onclick="saveHistory()">Сохранить запись</button>
       <button class="btn btn-d" id="h-delete-btn" style="display:none" onclick="deleteHistory()">🗑 Удалить запись</button>
@@ -304,24 +418,15 @@
 
 <!-- ADD PHOTO -->
 <div class="overlay" id="mo-photo">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Добавить фото</span><button class="mclose" onclick="closeModal('mo-photo')">✕</button></div>
     <div class="mbody">
-      <div class="fg">
-        <label class="fl">Фото</label>
-        <!-- Two buttons: gallery and camera -->
+      <div class="fg"><label class="fl">Фото</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <label class="photo-btn">
-            <input type="file" accept="image/*" onchange="handlePhotoFile(event,'ph-preview')" style="display:none">
-            🖼 Галерея
-          </label>
-          <label class="photo-btn">
-            <input type="file" accept="image/*" capture="environment" onchange="handlePhotoFile(event,'ph-preview')" style="display:none">
-            📷 Камера
-          </label>
+          <label class="photo-btn"><input type="file" accept="image/*" onchange="handlePhotoFile(event,'ph-preview')" style="display:none">🖼 Галерея</label>
+          <label class="photo-btn"><input type="file" accept="image/*" capture="environment" onchange="handlePhotoFile(event,'ph-preview')" style="display:none">📷 Камера</label>
         </div>
-        <div id="ph-preview" style="text-align:center"></div>
+        <div id="ph-preview"></div>
       </div>
       <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ph-date" type="date"></div>
       <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ph-note" placeholder="опционально"></div>
@@ -330,26 +435,21 @@
   </div>
 </div>
 
-<!-- DEALS -->
-<div class="overlay" id="mo-deals">
-  <div class="modal" style="max-height:88vh">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">✅ Дела</span><button class="mclose" onclick="closeModal('mo-deals')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:calc(88vh - 80px)">
-      <div class="srch-inner" style="margin-bottom:10px">
-        <span class="srch-icon">🔍</span>
-        <input class="srch-input" type="search" placeholder="Поиск в делах...">
-      </div>
-      <button class="add-btn" style="margin-bottom:10px" onclick="openModal('mo-add-task')">＋ Добавить задачу</button>
-      <div id="dealsList"></div>
+<!-- EDIT PHOTO META -->
+<div class="overlay" id="mo-edit-photo">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Редактировать фото</span><button class="mclose" onclick="closeModal('mo-edit-photo')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ep-photo-date" type="date"></div>
+      <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ep-photo-note"></div>
+      <button class="btn btn-p" onclick="savePhotoMeta()">💾 Сохранить</button>
     </div>
   </div>
 </div>
 
 <!-- ADD TASK -->
 <div class="overlay" id="mo-add-task">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Новая задача</span><button class="mclose" onclick="closeModal('mo-add-task')">✕</button></div>
     <div class="mbody">
       <div class="fg"><label class="fl">Название задачи</label><input class="fi" id="at-name" placeholder="Перенести на зимовку"></div>
@@ -361,107 +461,14 @@
   </div>
 </div>
 
-<!-- ADD LANDSCAPE -->
-<div class="overlay" id="mo-add-ls">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новый ландшафт</span><button class="mclose" onclick="closeModal('mo-add-ls')">✕</button></div>
-    <div class="mbody">
-      <div class="fg"><label class="fl">Название</label><input class="fi" id="al-name" placeholder="Теплица 1"></div>
-      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="al-code" placeholder="Т¹"></div>
-      <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="al-light"><button class="chip on" data-v="☀️" onclick="selChip(this,'al-light')">☀️ Солнце</button><button class="chip" data-v="⛅" onclick="selChip(this,'al-light')">⛅ Полутень</button><button class="chip" data-v="☁️" onclick="selChip(this,'al-light')">☁️ Тень</button></div></div>
-      <div class="f2"><div class="fg"><label class="fl">Темп. мин °C</label><input class="fi" id="al-tmin" type="number"></div><div class="fg"><label class="fl">Темп. макс °C</label><input class="fi" id="al-tmax" type="number"></div></div>
-      <div class="fg"><label class="fl">Влажность</label><div class="chips" id="al-hum"><button class="chip" data-v="~" onclick="selChip(this,'al-hum')">~ Низкая</button><button class="chip on" data-v="≈" onclick="selChip(this,'al-hum')">≈ Средняя</button><button class="chip" data-v="≋" onclick="selChip(this,'al-hum')">≋ Высокая</button></div></div>
-      <button class="btn btn-p" onclick="saveAddLs()">Сохранить</button>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT LANDSCAPE -->
-<div class="overlay" id="mo-edit-ls">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать ландшафт</span><button class="mclose" onclick="closeModal('mo-edit-ls')">✕</button></div>
-    <div class="mbody">
-      <div class="fg"><label class="fl">Название</label><input class="fi" id="el-name"></div>
-      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="el-code"></div>
-      <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="el-light"><button class="chip" data-v="☀️" onclick="selChip(this,'el-light')">☀️</button><button class="chip" data-v="⛅" onclick="selChip(this,'el-light')">⛅</button><button class="chip" data-v="☁️" onclick="selChip(this,'el-light')">☁️</button></div></div>
-      <div class="f2"><div class="fg"><label class="fl">Темп. мин</label><input class="fi" id="el-tmin" type="number"></div><div class="fg"><label class="fl">Темп. макс</label><input class="fi" id="el-tmax" type="number"></div></div>
-      <div class="fg"><label class="fl">Влажность</label><div class="chips" id="el-hum"><button class="chip" data-v="~" onclick="selChip(this,'el-hum')">~ Низкая</button><button class="chip" data-v="≈" onclick="selChip(this,'el-hum')">≈ Средняя</button><button class="chip" data-v="≋" onclick="selChip(this,'el-hum')">≋ Высокая</button></div></div>
-      <button class="btn btn-p" onclick="saveEditLs()">💾 Сохранить</button>
-      <button class="btn btn-d" onclick="deleteLs()">🗑 Удалить</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD POT -->
-<div class="overlay" id="mo-add-pot">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Новый горшок</span><button class="mclose" onclick="closeModal('mo-add-pot')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
-      <div class="fg"><label class="fl">Материал</label><div class="chips" id="ap2-mat"><button class="chip on" data-v="PL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">PL Пластик</button><button class="chip" data-v="CL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CL Глина</button><button class="chip" data-v="CR" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CR Керамика</button><button class="chip" data-v="CN" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CN Бетон</button><button class="chip" data-v="FB" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">FB Ткань</button><button class="chip" data-v="WD" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">WD Дерево</button><button class="chip" data-v="MT" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">MT Металл</button></div></div>
-      <div class="fg"><label class="fl">Номер (3 цифры)</label><input class="fi fi-mono" id="ap2-num" placeholder="001" oninput="_updateAddPotCode()"><div style="font-size:11px;color:var(--moss);margin-top:3px;font-family:monospace" id="ap2-code-preview"></div></div>
-      <div class="fg"><label class="fl">Форма</label><div class="chips" id="ap2-shape"><button class="chip" data-v="RD" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RD Круглый</button><button class="chip" data-v="SQ" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">SQ Квадрат</button><button class="chip" data-v="RC" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RC Прямоуг.</button><button class="chip" data-v="OV" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">OV Овал</button><button class="chip" data-v="HEX" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">HEX Шестигр.</button><button class="chip" data-v="BWL" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">BWL Плошка</button><button class="chip" data-v="NAT" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">NAT Природная</button><button class="chip" data-v="RAW" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RAW Грубая</button><button class="chip" data-v="STN" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">STN Камень</button><button class="chip" data-v="ORG" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">ORG Органик</button></div></div>
-      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ap2-prop"><button class="chip" data-v="^" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">^ Высокий</button><button class="chip on" data-v="=" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">= Пропорц.</button><button class="chip" data-v=">" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">> Низкий</button></div></div>
-      <div class="fg"><label class="fl">Размер</label><div class="chips" id="ap2-size"><button class="chip" data-v="XS" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XS &lt;7</button><button class="chip" data-v="S" onclick="selChip(this,'ap2-size');_updateAddPotCode()">S 7-12</button><button class="chip on" data-v="M" onclick="selChip(this,'ap2-size');_updateAddPotCode()">M 12-20</button><button class="chip" data-v="L" onclick="selChip(this,'ap2-size');_updateAddPotCode()">L 20-35</button><button class="chip" data-v="XL" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XL &gt;35</button></div></div>
-      <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ap2-color"><button class="chip" data-v="BK" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BK Чёрный</button><button class="chip" data-v="WH" onclick="selChip(this,'ap2-color');_updateAddPotCode()">WH Белый</button><button class="chip" data-v="BR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BR Коричневый</button><button class="chip" data-v="BE" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BE Бежевый</button><button class="chip" data-v="TC" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TC Терракота</button><button class="chip" data-v="GY" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GY Серый</button><button class="chip" data-v="GR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GR Зелёный</button><button class="chip" data-v="BL" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BL Синий</button><button class="chip" data-v="RD" onclick="selChip(this,'ap2-color');_updateAddPotCode()">RD Красный</button><button class="chip" data-v="TR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TR Прозрачный</button><button class="chip" data-v="TQ" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TQ Бирюзовый</button></div></div>
-      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ap2-pattern"><button class="chip on" data-v="" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">Без рисунка</button><button class="chip" data-v=".P" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">.P С рисунком</button></div></div>
-      <button class="btn btn-p" onclick="saveAddPot()">Сохранить горшок</button>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT POT -->
-<div class="overlay" id="mo-edit-pot">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать горшок</span><button class="mclose" onclick="closeModal('mo-edit-pot')">✕</button></div>
-    <div class="mbody" style="overflow-y:auto;max-height:85vh">
-      <div style="font-size:12px;font-family:monospace;color:var(--stone);padding:6px 0;margin-bottom:8px" id="ep2-current"></div>
-      <div class="fg"><label class="fl">Материал</label><div class="chips" id="ep2-mat"><button class="chip" data-v="PL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">PL</button><button class="chip" data-v="CL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CL</button><button class="chip" data-v="CR" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CR</button><button class="chip" data-v="CN" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CN</button><button class="chip" data-v="FB" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">FB</button><button class="chip" data-v="WD" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">WD</button><button class="chip" data-v="MT" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">MT</button></div></div>
-      <div class="fg"><label class="fl">Номер</label><input class="fi fi-mono" id="ep2-num" oninput="_updateEditPotCode()"></div>
-      <div class="fg"><label class="fl">Форма</label><div class="chips" id="ep2-shape"><button class="chip" data-v="RD" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RD</button><button class="chip" data-v="SQ" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">SQ</button><button class="chip" data-v="RC" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RC</button><button class="chip" data-v="OV" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">OV</button><button class="chip" data-v="HEX" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">HEX</button><button class="chip" data-v="BWL" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">BWL</button><button class="chip" data-v="NAT" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">NAT</button><button class="chip" data-v="RAW" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RAW</button><button class="chip" data-v="STN" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">STN</button><button class="chip" data-v="ORG" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">ORG</button></div></div>
-      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ep2-prop"><button class="chip" data-v="^" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">^</button><button class="chip" data-v="=" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">=</button><button class="chip" data-v=">" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">></button></div></div>
-      <div class="fg"><label class="fl">Размер</label><div class="chips" id="ep2-size"><button class="chip" data-v="XS" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XS</button><button class="chip" data-v="S" onclick="selChip(this,'ep2-size');_updateEditPotCode()">S</button><button class="chip" data-v="M" onclick="selChip(this,'ep2-size');_updateEditPotCode()">M</button><button class="chip" data-v="L" onclick="selChip(this,'ep2-size');_updateEditPotCode()">L</button><button class="chip" data-v="XL" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XL</button></div></div>
-      <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ep2-color"><button class="chip" data-v="BK" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BK</button><button class="chip" data-v="WH" onclick="selChip(this,'ep2-color');_updateEditPotCode()">WH</button><button class="chip" data-v="BR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BR</button><button class="chip" data-v="BE" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BE</button><button class="chip" data-v="TC" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TC</button><button class="chip" data-v="GY" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GY</button><button class="chip" data-v="GR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GR</button><button class="chip" data-v="BL" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BL</button><button class="chip" data-v="RD" onclick="selChip(this,'ep2-color');_updateEditPotCode()">RD</button><button class="chip" data-v="TR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TR</button><button class="chip" data-v="TQ" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TQ</button></div></div>
-      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ep2-pattern"><button class="chip" data-v="" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">Без</button><button class="chip" data-v=".P" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">.P</button></div></div>
-      <div style="font-size:12px;font-family:monospace;color:var(--moss);padding:6px 0;margin-bottom:10px" id="ep2-new-code"></div>
-      <button class="btn btn-p" onclick="saveEditPot()">💾 Сохранить</button>
-      <button class="btn btn-d" onclick="deletePot()">🗑 Удалить</button>
-    </div>
-  </div>
-</div>
-
-</div><!-- end app-main -->
-
-<!-- ═══ SCRIPT ════════════════════════════════════════════════════════════════ -->
-<style>
-.photo-btn {
-  display:flex;align-items:center;justify-content:center;gap:6px;
-  background:var(--parch);border:1.5px dashed var(--ash);border-radius:var(--r);
-  padding:12px 8px;font-size:13px;color:var(--stone);cursor:pointer;
-  text-align:center;transition:border-color .15s,color .15s;
-}
-.photo-btn:hover{border-color:var(--moss2);color:var(--moss)}
-.hist-subtab {
-  flex:1;padding:8px;background:none;border:1px solid var(--ash);
-  border-radius:var(--r);font-size:12px;font-family:'Inter',sans-serif;
-  color:var(--stone);cursor:pointer;transition:all .15s;
-}
-.hist-subtab.on { background:var(--ink);color:#fff;border-color:var(--ink); }
-</style>
 <!-- ADD REGULAR ACTION -->
 <div class="overlay" id="mo-add-ra">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Регулярное действие</span><button class="mclose" onclick="closeModal('mo-add-ra')">✕</button></div>
     <div class="mbody">
-      <div id="ra-species-note" style="display:none;background:rgba(90,107,74,.1);color:var(--moss);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px">
-        🌿 Будет добавлено для всех растений этого вида
-      </div>
+      <div id="ra-species-note" style="display:none;background:rgba(90,107,74,.1);color:var(--moss);font-size:12px;padding:8px 10px;border-radius:6px;margin-bottom:12px">🌿 Будет добавлено для всех растений этого вида</div>
       <div class="fg"><label class="fl">Название</label><input class="fi" id="ra-name" placeholder="Полив, Удобрение, Обработка..."></div>
-      <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="ra-period" type="number" min="1" value="7" placeholder="7"></div>
+      <div class="fg"><label class="fl">Период (дней)</label><input class="fi" id="ra-period" type="number" min="1" value="7"></div>
       <div class="fg"><label class="fl">Первая дата</label><input class="fi" id="ra-next-date" type="date"></div>
       <button class="btn btn-p" onclick="saveAddRegularAction()">Сохранить</button>
     </div>
@@ -470,8 +477,7 @@
 
 <!-- EDIT REGULAR ACTION -->
 <div class="overlay" id="mo-edit-ra">
-  <div class="modal">
-    <div class="mhandle"></div>
+  <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Редактировать действие</span><button class="mclose" onclick="closeModal('mo-edit-ra')">✕</button></div>
     <div class="mbody">
       <div class="fg"><label class="fl">Название</label><input class="fi" id="era-name"></div>
@@ -483,24 +489,252 @@
   </div>
 </div>
 
-<!-- EDIT PHOTO META -->
-<div class="overlay" id="mo-edit-photo">
-  <div class="modal">
-    <div class="mhandle"></div>
-    <div class="mhdr"><span class="mtitle">Редактировать фото</span><button class="mclose" onclick="closeModal('mo-edit-photo')">✕</button></div>
+<!-- ADD LANDSCAPE -->
+<div class="overlay" id="mo-add-ls">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Новый ландшафт</span><button class="mclose" onclick="closeModal('mo-add-ls')">✕</button></div>
     <div class="mbody">
-      <div class="fg"><label class="fl">Дата фото</label><input class="fi" id="ep-photo-date" type="date"></div>
-      <div class="fg"><label class="fl">Заметка</label><input class="fi" id="ep-photo-note" placeholder="опционально"></div>
-      <button class="btn btn-p" onclick="savePhotoMeta()">💾 Сохранить</button>
+      <div class="fg"><label class="fl">Название</label><input class="fi" id="al-name" placeholder="Теплица 1"></div>
+      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="al-code" placeholder="Т¹"></div>
+      <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="al-light">
+        <button class="chip on" data-v="☀️" onclick="selChip(this,'al-light')">☀️ Солнце</button>
+        <button class="chip" data-v="⛅" onclick="selChip(this,'al-light')">⛅ Полутень</button>
+        <button class="chip" data-v="☁️" onclick="selChip(this,'al-light')">☁️ Тень</button>
+      </div></div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Темп. мин °C</label><input class="fi" id="al-tmin" type="number"></div>
+        <div class="fg"><label class="fl">Темп. макс °C</label><input class="fi" id="al-tmax" type="number"></div>
+      </div>
+      <div class="fg"><label class="fl">Влажность</label><div class="chips" id="al-hum">
+        <button class="chip" data-v="~" onclick="selChip(this,'al-hum')">~ Низкая</button>
+        <button class="chip on" data-v="≈" onclick="selChip(this,'al-hum')">≈ Средняя</button>
+        <button class="chip" data-v="≋" onclick="selChip(this,'al-hum')">≋ Высокая</button>
+      </div></div>
+      <button class="btn btn-p" onclick="saveAddLs()">Сохранить</button>
     </div>
   </div>
 </div>
 
+<!-- EDIT LANDSCAPE -->
+<div class="overlay" id="mo-edit-ls">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Редактировать ландшафт</span><button class="mclose" onclick="closeModal('mo-edit-ls')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">Название</label><input class="fi" id="el-name"></div>
+      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="el-code"></div>
+      <div class="fg"><label class="fl">Освещённость</label><div class="chips" id="el-light">
+        <button class="chip" data-v="☀️" onclick="selChip(this,'el-light')">☀️</button>
+        <button class="chip" data-v="⛅" onclick="selChip(this,'el-light')">⛅</button>
+        <button class="chip" data-v="☁️" onclick="selChip(this,'el-light')">☁️</button>
+      </div></div>
+      <div class="f2">
+        <div class="fg"><label class="fl">Темп. мин</label><input class="fi" id="el-tmin" type="number"></div>
+        <div class="fg"><label class="fl">Темп. макс</label><input class="fi" id="el-tmax" type="number"></div>
+      </div>
+      <div class="fg"><label class="fl">Влажность</label><div class="chips" id="el-hum">
+        <button class="chip" data-v="~" onclick="selChip(this,'el-hum')">~ Низкая</button>
+        <button class="chip" data-v="≈" onclick="selChip(this,'el-hum')">≈ Средняя</button>
+        <button class="chip" data-v="≋" onclick="selChip(this,'el-hum')">≋ Высокая</button>
+      </div></div>
+      <button class="btn btn-p" onclick="saveEditLs()">💾 Сохранить</button>
+      <button class="btn btn-d" onclick="deleteLs()">🗑 Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD LOCATION PHOTO -->
+<div class="overlay" id="mo-location-photo">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Фото локации</span><button class="mclose" onclick="closeModal('mo-location-photo')">✕</button></div>
+    <div class="mbody">
+      <div class="fg"><label class="fl">Фото</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <label class="photo-btn"><input type="file" accept="image/*" onchange="handleLocPhotoFile(event)" style="display:none">🖼 Галерея</label>
+          <label class="photo-btn"><input type="file" accept="image/*" capture="environment" onchange="handleLocPhotoFile(event)" style="display:none">📷 Камера</label>
+        </div>
+        <div id="loc-photo-preview" style="margin-top:8px"></div>
+      </div>
+      <button class="btn btn-p" id="loc-photo-save-btn" onclick="saveLocationPhoto()" disabled style="opacity:.5">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD POT -->
+<div class="overlay" id="mo-add-pot">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Новый горшок</span><button class="mclose" onclick="closeModal('mo-add-pot')">✕</button></div>
+    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+      <div class="fg"><label class="fl">Материал</label><div class="chips" id="ap2-mat">
+        <button class="chip on" data-v="PL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">PL Пластик</button>
+        <button class="chip" data-v="CL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CL Глина</button>
+        <button class="chip" data-v="CR" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CR Керамика</button>
+        <button class="chip" data-v="CN" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CN Бетон</button>
+        <button class="chip" data-v="FB" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">FB Ткань</button>
+        <button class="chip" data-v="WD" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">WD Дерево</button>
+        <button class="chip" data-v="MT" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">MT Металл</button>
+      </div></div>
+      <div class="fg"><label class="fl">Номер (3 цифры)</label><input class="fi fi-mono" id="ap2-num" placeholder="001" oninput="_updateAddPotCode()"><div style="font-size:11px;color:var(--moss);margin-top:3px;font-family:monospace" id="ap2-code-preview"></div></div>
+      <div class="fg"><label class="fl">Форма</label><div class="chips" id="ap2-shape">
+        <button class="chip" data-v="RD" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RD Круглый</button>
+        <button class="chip" data-v="SQ" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">SQ Квадрат</button>
+        <button class="chip" data-v="RC" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RC Прямоуг.</button>
+        <button class="chip" data-v="OV" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">OV Овал</button>
+        <button class="chip" data-v="HEX" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">HEX Шестигр.</button>
+        <button class="chip" data-v="BWL" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">BWL Плошка</button>
+        <button class="chip" data-v="NAT" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">NAT Природная</button>
+        <button class="chip" data-v="STN" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">STN Камень</button>
+        <button class="chip" data-v="ORG" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">ORG Органик</button>
+      </div></div>
+      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ap2-prop">
+        <button class="chip" data-v="^" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">^ Высокий</button>
+        <button class="chip on" data-v="=" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">=  Пропорц.</button>
+        <button class="chip" data-v=">" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">> Низкий</button>
+      </div></div>
+      <div class="fg"><label class="fl">Размер</label><div class="chips" id="ap2-size">
+        <button class="chip" data-v="XS" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XS</button>
+        <button class="chip" data-v="S" onclick="selChip(this,'ap2-size');_updateAddPotCode()">S</button>
+        <button class="chip on" data-v="M" onclick="selChip(this,'ap2-size');_updateAddPotCode()">M</button>
+        <button class="chip" data-v="L" onclick="selChip(this,'ap2-size');_updateAddPotCode()">L</button>
+        <button class="chip" data-v="XL" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XL</button>
+      </div></div>
+      <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ap2-color">
+        <button class="chip" data-v="BK" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BK Чёрный</button>
+        <button class="chip" data-v="WH" onclick="selChip(this,'ap2-color');_updateAddPotCode()">WH Белый</button>
+        <button class="chip" data-v="BR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BR Коричневый</button>
+        <button class="chip" data-v="BE" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BE Бежевый</button>
+        <button class="chip" data-v="TC" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TC Терракота</button>
+        <button class="chip" data-v="GY" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GY Серый</button>
+        <button class="chip" data-v="GR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GR Зелёный</button>
+        <button class="chip" data-v="BL" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BL Синий</button>
+        <button class="chip" data-v="TR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TR Прозрачный</button>
+      </div></div>
+      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ap2-pattern">
+        <button class="chip on" data-v="" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">Без рисунка</button>
+        <button class="chip" data-v=".P" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">.P С рисунком</button>
+      </div></div>
+      <button class="btn btn-p" onclick="saveAddPot()">Сохранить горшок</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT POT -->
+<div class="overlay" id="mo-edit-pot">
+  <div class="modal"><div class="mhandle"></div>
+    <div class="mhdr"><span class="mtitle">Редактировать горшок</span><button class="mclose" onclick="closeModal('mo-edit-pot')">✕</button></div>
+    <div class="mbody" style="overflow-y:auto;max-height:85vh">
+      <div style="font-size:12px;font-family:monospace;color:var(--stone);padding:6px 0;margin-bottom:8px" id="ep2-current"></div>
+      <div class="fg"><label class="fl">Материал</label><div class="chips" id="ep2-mat">
+        <button class="chip" data-v="PL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">PL</button>
+        <button class="chip" data-v="CL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CL</button>
+        <button class="chip" data-v="CR" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CR</button>
+        <button class="chip" data-v="CN" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CN</button>
+        <button class="chip" data-v="FB" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">FB</button>
+        <button class="chip" data-v="WD" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">WD</button>
+        <button class="chip" data-v="MT" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">MT</button>
+      </div></div>
+      <div class="fg"><label class="fl">Номер</label><input class="fi fi-mono" id="ep2-num" oninput="_updateEditPotCode()"></div>
+      <div class="fg"><label class="fl">Форма</label><div class="chips" id="ep2-shape">
+        <button class="chip" data-v="RD" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RD</button>
+        <button class="chip" data-v="SQ" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">SQ</button>
+        <button class="chip" data-v="RC" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RC</button>
+        <button class="chip" data-v="OV" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">OV</button>
+        <button class="chip" data-v="HEX" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">HEX</button>
+        <button class="chip" data-v="BWL" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">BWL</button>
+        <button class="chip" data-v="NAT" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">NAT</button>
+        <button class="chip" data-v="STN" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">STN</button>
+        <button class="chip" data-v="ORG" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">ORG</button>
+      </div></div>
+      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ep2-prop">
+        <button class="chip" data-v="^" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">^</button>
+        <button class="chip" data-v="=" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">=</button>
+        <button class="chip" data-v=">" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">></button>
+      </div></div>
+      <div class="fg"><label class="fl">Размер</label><div class="chips" id="ep2-size">
+        <button class="chip" data-v="XS" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XS</button>
+        <button class="chip" data-v="S" onclick="selChip(this,'ep2-size');_updateEditPotCode()">S</button>
+        <button class="chip" data-v="M" onclick="selChip(this,'ep2-size');_updateEditPotCode()">M</button>
+        <button class="chip" data-v="L" onclick="selChip(this,'ep2-size');_updateEditPotCode()">L</button>
+        <button class="chip" data-v="XL" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XL</button>
+      </div></div>
+      <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ep2-color">
+        <button class="chip" data-v="BK" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BK</button>
+        <button class="chip" data-v="WH" onclick="selChip(this,'ep2-color');_updateEditPotCode()">WH</button>
+        <button class="chip" data-v="BR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BR</button>
+        <button class="chip" data-v="BE" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BE</button>
+        <button class="chip" data-v="TC" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TC</button>
+        <button class="chip" data-v="GY" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GY</button>
+        <button class="chip" data-v="GR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GR</button>
+        <button class="chip" data-v="BL" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BL</button>
+        <button class="chip" data-v="TR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TR</button>
+      </div></div>
+      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ep2-pattern">
+        <button class="chip" data-v="" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">Без</button>
+        <button class="chip" data-v=".P" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">.P</button>
+      </div></div>
+      <div style="font-size:12px;font-family:monospace;color:var(--moss);padding:6px 0;margin-bottom:10px" id="ep2-new-code"></div>
+      <button class="btn btn-p" onclick="saveEditPot()">💾 Сохранить</button>
+      <button class="btn btn-d" onclick="deletePot()">🗑 Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCRIPTS ═══════════════════════════════════════════════════════════════ -->
 <script type="module" src="js/app.js"></script>
 <script type="module">
-  import { renderPlants, switchHistSubtab } from './js/render.js';
+  import { renderPlants, renderLandscapes, renderPots, renderDeals, renderStats, renderTrash, renderLocationPlants, switchHistSubtab } from './js/render.js';
   window.renderPlants = renderPlants;
+  window.renderLandscapes = renderLandscapes;
+  window.renderPots = renderPots;
+  window.renderDeals = renderDeals;
+  window.renderStats = renderStats;
+  window.renderTrash = renderTrash;
+  window.renderLocationPlants = renderLocationPlants;
   window.switchHistSubtab = switchHistSubtab;
+</script>
+<script type="module">
+  import { openModal, closeModal, closeTop } from './js/modals.js';
+  // Handle location photo upload
+  window._locPhotoFile = null;
+  window._locPhotoTarget = null;
+
+  window.openAddLocationPhoto = (landscapeId, locId) => {
+    window._locPhotoTarget = { landscapeId, locId };
+    window._locPhotoFile = null;
+    document.getElementById('loc-photo-preview').innerHTML = '';
+    const btn = document.getElementById('loc-photo-save-btn');
+    btn.disabled = true; btn.style.opacity = '.5';
+    openModal('mo-location-photo');
+  };
+
+  window.handleLocPhotoFile = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    window._locPhotoFile = file;
+    const url = URL.createObjectURL(file);
+    document.getElementById('loc-photo-preview').innerHTML =
+      `<img src="${url}" style="max-width:100%;max-height:180px;border-radius:8px" onload="URL.revokeObjectURL(this.src)">`;
+    const btn = document.getElementById('loc-photo-save-btn');
+    btn.disabled = false; btn.style.opacity = '1';
+  };
+
+  window.saveLocationPhoto = async () => {
+    const { landscapeId, locId } = window._locPhotoTarget || {};
+    const file = window._locPhotoFile;
+    if (!file || !landscapeId || !locId) return;
+    const user = await window.DB.Photos.upload ? null : null; // just use SBPhotos
+    // Upload photo to storage
+    const user2 = window._currentUser;
+    const blob = file.size > 2*1024*1024 ? file : file;
+    const path = `${user2?.id}/locations/${landscapeId}/${locId}/${Date.now()}.jpg`;
+    const { error } = await window._sbClient().storage.from('photos').upload(path, file, { contentType:'image/jpeg', upsert:true });
+    if (error) { alert('Ошибка: ' + error.message); return; }
+    // Save path to landscape
+    const ls = await window.DB.Landscapes.get(landscapeId);
+    if (!ls.location_photos) ls.location_photos = {};
+    ls.location_photos[locId] = path;
+    await window.DB.Landscapes.save(ls);
+    closeModal('mo-location-photo');
+    renderLandscapes();
+  };
 </script>
 
 </body>
