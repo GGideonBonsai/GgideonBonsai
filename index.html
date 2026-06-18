@@ -579,52 +579,54 @@
     <div class="mhdr"><span class="mtitle">Новый горшок</span><button class="mclose" onclick="closeModal('mo-add-pot')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:85vh">
       <div class="fg"><label class="fl">Материал</label><div class="chips" id="ap2-mat">
-        <button class="chip on" data-v="PL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">PL Пластик</button>
-        <button class="chip" data-v="CL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CL Глина</button>
-        <button class="chip" data-v="CR" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CR Керамика</button>
-        <button class="chip" data-v="CN" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">CN Бетон</button>
-        <button class="chip" data-v="FB" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">FB Ткань</button>
-        <button class="chip" data-v="WD" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">WD Дерево</button>
-        <button class="chip" data-v="MT" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">MT Металл</button>
+        <button class="chip on" data-v="PL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🪣 Пластик</button>
+        <button class="chip" data-v="CL" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🏺 Глина</button>
+        <button class="chip" data-v="CR" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🫙 Керамика</button>
+        <button class="chip" data-v="CN" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🧱 Бетон</button>
+        <button class="chip" data-v="FB" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🧺 Ткань</button>
+        <button class="chip" data-v="WD" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">🪵 Дерево</button>
+        <button class="chip" data-v="MT" onclick="selChip(this,'ap2-mat');_updateAddPotCode()">⚙️ Металл</button>
       </div></div>
       <div class="fg"><label class="fl">Номер (3 цифры)</label><input class="fi fi-mono" id="ap2-num" placeholder="001" oninput="_updateAddPotCode()"><div style="font-size:11px;color:var(--moss);margin-top:3px;font-family:monospace" id="ap2-code-preview"></div></div>
       <div class="fg"><label class="fl">Форма</label><div class="chips" id="ap2-shape">
-        <button class="chip" data-v="RD" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RD Круглый</button>
-        <button class="chip" data-v="SQ" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">SQ Квадрат</button>
-        <button class="chip" data-v="RC" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">RC Прямоуг.</button>
-        <button class="chip" data-v="OV" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">OV Овал</button>
-        <button class="chip" data-v="HEX" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">HEX Шестигр.</button>
-        <button class="chip" data-v="BWL" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">BWL Плошка</button>
-        <button class="chip" data-v="NAT" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">NAT Природная</button>
-        <button class="chip" data-v="STN" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">STN Камень</button>
-        <button class="chip" data-v="ORG" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">ORG Органик</button>
+        <button class="chip" data-v="RD" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">⭕ Круглый</button>
+        <button class="chip" data-v="SQ" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">⬜ Квадратный</button>
+        <button class="chip" data-v="RC" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">▭ Прямоугольный</button>
+        <button class="chip" data-v="OV" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">🥚 Овальный</button>
+        <button class="chip" data-v="HEX" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">⬡ Шестигранный</button>
+        <button class="chip" data-v="BWL" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">🥣 Плошка/Чаша</button>
+        <button class="chip" data-v="NAT" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">🪨 Природная форма</button>
+        <button class="chip" data-v="STN" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">🗿 Каменный стиль</button>
+        <button class="chip" data-v="ORG" onclick="selChip(this,'ap2-shape');_updateAddPotCode()">🌀 Органическая</button>
       </div></div>
-      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ap2-prop">
-        <button class="chip" data-v="^" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">^ Высокий</button>
-        <button class="chip on" data-v="=" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">=  Пропорц.</button>
-        <button class="chip" data-v=">" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">> Низкий</button>
+      <div class="fg"><label class="fl">Высота</label><div class="chips" id="ap2-prop">
+        <button class="chip" data-v="^" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">↑ Высокий</button>
+        <button class="chip on" data-v="=" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">↔ Пропорциональный</button>
+        <button class="chip" data-v=">" onclick="selChip(this,'ap2-prop');_updateAddPotCode()">↓ Низкий/Плоский</button>
       </div></div>
-      <div class="fg"><label class="fl">Размер</label><div class="chips" id="ap2-size">
-        <button class="chip" data-v="XS" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XS</button>
-        <button class="chip" data-v="S" onclick="selChip(this,'ap2-size');_updateAddPotCode()">S</button>
-        <button class="chip on" data-v="M" onclick="selChip(this,'ap2-size');_updateAddPotCode()">M</button>
-        <button class="chip" data-v="L" onclick="selChip(this,'ap2-size');_updateAddPotCode()">L</button>
-        <button class="chip" data-v="XL" onclick="selChip(this,'ap2-size');_updateAddPotCode()">XL</button>
+      <div class="fg"><label class="fl">Размер (по макс. стороне)</label><div class="chips" id="ap2-size">
+        <button class="chip" data-v="XS" onclick="selChip(this,'ap2-size');_updateAddPotCode()">До 7 см</button>
+        <button class="chip" data-v="S" onclick="selChip(this,'ap2-size');_updateAddPotCode()">7–12 см</button>
+        <button class="chip on" data-v="M" onclick="selChip(this,'ap2-size');_updateAddPotCode()">12–20 см</button>
+        <button class="chip" data-v="L" onclick="selChip(this,'ap2-size');_updateAddPotCode()">20–35 см</button>
+        <button class="chip" data-v="XL" onclick="selChip(this,'ap2-size');_updateAddPotCode()">Более 35 см</button>
       </div></div>
       <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ap2-color">
-        <button class="chip" data-v="BK" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BK Чёрный</button>
-        <button class="chip" data-v="WH" onclick="selChip(this,'ap2-color');_updateAddPotCode()">WH Белый</button>
-        <button class="chip" data-v="BR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BR Коричневый</button>
-        <button class="chip" data-v="BE" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BE Бежевый</button>
-        <button class="chip" data-v="TC" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TC Терракота</button>
-        <button class="chip" data-v="GY" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GY Серый</button>
-        <button class="chip" data-v="GR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">GR Зелёный</button>
-        <button class="chip" data-v="BL" onclick="selChip(this,'ap2-color');_updateAddPotCode()">BL Синий</button>
-        <button class="chip" data-v="TR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">TR Прозрачный</button>
+        <button class="chip" data-v="BK" onclick="selChip(this,'ap2-color');_updateAddPotCode()">⬛ Чёрный</button>
+        <button class="chip" data-v="WH" onclick="selChip(this,'ap2-color');_updateAddPotCode()">⬜ Белый</button>
+        <button class="chip" data-v="BR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🟫 Коричневый</button>
+        <button class="chip" data-v="BE" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🟨 Бежевый</button>
+        <button class="chip" data-v="TC" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🧱 Терракота</button>
+        <button class="chip" data-v="GY" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🩶 Серый</button>
+        <button class="chip" data-v="GR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🟩 Зелёный</button>
+        <button class="chip" data-v="BL" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🟦 Синий</button>
+        <button class="chip" data-v="TR" onclick="selChip(this,'ap2-color');_updateAddPotCode()">💎 Прозрачный</button>
+        <button class="chip" data-v="RD" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🟥 Красный</button>
+        <button class="chip" data-v="TQ" onclick="selChip(this,'ap2-color');_updateAddPotCode()">🩵 Бирюзовый</button>
       </div></div>
-      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ap2-pattern">
-        <button class="chip on" data-v="" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">Без рисунка</button>
-        <button class="chip" data-v=".P" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">.P С рисунком</button>
+      <div class="fg"><label class="fl">Узор / Рисунок</label><div class="chips" id="ap2-pattern">
+        <button class="chip on" data-v="" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">Без узора</button>
+        <button class="chip" data-v=".P" onclick="selChip(this,'ap2-pattern');_updateAddPotCode()">🎨 С узором/рисунком</button>
       </div></div>
       <button class="btn btn-p" onclick="saveAddPot()">Сохранить горшок</button>
     </div>
@@ -636,54 +638,56 @@
   <div class="modal"><div class="mhandle"></div>
     <div class="mhdr"><span class="mtitle">Редактировать горшок</span><button class="mclose" onclick="closeModal('mo-edit-pot')">✕</button></div>
     <div class="mbody" style="overflow-y:auto;max-height:85vh">
-      <div style="font-size:12px;font-family:monospace;color:var(--stone);padding:6px 0;margin-bottom:8px" id="ep2-current"></div>
+      <div style="font-size:11px;color:var(--stone);padding:4px 0 10px;font-family:monospace" id="ep2-current"></div>
       <div class="fg"><label class="fl">Материал</label><div class="chips" id="ep2-mat">
-        <button class="chip" data-v="PL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">PL</button>
-        <button class="chip" data-v="CL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CL</button>
-        <button class="chip" data-v="CR" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CR</button>
-        <button class="chip" data-v="CN" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">CN</button>
-        <button class="chip" data-v="FB" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">FB</button>
-        <button class="chip" data-v="WD" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">WD</button>
-        <button class="chip" data-v="MT" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">MT</button>
+        <button class="chip" data-v="PL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🪣 Пластик</button>
+        <button class="chip" data-v="CL" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🏺 Глина</button>
+        <button class="chip" data-v="CR" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🫙 Керамика</button>
+        <button class="chip" data-v="CN" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🧱 Бетон</button>
+        <button class="chip" data-v="FB" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🧺 Ткань</button>
+        <button class="chip" data-v="WD" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">🪵 Дерево</button>
+        <button class="chip" data-v="MT" onclick="selChip(this,'ep2-mat');_updateEditPotCode()">⚙️ Металл</button>
       </div></div>
       <div class="fg"><label class="fl">Номер</label><input class="fi fi-mono" id="ep2-num" oninput="_updateEditPotCode()"></div>
       <div class="fg"><label class="fl">Форма</label><div class="chips" id="ep2-shape">
-        <button class="chip" data-v="RD" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RD</button>
-        <button class="chip" data-v="SQ" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">SQ</button>
-        <button class="chip" data-v="RC" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">RC</button>
-        <button class="chip" data-v="OV" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">OV</button>
-        <button class="chip" data-v="HEX" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">HEX</button>
-        <button class="chip" data-v="BWL" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">BWL</button>
-        <button class="chip" data-v="NAT" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">NAT</button>
-        <button class="chip" data-v="STN" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">STN</button>
-        <button class="chip" data-v="ORG" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">ORG</button>
+        <button class="chip" data-v="RD" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">⭕ Круглый</button>
+        <button class="chip" data-v="SQ" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">⬜ Квадратный</button>
+        <button class="chip" data-v="RC" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">▭ Прямоугольный</button>
+        <button class="chip" data-v="OV" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">🥚 Овальный</button>
+        <button class="chip" data-v="HEX" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">⬡ Шестигранный</button>
+        <button class="chip" data-v="BWL" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">🥣 Плошка/Чаша</button>
+        <button class="chip" data-v="NAT" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">🪨 Природная форма</button>
+        <button class="chip" data-v="STN" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">🗿 Каменный стиль</button>
+        <button class="chip" data-v="ORG" onclick="selChip(this,'ep2-shape');_updateEditPotCode()">🌀 Органическая</button>
       </div></div>
-      <div class="fg"><label class="fl">Пропорции</label><div class="chips" id="ep2-prop">
-        <button class="chip" data-v="^" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">^</button>
-        <button class="chip" data-v="=" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">=</button>
-        <button class="chip" data-v=">" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">></button>
+      <div class="fg"><label class="fl">Высота</label><div class="chips" id="ep2-prop">
+        <button class="chip" data-v="^" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">↑ Высокий</button>
+        <button class="chip" data-v="=" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">↔ Пропорциональный</button>
+        <button class="chip" data-v=">" onclick="selChip(this,'ep2-prop');_updateEditPotCode()">↓ Низкий/Плоский</button>
       </div></div>
       <div class="fg"><label class="fl">Размер</label><div class="chips" id="ep2-size">
-        <button class="chip" data-v="XS" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XS</button>
-        <button class="chip" data-v="S" onclick="selChip(this,'ep2-size');_updateEditPotCode()">S</button>
-        <button class="chip" data-v="M" onclick="selChip(this,'ep2-size');_updateEditPotCode()">M</button>
-        <button class="chip" data-v="L" onclick="selChip(this,'ep2-size');_updateEditPotCode()">L</button>
-        <button class="chip" data-v="XL" onclick="selChip(this,'ep2-size');_updateEditPotCode()">XL</button>
+        <button class="chip" data-v="XS" onclick="selChip(this,'ep2-size');_updateEditPotCode()">До 7 см</button>
+        <button class="chip" data-v="S" onclick="selChip(this,'ep2-size');_updateEditPotCode()">7–12 см</button>
+        <button class="chip" data-v="M" onclick="selChip(this,'ep2-size');_updateEditPotCode()">12–20 см</button>
+        <button class="chip" data-v="L" onclick="selChip(this,'ep2-size');_updateEditPotCode()">20–35 см</button>
+        <button class="chip" data-v="XL" onclick="selChip(this,'ep2-size');_updateEditPotCode()">Более 35 см</button>
       </div></div>
       <div class="fg"><label class="fl">Цвет</label><div class="chips" id="ep2-color">
-        <button class="chip" data-v="BK" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BK</button>
-        <button class="chip" data-v="WH" onclick="selChip(this,'ep2-color');_updateEditPotCode()">WH</button>
-        <button class="chip" data-v="BR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BR</button>
-        <button class="chip" data-v="BE" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BE</button>
-        <button class="chip" data-v="TC" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TC</button>
-        <button class="chip" data-v="GY" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GY</button>
-        <button class="chip" data-v="GR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">GR</button>
-        <button class="chip" data-v="BL" onclick="selChip(this,'ep2-color');_updateEditPotCode()">BL</button>
-        <button class="chip" data-v="TR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">TR</button>
+        <button class="chip" data-v="BK" onclick="selChip(this,'ep2-color');_updateEditPotCode()">⬛ Чёрный</button>
+        <button class="chip" data-v="WH" onclick="selChip(this,'ep2-color');_updateEditPotCode()">⬜ Белый</button>
+        <button class="chip" data-v="BR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🟫 Коричневый</button>
+        <button class="chip" data-v="BE" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🟨 Бежевый</button>
+        <button class="chip" data-v="TC" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🧱 Терракота</button>
+        <button class="chip" data-v="GY" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🩶 Серый</button>
+        <button class="chip" data-v="GR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🟩 Зелёный</button>
+        <button class="chip" data-v="BL" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🟦 Синий</button>
+        <button class="chip" data-v="TR" onclick="selChip(this,'ep2-color');_updateEditPotCode()">💎 Прозрачный</button>
+        <button class="chip" data-v="RD" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🟥 Красный</button>
+        <button class="chip" data-v="TQ" onclick="selChip(this,'ep2-color');_updateEditPotCode()">🩵 Бирюзовый</button>
       </div></div>
-      <div class="fg"><label class="fl">Рисунок</label><div class="chips" id="ep2-pattern">
-        <button class="chip" data-v="" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">Без</button>
-        <button class="chip" data-v=".P" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">.P</button>
+      <div class="fg"><label class="fl">Узор / Рисунок</label><div class="chips" id="ep2-pattern">
+        <button class="chip" data-v="" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">Без узора</button>
+        <button class="chip" data-v=".P" onclick="selChip(this,'ep2-pattern');_updateEditPotCode()">🎨 С узором/рисунком</button>
       </div></div>
       <div style="font-size:12px;font-family:monospace;color:var(--moss);padding:6px 0;margin-bottom:10px" id="ep2-new-code"></div>
       <button class="btn btn-p" onclick="saveEditPot()">💾 Сохранить</button>
