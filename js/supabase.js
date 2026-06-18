@@ -1,8 +1,8 @@
 // supabase.js — Supabase backend for Gideon Bonsai
 // Replace the two constants below with your project values
 
-export const SUPABASE_URL = 'https://oyimrrwsbleuhdnhfsub.supabase.co';
-export const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95aW1ycndzYmxldWhkbmhmc3ViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MjQ3MzYsImV4cCI6MjA5NzIwMDczNn0.tJu6zTqDYFPZDhLh1tN2E0sfYxidRmzvdGxnfPwzkj8';
+export const SUPABASE_URL = 'ВСТАВЬТЕ_PROJECT_URL';
+export const SUPABASE_KEY = 'ВСТАВЬТЕ_ANON_KEY';
 
 const PHOTO_BUCKET = 'photos';
 
@@ -217,6 +217,11 @@ export const SBTasks = {
     const { data, error } = await sb().from('tasks').select('*').order('date');
     if (error) throw error;
     return data;
+  },
+  async get(id) {
+    const { data, error } = await sb().from('tasks').select('*').eq('id', id).single();
+    if (error) return null;
+    return data ? { ...data, targetId: data.target_id } : null;
   },
   async pending() {
     const { data, error } = await sb().from('tasks').select('*').eq('done', false).order('date');
@@ -495,5 +500,3 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
-
-
