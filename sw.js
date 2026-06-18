@@ -1,16 +1,28 @@
 // sw.js — Service Worker for Gideon Bonsai
 const CACHE_NAME = 'gideon-bonsai-v1';
-const ASSETS = ['/', '/index.html', '/css/style.css', '/js/db.js', '/js/render.js', '/js/modals.js', '/js/app.js'];
+const BASE = '/GgideonBonsai';
+const ASSETS = [
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/css/style.css',
+  BASE + '/js/config.js',
+  BASE + '/js/supabase.js',
+  BASE + '/js/app.js',
+  BASE + '/js/render.js',
+  BASE + '/js/modals.js',
+  BASE + '/icons/icon-192.svg',
+  BASE + '/icons/icon-512.svg',
+];
 
-// ── Install ──────────────────────────────────────────────────────────────────
+// ── Install ───────────────────────────────────────────────────────────────────
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)).catch(() => {})
   );
   self.skipWaiting();
 });
 
-// ── Activate ─────────────────────────────────────────────────────────────────
+// ── Activate ──────────────────────────────────────────────────────────────────
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -20,10 +32,22 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// ── Fetch (offline first) ─────────────────────────────────────────────────────
+// ── Fetch (network first, fallback to cache) ──────────────────────────────────
 self.addEventListener('fetch', e => {
+  // Skip Supabase API calls — never cache those
+  if (e.request.url.includes('supabase.co')) return;
+
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    fetch(e.request)
+      .then(res => {
+        // Cache successful responses
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
 
@@ -33,29 +57,29 @@ self.addEventListener('push', e => {
   e.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
+      icon: BASE + '/icons/icon-192.svg',
+      badge: BASE + '/icons/icon-192.svg',
       tag: data.tag || 'reminder',
-      data: { url: data.url || '/' }
+      data: { url: BASE + '/' }
     })
   );
 });
 
+// ── Notification click ────────────────────────────────────────────────────────
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(
     clients.matchAll({ type: 'window' }).then(list => {
-      const url = e.notification.data?.url || '/';
+      const url = BASE + '/';
       for (const client of list) {
-        if (client.url === url && 'focus' in client) return client.focus();
+        if (client.url.includes(BASE) && 'focus' in client) return client.focus();
       }
       if (clients.openWindow) return clients.openWindow(url);
     })
   );
 });
 
-// ── Local Alarm Scheduling ────────────────────────────────────────────────────
-// Fired from app.js via postMessage to schedule local notifications
+// ── Scheduled local alarms ────────────────────────────────────────────────────
 self.addEventListener('message', e => {
   if (e.data?.type === 'SCHEDULE_ALARM') {
     const { id, title, body, timestamp } = e.data;
@@ -64,9 +88,9 @@ self.addEventListener('message', e => {
     setTimeout(() => {
       self.registration.showNotification(title, {
         body,
-        icon: '/icons/icon-192.png',
+        icon: BASE + '/icons/icon-192.svg',
         tag: id,
-        data: { url: '/' }
+        data: { url: BASE + '/' }
       });
     }, delay);
   }
