@@ -357,7 +357,7 @@ window.requestNotifications = async function() {
 // ── Service Worker ────────────────────────────────────────────────────────────
 function registerSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
+    navigator.serviceWorker.register('/GgideonBonsai/sw.js')
       .then(reg => {
         window._swReg = reg;
         // Schedule notifications after SW ready
