@@ -19,7 +19,14 @@ export async function initSupabase() {
       document.head.appendChild(s);
     });
   }
-  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    }
+  });
   return _sb;
 }
 
@@ -39,7 +46,13 @@ export async function signInWithEmail(email, password) {
 }
 
 export async function signUpWithEmail(email, password) {
-  const { data, error } = await sb().auth.signUp({ email, password });
+  const { data, error } = await sb().auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: 'https://ggideonbonsai.github.io/GgideonBonsai/'
+    }
+  });
   if (error) throw error;
   return data;
 }
