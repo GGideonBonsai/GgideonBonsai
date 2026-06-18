@@ -80,7 +80,7 @@ export const SBSpecies = {
     return data.map(_fromDB_species);
   },
   async get(id) {
-    const { data, error } = await sb().from('species').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('species').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return _fromDB_species(data);
   },
@@ -117,7 +117,7 @@ export const SBPlants = {
     return data.map(_fromDB_plant);
   },
   async get(id) {
-    const { data, error } = await sb().from('plants').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('plants').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return _fromDB_plant(data);
   },
@@ -158,7 +158,7 @@ export const SBLandscapes = {
     return data.map(_fromDB_landscape);
   },
   async get(id) {
-    const { data, error } = await sb().from('landscapes').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('landscapes').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return _fromDB_landscape(data);
   },
@@ -194,7 +194,7 @@ export const SBPots = {
     return data;
   },
   async get(id) {
-    const { data, error } = await sb().from('pots').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('pots').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return data;
   },
@@ -230,7 +230,7 @@ export const SBTasks = {
     return data;
   },
   async get(id) {
-    const { data, error } = await sb().from('tasks').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('tasks').select('*').eq('id', id).maybeSingle();
     if (error) return null;
     return data ? { ...data, targetId: data.target_id } : null;
   },
@@ -272,7 +272,7 @@ export const SBRegularActions = {
     return data;
   },
   async get(id) {
-    const { data, error } = await sb().from('regular_actions').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('regular_actions').select('*').eq('id', id).maybeSingle();
     if (error) return null;
     return _fromDB_ra(data);
   },
@@ -344,7 +344,7 @@ export const SBTrash = {
     if (error) throw error;
   },
   async restore(id) {
-    const { data, error } = await sb().from('trash').select('*').eq('id', id).single();
+    const { data, error } = await sb().from('trash').select('*').eq('id', id).maybeSingle();
     if (error) throw error;
     return data;
   },
@@ -400,7 +400,7 @@ export const SBPhotos = {
   },
 
   async get(photoId) {
-    const { data, error } = await sb().from('photos').select('*').eq('id', photoId).single();
+    const { data, error } = await sb().from('photos').select('*').eq('id', photoId).maybeSingle();
     if (error) return null;
     return data;
   },
