@@ -1,7 +1,7 @@
 // modals.js — Modal logic (Supabase version)
 import { renderSpecies, renderPlants, renderPlantDetail, renderLandscapes, renderPots, renderDeals, renderHistoryTab, renderPhotosTab, updateBadge } from './render.js';
 
-const DB = () => window.DB;
+
 
 // ── Modal stack ───────────────────────────────────────────────────────────────
 const stack = [];
@@ -69,47 +69,47 @@ function styleOpts(sel='') { return STYLES.map(s=>`<option ${s===sel?'selected':
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function saveAddSpecies() {
   const nameRu=v('as-ru').trim(), code=v('as-code').trim();
-  if(!nameRu||!code) return alert('Заполните название и код');
-  await DB().Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
+  if(!nameRu||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
+  await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
   closeModal('mo-add-species'); renderSpecies();
 }
 async function _fillEditSpecies(id) {
-  const s=await DB().Species.get(id);
+  const s=await window.DB.Species.get(id);
   document.getElementById('mo-edit-species')._editId=id;
   sv('es-ru',s.nameRu);sv('es-lat',s.nameLat);sv('es-code',s.code);sv('es-syn',s.synonyms);sv('es-care',s.careCode);
   setChip('es-type',s.type||'🌳');
   // Show current photo if exists
   const prev=document.getElementById('es-photo-preview');
   if(prev) prev.innerHTML = s.photoPath
-    ? `<img src="${DB().Photos.getURL(s.photoPath)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px">`
+    ? `<img src="${window.DB.Photos.getURL(s.photoPath)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px">`
     : '';
   window._esSelectedFile=null;
 }
 export async function saveEditSpecies() {
   const id=document.getElementById('mo-edit-species')._editId;
-  const s=await DB().Species.get(id);
+  const s=await window.DB.Species.get(id);
   Object.assign(s,{nameRu:v('es-ru').trim(),nameLat:v('es-lat').trim(),code:v('es-code').trim(),synonyms:v('es-syn').trim(),careCode:v('es-care').trim(),type:getChip('es-type')||s.type});
   // Upload photo if selected
   if(window._esSelectedFile) {
     try {
-      const path = await DB().Photos.uploadSpeciesPhoto(window._esSelectedFile, id);
+      const path = await window.DB.Photos.uploadSpeciesPhoto(window._esSelectedFile, id);
       s.photoPath = path;
       window._esSelectedFile = null;
     } catch(e) { console.warn('Species photo upload failed:', e); }
   }
-  await DB().Species.save(s); closeModal('mo-edit-species'); renderSpecies();
+  await window.DB.Species.save(s); closeModal('mo-edit-species'); renderSpecies();
 }
 export async function deleteSpecies() {
   const id=document.getElementById('mo-edit-species')._editId;
-  const plants=await DB().Plants.bySpecies(id);
-  if(plants.length>0&&!confirm(`В этом виде ${plants.length} растений. Удалить всё?`)) return;
-  await Promise.all(plants.map(p=>DB().Plants.delete(p.id)));
-  await DB().Species.delete(id); closeModal('mo-edit-species'); renderSpecies();
+  const plants=await window.DB.Plants.bySpecies(id);
+  if(plants.length>0&&!await window.showConfirm(`В этом виде ${plants.length} растений. Все будут удалены.`,'Удалить вид?','⚠️','Удалить')) return;
+  await Promise.all(plants.map(p=>window.DB.Plants.delete(p.id)));
+  await window.DB.Species.delete(id); closeModal('mo-edit-species'); renderSpecies();
 }
 
 // ── Species list ──────────────────────────────────────────────────────────────
 export async function openSpeciesList(speciesId) {
-  const s=await DB().Species.get(speciesId);
+  const s=await window.DB.Species.get(speciesId);
   document.getElementById('mo-species-title').textContent=s?.nameRu||'';
   document.getElementById('mo-species')._speciesId=speciesId;
   document.getElementById('mo-species').classList.add('open');
@@ -119,17 +119,17 @@ export async function openSpeciesList(speciesId) {
 
 // ── Plants ────────────────────────────────────────────────────────────────────
 async function _lsOpts(sel='') {
-  const all=await DB().Landscapes.all();
+  const all=await window.DB.Landscapes.all();
   return `<option value="">— выбрать —</option>`+all.map(l=>`<option value="${l.id}" ${l.id===sel?'selected':''}>${l.name} (${l.code})</option>`).join('');
 }
 async function _potOpts(sel='') {
-  const all=await DB().Pots.all();
+  const all=await window.DB.Pots.all();
   return `<option value="">— выбрать —</option>`+all.map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${p.code}</option>`).join('');
 }
 
 async function _fillAddPlant(speciesId) {
-  const s=await DB().Species.get(speciesId);
-  const ex=await DB().Plants.bySpecies(speciesId);
+  const s=await window.DB.Species.get(speciesId);
+  const ex=await window.DB.Plants.bySpecies(speciesId);
   const next=ex.length>0?Math.max(...ex.map(p=>p.number))+1:1;
   document.getElementById('mo-add-plant')._speciesId=speciesId;
   document.getElementById('ap-title').textContent=`Добавить: ${s?.nameRu||''}`;
@@ -145,11 +145,11 @@ async function _fillAddPlant(speciesId) {
 export async function saveAddPlant() {
   const sid=document.getElementById('mo-add-plant')._speciesId;
   const style=v('ap-style')==='Другой'?v('ap-style-other'):v('ap-style');
-  await DB().Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
+  await window.DB.Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
   closeModal('mo-add-plant'); renderPlants(sid); renderSpecies();
 }
 async function _fillEditPlant(plantId) {
-  const p=await DB().Plants.get(plantId);
+  const p=await window.DB.Plants.get(plantId);
   document.getElementById('mo-edit-plant')._plantId=plantId;
   setChip('ep-status',p.status||'°'); setChips('ep-flags',p.checkFlags||[]);
   sv('ep-care',p.shortCare);sv('ep-date',p.dateStart);sv('ep-variety',p.variety);sv('ep-country',p.country);sv('ep-price',p.price);sv('ep-qty',p.qty);sv('ep-comment',p.comment);
@@ -161,26 +161,26 @@ async function _fillEditPlant(plantId) {
 }
 export async function saveEditPlant() {
   const id=document.getElementById('mo-edit-plant')._plantId;
-  const p=await DB().Plants.get(id);
+  const p=await window.DB.Plants.get(id);
   const style=v('ep-style')==='Другой'?v('ep-style-other'):v('ep-style');
   Object.assign(p,{status:getChip('ep-status')||p.status,checkFlags:getChips('ep-flags'),shortCare:v('ep-care'),origin:getChip('ep-origin')||p.origin,bonsaiStyle:style,dateStart:v('ep-date'),landscapeId:v('ep-ls'),potId:v('ep-pot'),variety:v('ep-variety'),country:v('ep-country'),price:parseFloat(v('ep-price'))||0,qty:parseInt(v('ep-qty'))||1,comment:v('ep-comment')});
-  await DB().Plants.save(p); closeModal('mo-edit-plant'); renderPlantDetail(id);
+  await window.DB.Plants.save(p); closeModal('mo-edit-plant'); renderPlantDetail(id);
   const sid=document.getElementById('mo-species')._speciesId; if(sid) renderPlants(sid);
 }
 export async function deletePlant(plantId) {
-  if(!confirm('Удалить растение?')) return;
-  await DB().Plants.delete(plantId); closeModal('mo-plant');
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить растение?','🗑','Удалить')) return;
+  await window.DB.Plants.delete(plantId); closeModal('mo-plant');
   document.getElementById('fab').style.display='flex';
   const sid=document.getElementById('mo-species')._speciesId; if(sid) renderPlants(sid);
   renderSpecies();
 }
 export async function clonePlant(plantId) {
-  const p=await DB().Plants.get(plantId);
-  const ex=await DB().Plants.bySpecies(p.speciesId);
+  const p=await window.DB.Plants.get(plantId);
+  const ex=await window.DB.Plants.bySpecies(p.speciesId);
   const next=Math.max(...ex.map(x=>x.number))+1;
   const clone=JSON.parse(JSON.stringify(p));
   delete clone.id; clone.number=next; clone.photoIds=[]; clone.mainPhotoId=null; clone.status='°';
-  await DB().Plants.save(clone); closeModal('mo-plant');
+  await window.DB.Plants.save(clone); closeModal('mo-plant');
   document.getElementById('fab').style.display='flex'; renderPlants(p.speciesId);
 }
 
@@ -225,31 +225,31 @@ export function handlePhotoFile(e, previewId) {
 }
 export async function savePhoto() {
   const plantId=document.getElementById('mo-photo')._plantId;
-  if(!_selectedFile) return alert('Выберите фото');
+  if(!_selectedFile) return window.showAlert('Выберите или сделайте фото','Нет фото','📷');
   try {
-    const photoId=await DB().Photos.upload(_selectedFile,plantId,{date:v('ph-date'),note:v('ph-note')});
-    const plant=await DB().Plants.get(plantId);
+    const photoId=await window.DB.Photos.upload(_selectedFile,plantId,{date:v('ph-date'),note:v('ph-note')});
+    const plant=await window.DB.Plants.get(plantId);
     plant.photoIds=plant.photoIds||[];
     plant.photoIds.push(photoId);
     if(!plant.mainPhotoId) plant.mainPhotoId=photoId;
-    await DB().Plants.save(plant);
+    await window.DB.Plants.save(plant);
     _selectedFile=null;
     closeModal('mo-photo');
     renderPlantDetail(plantId);
     switchItab(1);
-  } catch(err) { alert('Ошибка загрузки: '+err.message); }
+  } catch(err) { window.showAlert('Ошибка загрузки: '+err.message,'Ошибка','❌'); }
 }
 export async function setMainPhoto(plantId, photoId) {
-  const p=await DB().Plants.get(plantId); p.mainPhotoId=photoId;
-  await DB().Plants.save(p); renderPlantDetail(plantId); switchItab(1);
+  const p=await window.DB.Plants.get(plantId); p.mainPhotoId=photoId;
+  await window.DB.Plants.save(p); renderPlantDetail(plantId); switchItab(1);
 }
 export async function deletePhoto(plantId, photoId) {
-  if(!confirm('Удалить фото?')) return;
-  await DB().Photos.delete(photoId);
-  const p=await DB().Plants.get(plantId);
+  if(!await window.showConfirm('Фото будет удалено навсегда.','Удалить фото?','🗑','Удалить')) return;
+  await window.DB.Photos.delete(photoId);
+  const p=await window.DB.Plants.get(plantId);
   p.photoIds=(p.photoIds||[]).filter(id=>id!==photoId);
   if(p.mainPhotoId===photoId) p.mainPhotoId=p.photoIds[0]||null;
-  await DB().Plants.save(p); renderPlantDetail(plantId); switchItab(1);
+  await window.DB.Plants.save(p); renderPlantDetail(plantId); switchItab(1);
 }
 
 // ── History ───────────────────────────────────────────────────────────────────
@@ -263,41 +263,41 @@ async function _fillHistory(plantId, histId) {
   _selectedFile=null;
   document.getElementById('h-preview').innerHTML='';
   if(isEdit) {
-    const plant=await DB().Plants.get(plantId);
+    const plant=await window.DB.Plants.get(plantId);
     const entry=(plant.history||[]).find(h=>h.id===histId);
     if(entry){sv('h-title',entry.title);sv('h-date',entry.date);sv('h-comment',entry.comment);}
   } else {
     sv('h-title','');sv('h-date',new Date().toISOString().split('T')[0]);sv('h-comment','');
   }
-  const all=await DB().Plants.all();
+  const all=await window.DB.Plants.all();
   const titles=[...new Set(all.flatMap(p=>(p.history||[]).map(h=>h.title)))].filter(Boolean);
   document.getElementById('h-suggestions').innerHTML=titles.slice(0,8).map(t=>`<button class="chip chip-sm" onclick="document.getElementById('h-title').value='${t}'">${t}</button>`).join('');
 }
 export async function saveHistory() {
   const modal=document.getElementById('mo-history');
   const plantId=modal._plantId, histId=modal._histId;
-  const title=v('h-title').trim(); if(!title) return alert('Введите название');
-  const plant=await DB().Plants.get(plantId);
+  const title=v('h-title').trim(); if(!title) return window.showAlert('Введите название действия','Ошибка','❌');
+  const plant=await window.DB.Plants.get(plantId);
   if(!plant.history) plant.history=[];
   const entry={id:histId||'h_'+Date.now(),date:v('h-date'),title,comment:v('h-comment').trim()};
   if(_selectedFile) {
-    try { await DB().Photos.upload(_selectedFile,plantId,{date:v('h-date'),note:title}); _selectedFile=null; } catch(e){}
+    try { await window.DB.Photos.upload(_selectedFile,plantId,{date:v('h-date'),note:title}); _selectedFile=null; } catch(e){}
   }
   if(histId) { const i=plant.history.findIndex(h=>h.id===histId); if(i!==-1) plant.history[i]=entry; }
   else plant.history.push(entry);
-  await DB().Plants.save(plant); closeModal('mo-history'); renderPlantDetail(plantId); switchItab(2);
+  await window.DB.Plants.save(plant); closeModal('mo-history'); renderPlantDetail(plantId); switchItab(2);
 }
 export async function deleteHistory() {
   const modal=document.getElementById('mo-history');
-  if(!confirm('Удалить запись?')) return;
-  const plant=await DB().Plants.get(modal._plantId);
+  if(!await window.showConfirm('Запись будет удалена из истории.','Удалить запись?','🗑','Удалить')) return;
+  const plant=await window.DB.Plants.get(modal._plantId);
   plant.history=(plant.history||[]).filter(h=>h.id!==modal._histId);
-  await DB().Plants.save(plant); closeModal('mo-history'); renderPlantDetail(modal._plantId); switchItab(2);
+  await window.DB.Plants.save(plant); closeModal('mo-history'); renderPlantDetail(modal._plantId); switchItab(2);
 }
 
 // ── Tasks ─────────────────────────────────────────────────────────────────────
 async function _fillAddTask(plantId) {
-  const [allS,allP]=await Promise.all([DB().Species.all(),DB().Plants.all()]);
+  const [allS,allP]=await Promise.all([window.DB.Species.all(),window.DB.Plants.all()]);
   const select = document.getElementById('at-target');
   select.innerHTML='<option value="">— выбрать —</option>'+
     allS.map(s=>`<option value="${s.id}">[Вид] ${s.nameRu}</option>`).join('')+
@@ -306,21 +306,21 @@ async function _fillAddTask(plantId) {
   if (plantId) select.value = plantId;
 }
 export async function saveAddTask() {
-  const name=v('at-name').trim(); if(!name) return alert('Введите название');
+  const name=v('at-name').trim(); if(!name) return window.showAlert('Введите название действия','Ошибка','❌');
   const targetId=v('at-target');
-  const allS=await DB().Species.all();
+  const allS=await window.DB.Species.all();
   const type=allS.find(s=>s.id===targetId)?'species':'plant';
-  await DB().Tasks.save({name,type,targetId,date:v('at-date'),comment:v('at-comment').trim(),done:false});
+  await window.DB.Tasks.save({name,type,targetId,date:v('at-date'),comment:v('at-comment').trim(),done:false});
   closeModal('mo-add-task'); renderDeals(); updateBadge();
 }
 export async function completeTask(taskId, plantId) {
-  const task = await DB().Tasks.get(taskId);
+  const task = await window.DB.Tasks.get(taskId);
   if (!task) return;
   const today = new Date().toISOString().split('T')[0];
 
   // Add to plant history only if it's a plant task
   if (task.type === 'plant' && task.targetId) {
-    const p = await DB().Plants.get(task.targetId);
+    const p = await window.DB.Plants.get(task.targetId);
     if (p) {
       if (!p.history) p.history = [];
       p.history.push({
@@ -329,13 +329,13 @@ export async function completeTask(taskId, plantId) {
         title: task.name,
         comment: task.comment || ''
       });
-      await DB().Plants.save(p);
+      await window.DB.Plants.save(p);
     }
   }
 
   // Mark done (do NOT add species tasks to any plant history)
   task.done = true;
-  await DB().Tasks.save(task);
+  await window.DB.Tasks.save(task);
 
   const { updateBadge, renderDeals, renderPlantDetail } = await import('./render.js');
   await updateBadge();
@@ -345,33 +345,33 @@ export async function completeTask(taskId, plantId) {
 
 // ── Landscapes ────────────────────────────────────────────────────────────────
 export async function saveAddLs() {
-  const name=v('al-name').trim(),code=v('al-code').trim(); if(!name||!code) return alert('Заполните название и код');
-  await DB().Landscapes.save({name,code,light:getChip('al-light')||'☀️',tempMin:v('al-tmin'),tempMax:v('al-tmax'),humidity:getChip('al-hum')||'≈',locations:[]});
+  const name=v('al-name').trim(),code=v('al-code').trim(); if(!name||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
+  await window.DB.Landscapes.save({name,code,light:getChip('al-light')||'☀️',tempMin:v('al-tmin'),tempMax:v('al-tmax'),humidity:getChip('al-hum')||'≈',locations:[]});
   closeModal('mo-add-ls'); renderLandscapes();
 }
 async function _fillEditLs(id) {
-  const l=await DB().Landscapes.get(id);
+  const l=await window.DB.Landscapes.get(id);
   document.getElementById('mo-edit-ls')._editId=id;
   sv('el-name',l.name);sv('el-code',l.code);sv('el-tmin',l.tempMin);sv('el-tmax',l.tempMax);
   setChip('el-light',l.light||'☀️'); setChip('el-hum',l.humidity||'≈');
 }
 export async function saveEditLs() {
   const id=document.getElementById('mo-edit-ls')._editId;
-  const l=await DB().Landscapes.get(id);
+  const l=await window.DB.Landscapes.get(id);
   Object.assign(l,{name:v('el-name').trim(),code:v('el-code').trim(),light:getChip('el-light')||l.light,tempMin:v('el-tmin'),tempMax:v('el-tmax'),humidity:getChip('el-hum')||l.humidity});
-  await DB().Landscapes.save(l); closeModal('mo-edit-ls'); renderLandscapes();
+  await window.DB.Landscapes.save(l); closeModal('mo-edit-ls'); renderLandscapes();
 }
 export async function deleteLs() {
-  if(!confirm('Удалить ландшафт?')) return;
-  await DB().Landscapes.delete(document.getElementById('mo-edit-ls')._editId);
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить ландшафт?','🗑','Удалить')) return;
+  await window.DB.Landscapes.delete(document.getElementById('mo-edit-ls')._editId);
   closeModal('mo-edit-ls'); renderLandscapes();
 }
 export async function addLocation(lsId) {
   const name=prompt('Название локации:'); if(!name) return;
   const code=prompt('Код локации:'); if(!code) return;
-  const l=await DB().Landscapes.get(lsId);
+  const l=await window.DB.Landscapes.get(lsId);
   l.locations=l.locations||[]; l.locations.push({id:'loc_'+Date.now(),name,code});
-  await DB().Landscapes.save(l); renderLandscapes();
+  await window.DB.Landscapes.save(l); renderLandscapes();
 }
 
 // ── Pots ─────────────────────────────────────────────────────────────────────
@@ -388,12 +388,12 @@ window._updateAddPotCode=()=>{
 };
 export async function saveAddPot() {
   const m=getChip('ap2-mat')||'PL',n=v('ap2-num')||'001',sh=getChip('ap2-shape'),pr=getChip('ap2-prop')||'=',sz=getChip('ap2-size')||'M',c=getChip('ap2-color'),p=getChip('ap2-pattern')||'';
-  if(!sh||!c) return alert('Выберите форму и цвет');
-  await DB().Pots.save({material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:p,code:potCode(m,n,sh,pr,sz,c,p)});
+  if(!sh||!c) return window.showAlert('Выберите форму и цвет','','ℹ️');
+  await window.DB.Pots.save({material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:p,code:potCode(m,n,sh,pr,sz,c,p)});
   closeModal('mo-add-pot'); renderPots();
 }
 async function _fillEditPot(id) {
-  const p=await DB().Pots.get(id);
+  const p=await window.DB.Pots.get(id);
   document.getElementById('mo-edit-pot')._editId=id;
   document.getElementById('ep2-current').textContent=p.code;
   setChip('ep2-mat',p.material);setChip('ep2-shape',p.shape);setChip('ep2-prop',p.prop||'=');
@@ -406,14 +406,14 @@ window._updateEditPotCode=()=>{
 };
 export async function saveEditPot() {
   const id=document.getElementById('mo-edit-pot')._editId;
-  const p=await DB().Pots.get(id);
+  const p=await window.DB.Pots.get(id);
   const m=getChip('ep2-mat')||p.material,n=v('ep2-num')||p.number,sh=getChip('ep2-shape')||p.shape,pr=getChip('ep2-prop')||p.prop,sz=getChip('ep2-size')||p.size,c=getChip('ep2-color')||p.color,pt=getChip('ep2-pattern')!==''?getChip('ep2-pattern'):p.pattern;
   Object.assign(p,{material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:pt,code:potCode(m,n,sh,pr,sz,c,pt)});
-  await DB().Pots.save(p); closeModal('mo-edit-pot'); renderPots();
+  await window.DB.Pots.save(p); closeModal('mo-edit-pot'); renderPots();
 }
 export async function deletePot() {
-  if(!confirm('Удалить горшок?')) return;
-  await DB().Pots.delete(document.getElementById('mo-edit-pot')._editId);
+  if(!await window.showConfirm('Это действие нельзя отменить.','Удалить горшок?','🗑','Удалить')) return;
+  await window.DB.Pots.delete(document.getElementById('mo-edit-pot')._editId);
   closeModal('mo-edit-pot'); renderPots();
 }
 
@@ -422,7 +422,7 @@ export async function editPhotoMeta(photoId, plantId) {
   const modal = document.getElementById('mo-edit-photo');
   modal._photoId = photoId;
   modal._plantId = plantId;
-  const ph = await DB().Photos.get(photoId);
+  const ph = await window.DB.Photos.get(photoId);
   if (ph) {
     document.getElementById('ep-photo-date').value = ph.date || '';
     document.getElementById('ep-photo-note').value = ph.note || '';
@@ -434,12 +434,12 @@ export async function savePhotoMeta() {
   const modal = document.getElementById('mo-edit-photo');
   const photoId = modal._photoId;
   const plantId = modal._plantId;
-  await DB().Photos.update(photoId, {
+  await window.DB.Photos.update(photoId, {
     date: document.getElementById('ep-photo-date').value,
     note: document.getElementById('ep-photo-note').value.trim()
   });
   closeModal('mo-edit-photo');
-  const plant = await DB().Plants.get(plantId);
+  const plant = await window.DB.Plants.get(plantId);
   const { renderPhotosTab } = await import('./render.js');
   await renderPhotosTab(plant);
   switchItab(1);
@@ -453,19 +453,19 @@ export async function saveAddRegularAction() {
   const name      = document.getElementById('ra-name').value.trim();
   const period    = parseInt(document.getElementById('ra-period').value) || 7;
   const nextDate  = document.getElementById('ra-next-date').value || new Date().toISOString().split('T')[0];
-  if (!name) return alert('Введите название');
+  if (!name) return window.showAlert('Введите название действия','Ошибка','❌');
 
   if (speciesId) {
     // Create regular action for ALL plants of this species
-    const plants = await DB().Plants.bySpecies(speciesId);
-    await Promise.all(plants.map(p => DB().RegularActions.save({
+    const plants = await window.DB.Plants.bySpecies(speciesId);
+    await Promise.all(plants.map(p => window.DB.RegularActions.save({
       plantId: p.id,
       name,
       periodDays: period,
       nextDate
     })));
   } else if (plantId) {
-    await DB().RegularActions.save({ plantId, name, periodDays: period, nextDate });
+    await window.DB.RegularActions.save({ plantId, name, periodDays: period, nextDate });
   }
 
   closeModal('mo-add-ra');
@@ -473,7 +473,7 @@ export async function saveAddRegularAction() {
   await renderDeals();
   await updateBadge();
   if (plantId) {
-    const plant = await DB().Plants.get(plantId);
+    const plant = await window.DB.Plants.get(plantId);
     if (plant) await renderHistoryTab(plant);
   }
 }
@@ -482,7 +482,7 @@ export async function editRegularAction(raId, plantId) {
   const modal = document.getElementById('mo-edit-ra');
   modal._raId    = raId;
   modal._plantId = plantId;
-  const ra = await DB().RegularActions.get(raId);
+  const ra = await window.DB.RegularActions.get(raId);
   if (ra) {
     document.getElementById('era-name').value      = ra.name       || '';
     document.getElementById('era-period').value    = ra.periodDays || 7;
@@ -498,15 +498,15 @@ export async function saveEditRegularAction() {
   const name     = document.getElementById('era-name').value.trim();
   const period   = parseInt(document.getElementById('era-period').value) || 7;
   const nextDate = document.getElementById('era-next-date').value || null;
-  if (!name) return alert('Введите название');
-  const ra = await DB().RegularActions.get(raId);
-  await DB().RegularActions.save({ ...ra, name, periodDays: period, nextDate });
+  if (!name) return window.showAlert('Введите название действия','Ошибка','❌');
+  const ra = await window.DB.RegularActions.get(raId);
+  await window.DB.RegularActions.save({ ...ra, name, periodDays: period, nextDate });
   closeModal('mo-edit-ra');
   const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
   await renderDeals();
   await updateBadge();
   if (plantId) {
-    const plant = await DB().Plants.get(plantId);
+    const plant = await window.DB.Plants.get(plantId);
     if (plant) await renderHistoryTab(plant);
   }
 }
@@ -514,9 +514,9 @@ export async function saveEditRegularAction() {
 export async function deleteRegularAction() {
   const modal = document.getElementById('mo-edit-ra');
   if (!confirm('Удалить регулярное действие?')) return;
-  await DB().RegularActions.delete(modal._raId);
+  await window.DB.RegularActions.delete(modal._raId);
   closeModal('mo-edit-ra');
-  const plant = await DB().Plants.get(modal._plantId);
+  const plant = await window.DB.Plants.get(modal._plantId);
   const { renderHistoryTab, renderDeals, updateBadge } = await import('./render.js');
   await renderHistoryTab(plant);
   await renderDeals();
@@ -525,12 +525,12 @@ export async function deleteRegularAction() {
 
 export async function completeRegularAction(raId, plantId) {
   const today = new Date().toISOString().split('T')[0];
-  const nextDate = await DB().RegularActions.complete(raId, today);
+  const nextDate = await window.DB.RegularActions.complete(raId, today);
 
   // Add to plant history
-  const ra = await DB().RegularActions.get(raId);
+  const ra = await window.DB.RegularActions.get(raId);
   if (ra && ra.plantId) {
-    const plant = await DB().Plants.get(ra.plantId);
+    const plant = await window.DB.Plants.get(ra.plantId);
     if (plant) {
       if (!plant.history) plant.history = [];
       plant.history.push({
@@ -540,7 +540,7 @@ export async function completeRegularAction(raId, plantId) {
         comment: `Регулярное действие. Следующее: ${nextDate}`,
         type: 'regular'
       });
-      await DB().Plants.save(plant);
+      await window.DB.Plants.save(plant);
     }
   }
 
@@ -551,7 +551,7 @@ export async function completeRegularAction(raId, plantId) {
   // Refresh plant history if open
   if (plantId || ra?.plantId) {
     const pid = plantId || ra.plantId;
-    const plant = await DB().Plants.get(pid);
+    const plant = await window.DB.Plants.get(pid);
     const { renderHistoryTab } = await import('./render.js');
     await renderHistoryTab(plant);
   }
