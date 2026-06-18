@@ -38,33 +38,58 @@ function sdotClass(s) {
   return 'sdot-work';
 }
 
+// ── Species sort state ────────────────────────────────────────────────────────
+window._speciesSort = 'az'; // 'az' | 'count' | 'date'
+
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function renderSpecies(filter='') {
   const [allSpecies, allPlants] = await Promise.all([window.DB.Species.all(), window.DB.Plants.all()]);
   const f = filter.toLowerCase();
-  const list = allSpecies.filter(s =>
+  let list = allSpecies.filter(s =>
     !f || s.nameRu.toLowerCase().includes(f) || (s.nameLat||'').toLowerCase().includes(f) || s.code.toLowerCase().includes(f)
   );
+
+  // Sort
+  const sort = window._speciesSort || 'az';
+  if (sort === 'az') {
+    list.sort((a,b) => a.nameRu.localeCompare(b.nameRu, 'ru'));
+  } else if (sort === 'count') {
+    list.sort((a,b) => {
+      const ca = allPlants.filter(p=>p.speciesId===a.id).length;
+      const cb = allPlants.filter(p=>p.speciesId===b.id).length;
+      return cb - ca;
+    });
+  } else if (sort === 'date') {
+    list.sort((a,b) => new Date(b.created_at||0) - new Date(a.created_at||0));
+  }
+
   el('speciesBadge').textContent = list.length;
+
+  // Update sort selector if exists
+  const sortSel = el('species-sort-sel');
+  if (sortSel) sortSel.value = sort;
+
   el('speciesList').innerHTML = list.map(s => {
     const count = allPlants.filter(p => p.speciesId === s.id).length;
-    const iconHtml = s.photoPath
-      ? `<div class="card-icon" style="padding:0"><img src="${window.DB.Photos.getURL(s.photoPath)}"></div>`
-      : `<div class="card-icon">${s.type||'🌱'}</div>`;
+    const photoUrl = s.photoPath ? window.DB.Photos.getURL(s.photoPath) : null;
     return `
-    <div class="card">
+    <div class="card" style="margin-bottom:10px">
       <div class="card-row" onclick="openSpeciesList('${s.id}')">
-        ${iconHtml}
+        <div class="card-icon" style="${photoUrl ? 'padding:0' : ''}">
+          ${photoUrl ? `<img src="${photoUrl}">` : (s.type||'🌱')}
+        </div>
         <div class="card-info">
           <div class="card-name">${s.nameRu}</div>
-          <div class="card-sub" style="font-style:italic">${s.nameLat||''}</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px">
-            <span style="font-size:10px;color:var(--stone);font-family:monospace">${s.code}</span>
-            ${s.careCode ? `<span class="care-chip" onclick="event.stopPropagation();openCareDecoder('${s.careCode}')">${s.careCode} 📖</span>` : ''}
+          <div class="card-sub">${s.nameLat||''}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
+            <span style="background:var(--parch);border:1px solid var(--ash);border-radius:12px;padding:2px 10px;font-size:11px;font-family:monospace;color:var(--ink2)">${s.code}</span>
+            ${s.careCode ? `<span class="care-chip" onclick="event.stopPropagation();openCareDecoder('${s.careCode}')" title="Расшифровать код ухода">${s.careCode}</span>` : ''}
           </div>
         </div>
-        <span class="card-count">${count}</span>
-        <span class="card-arrow">›</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+          <span style="background:var(--earth2);color:var(--white);font-size:11px;padding:3px 10px;border-radius:12px;font-weight:500">${count} шт.</span>
+          <span class="card-arrow">›</span>
+        </div>
       </div>
       <div class="card-actions">
         <button class="card-act-btn" onclick="openSpeciesList('${s.id}')">🌿 Открыть</button>
@@ -74,6 +99,11 @@ export async function renderSpecies(filter='') {
     </div>`;
   }).join('');
 }
+
+window.setSpeciesSort = function(val) {
+  window._speciesSort = val;
+  renderSpecies(document.getElementById('srchInput')?.value || '');
+};
 
 // ── Plants list ───────────────────────────────────────────────────────────────
 export async function renderPlants(speciesId, filter='') {
