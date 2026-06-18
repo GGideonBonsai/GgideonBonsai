@@ -76,6 +76,7 @@ export async function saveAddSpecies() {
 }
 async function _fillEditSpecies(id) {
   const s=await window.DB.Species.get(id);
+  if (!s) return;
   document.getElementById('mo-edit-species')._editId=id;
   sv('es-ru',s.nameRu);sv('es-lat',s.nameLat);sv('es-code',s.code);sv('es-syn',s.synonyms);sv('es-care',s.careCode);
   setChip('es-type',s.type||'🌳');
@@ -85,6 +86,21 @@ async function _fillEditSpecies(id) {
     ? `<img src="${window.DB.Photos.getURL(s.photoPath)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:6px">`
     : '';
   window._esSelectedFile=null;
+  // Update preview fields
+  const pName = document.getElementById('es-preview-name');
+  const pLat  = document.getElementById('es-preview-lat');
+  const pCode = document.getElementById('es-preview-code');
+  const pImg  = document.getElementById('es-preview-img');
+  if(pName) pName.textContent = s.nameRu || '—';
+  if(pLat)  pLat.textContent  = s.nameLat || '';
+  if(pCode) pCode.textContent = s.code || '—';
+  if(pImg) {
+    if(s.photoPath) {
+      pImg.innerHTML = `<img src="${window.DB.Photos.getURL(s.photoPath)}" style="width:100%;height:100%;object-fit:cover">`;
+    } else {
+      pImg.textContent = s.type || '🌱';
+    }
+  }
 }
 export async function saveEditSpecies() {
   const id=document.getElementById('mo-edit-species')._editId;
