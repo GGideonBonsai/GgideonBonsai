@@ -8,6 +8,16 @@
   <meta name="theme-color" content="#1a1a1a">
   <title>Gideon Bonsai 義典</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Fallback critical styles */
+    body { font-family: Inter, sans-serif; background: #f5f2ed; margin: 0; max-width: 480px; margin: 0 auto; }
+    .screen { display: none; }
+    .screen.on { display: block; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: #fff; border-radius: 16px 16px 0 0; width: 100%; max-height: 92vh; overflow-y: auto; transform: translateY(100%); transition: transform .25s; padding-bottom: 28px; }
+    .overlay.open .modal { transform: translateY(0); }
+  </style>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -30,6 +40,9 @@
 <!-- ═══ APP ═══════════════════════════════════════════════════════════════════ -->
 <div id="app-main" style="display:none">
 
+  <!-- Hidden user email storage -->
+  <span id="user-email" style="display:none"></span>
+
   <!-- DATA BAR -->
   <div class="data-bar" id="dataBar">
     <button class="d-btn" onclick="requestNotifications()">🔔 Уведомления</button>
@@ -40,10 +53,11 @@
   <div class="screen on" id="screen-home">
     <div class="home-page">
       <div class="home-hero">
+        <div class="home-title">Gideon Bonsai</div>
+        <div class="home-kanji-sub">義 典</div>
         <div class="home-logo-circle">
           <span class="home-kanji">義典</span>
         </div>
-        <div class="home-title">Gideon Bonsai</div>
         <div class="home-subtitle">Искусство в гармонии с природой</div>
         <div class="home-divider"></div>
       </div>
@@ -674,6 +688,35 @@
       <div style="font-size:12px;font-family:monospace;color:var(--moss);padding:6px 0;margin-bottom:10px" id="ep2-new-code"></div>
       <button class="btn btn-p" onclick="saveEditPot()">💾 Сохранить</button>
       <button class="btn btn-d" onclick="deletePot()">🗑 Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="overlay" id="mo-confirm" style="align-items:center;justify-content:center;padding:0 16px">
+  <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
+    <div style="padding:24px 20px 8px;text-align:center">
+      <div id="confirm-icon" style="font-size:36px;margin-bottom:10px">⚠️</div>
+      <div id="confirm-title" style="font-family:'Noto Serif JP',serif;font-size:16px;font-weight:400;margin-bottom:6px"></div>
+      <div id="confirm-msg" style="font-size:13px;color:var(--stone);line-height:1.5"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ash);margin-top:16px">
+      <button onclick="window._confirmResolve(false)" style="padding:14px;background:none;border:none;border-right:1px solid var(--ash);font-size:15px;color:var(--stone);cursor:pointer;font-family:'Inter',sans-serif">Нет</button>
+      <button id="confirm-yes-btn" onclick="window._confirmResolve(true)" style="padding:14px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--danger)">Да</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALERT DIALOG -->
+<div class="overlay" id="mo-alert" style="align-items:center;justify-content:center;padding:0 16px">
+  <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
+    <div style="padding:24px 20px 8px;text-align:center">
+      <div id="alert-icon" style="font-size:36px;margin-bottom:10px">ℹ️</div>
+      <div id="alert-title" style="font-family:'Noto Serif JP',serif;font-size:16px;font-weight:400;margin-bottom:6px"></div>
+      <div id="alert-msg" style="font-size:13px;color:var(--stone);line-height:1.5"></div>
+    </div>
+    <div style="border-top:1px solid var(--ash);margin-top:16px">
+      <button onclick="window._alertResolve()" style="width:100%;padding:14px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--moss)">OK</button>
     </div>
   </div>
 </div>
