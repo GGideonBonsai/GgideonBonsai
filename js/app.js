@@ -206,12 +206,12 @@ Object.assign(window, {
     renderTrash();
   },
   deleteFromTrash: async (id) => {
-    if (!confirm('Удалить навсегда?')) return;
+    if (!await window.showConfirm('Удалить навсегда?','Подтвердите','⚠️','Да')) return;
     await window.DB.Trash.delete(id);
     renderTrash();
   },
   clearTrash: async () => {
-    if (!confirm('Очистить всю корзину?')) return;
+    if (!await window.showConfirm('Очистить всю корзину?','Подтвердите','⚠️','Да')) return;
     await window.DB.Trash.clear();
     renderTrash();
   },
