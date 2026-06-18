@@ -367,8 +367,8 @@ export async function deleteLs() {
   closeModal('mo-edit-ls'); renderLandscapes();
 }
 export async function addLocation(lsId) {
-  const name=prompt('Название локации:'); if(!name) return;
-  const code=prompt('Код локации:'); if(!code) return;
+  const name = await window.showPrompt('Название локации:',''); if(!name) return;
+  const code = await window.showPrompt('Код локации:',''); if(!code) return;
   const l=await window.DB.Landscapes.get(lsId);
   l.locations=l.locations||[]; l.locations.push({id:'loc_'+Date.now(),name,code});
   await window.DB.Landscapes.save(l); renderLandscapes();
@@ -513,7 +513,7 @@ export async function saveEditRegularAction() {
 
 export async function deleteRegularAction() {
   const modal = document.getElementById('mo-edit-ra');
-  if (!confirm('Удалить регулярное действие?')) return;
+  if (!await window.showConfirm('Удалить регулярное действие?','Подтвердите','⚠️','Да')) return;
   await window.DB.RegularActions.delete(modal._raId);
   closeModal('mo-edit-ra');
   const plant = await window.DB.Plants.get(modal._plantId);
