@@ -34,6 +34,14 @@ function sb() {
 export function getSB() { return _sb; }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
+export async function signInWithGoogle() {
+  const { error } = await sb().auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) throw error;
+}
+
 export async function signInWithEmail(email, password) {
   const { data, error } = await sb().auth.signInWithPassword({ email, password });
   if (error) throw error;
@@ -87,6 +95,12 @@ export const SBSpecies = {
     }
   },
   async delete(id) {
+    // Move to trash first
+    const { data } = await sb().from('species').select('*').eq('id', id).single();
+    if (data) {
+      const user = await getUser();
+      await sb().from('trash').insert({ user_id: user?.id, type: 'species', data });
+    }
     const { error } = await sb().from('species').delete().eq('id', id);
     if (error) throw error;
   }
@@ -123,6 +137,11 @@ export const SBPlants = {
     }
   },
   async delete(id) {
+    const { data } = await sb().from('plants').select('*').eq('id', id).single();
+    if (data) {
+      const user = await getUser();
+      await sb().from('trash').insert({ user_id: user?.id, type: 'plant', data });
+    }
     const { error } = await sb().from('plants').delete().eq('id', id);
     if (error) throw error;
   }
@@ -154,6 +173,11 @@ export const SBLandscapes = {
     }
   },
   async delete(id) {
+    const { data } = await sb().from('landscapes').select('*').eq('id', id).single();
+    if (data) {
+      const user = await getUser();
+      await sb().from('trash').insert({ user_id: user?.id, type: 'landscape', data });
+    }
     const { error } = await sb().from('landscapes').delete().eq('id', id);
     if (error) throw error;
   }
@@ -185,6 +209,11 @@ export const SBPots = {
     }
   },
   async delete(id) {
+    const { data } = await sb().from('pots').select('*').eq('id', id).single();
+    if (data) {
+      const user = await getUser();
+      await sb().from('trash').insert({ user_id: user?.id, type: 'pot', data });
+    }
     const { error } = await sb().from('pots').delete().eq('id', id);
     if (error) throw error;
   }
@@ -293,6 +322,34 @@ export const SBRegularActions = {
 function _fromDB_ra(r) {
   return { id: r.id, plantId: r.plant_id, name: r.name, periodDays: r.period_days, nextDate: r.next_date, lastDone: r.last_done };
 }
+
+// ── Trash ────────────────────────────────────────────────────────────────────
+export const SBTrash = {
+  async all() {
+    const { data, error } = await sb().from('trash').select('*').order('deleted_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+  async add(type, data) {
+    const user = await getUser();
+    const { error } = await sb().from('trash').insert({ user_id: user?.id, type, data });
+    if (error) throw error;
+  },
+  async restore(id) {
+    const { data, error } = await sb().from('trash').select('*').eq('id', id).single();
+    if (error) throw error;
+    return data;
+  },
+  async delete(id) {
+    const { error } = await sb().from('trash').delete().eq('id', id);
+    if (error) throw error;
+  },
+  async clear() {
+    const user = await getUser();
+    const { error } = await sb().from('trash').delete().eq('user_id', user?.id);
+    if (error) throw error;
+  }
+};
 
 // ── Photos (Supabase Storage) ─────────────────────────────────────────────────
 export const SBPhotos = {
@@ -446,4 +503,5 @@ function _resize(file, maxSize) {
     img.src = url;
   });
 }
+
 
