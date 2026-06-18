@@ -179,6 +179,7 @@ Object.assign(window, {
   goToLandscape, goToPot, toggleLs, switchHistSubtab, renderLocationPlants,
 
   openAddPhoto: (plantId) => openModal('mo-photo', plantId),
+  setSpeciesSort: (v) => window.setSpeciesSort(v),
   setMainPhotoUI: (plantId, photoId) => setMainPhoto(plantId, photoId),
   deletePhotoUI: (plantId, photoId) => deletePhoto(plantId, photoId),
   viewPhoto: (url) => {
@@ -376,6 +377,40 @@ window.requestNotifications = async function() {
 };
 
 // ── Service Worker ────────────────────────────────────────────────────────────
+// ── Emergency unlock ─────────────────────────────────────────────────────────
+// If app becomes unclickable, tap header 3 times to reset
+let _tapCount = 0, _tapTimer = null;
+window.emergencyReset = function() {
+  _tapCount++;
+  clearTimeout(_tapTimer);
+  _tapTimer = setTimeout(() => { _tapCount = 0; }, 1000);
+  if (_tapCount >= 3) {
+    _tapCount = 0;
+    // Close ALL overlays
+    document.querySelectorAll('.overlay').forEach(o => {
+      o.classList.remove('open');
+    });
+    // Reset confirm/alert state
+    if (window._confirmResolve) { window._confirmResolve(false); }
+    if (window._alertResolve) { window._alertResolve(); }
+    // Remove any stray prompt modals
+    document.getElementById('mo-prompt')?.remove();
+    console.log('Emergency reset done');
+  }
+};
+
+// Also add global click tracker to detect stuck state
+document.addEventListener('click', (e) => {
+  // If click hits an overlay backdrop (not modal content), close it
+  if (e.target.classList.contains('overlay') && e.target.classList.contains('open')) {
+    const modalId = e.target.id;
+    // Don't auto-close confirm/alert by backdrop click - they need button
+    if (modalId !== 'mo-confirm' && modalId !== 'mo-alert') {
+      e.target.classList.remove('open');
+    }
+  }
+}, true);
+
 function registerSW() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/GgideonBonsai/sw.js')
