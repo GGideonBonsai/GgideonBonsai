@@ -34,14 +34,6 @@ function sb() {
 export function getSB() { return _sb; }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
-export async function signInWithGoogle() {
-  const { error } = await sb().auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: window.location.origin }
-  });
-  if (error) throw error;
-}
-
 export async function signInWithEmail(email, password) {
   const { data, error } = await sb().auth.signInWithPassword({ email, password });
   if (error) throw error;
