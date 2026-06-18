@@ -1,14 +1,22 @@
 {
-  "name": "Gideon Bonsai 義典",
+  "name": "Gideon Bonsai \u7fa9\u5178",
   "short_name": "Gideon Bonsai",
-  "description": "Менеджер коллекции бонсай",
-  "start_url": "/GgideonBonsai/",
+  "description": "\u041c\u0435\u043d\u0435\u0434\u0436\u0435\u0440 \u043a\u043e\u043b\u043b\u0435\u043a\u0446\u0438\u0438 \u0431\u043e\u043d\u0441\u0430\u0439",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#1a1a1a",
   "orientation": "portrait",
   "icons": [
-    { "src": "icons/icon-192.svg", "sizes": "192x192", "type": "image/svg+xml" },
-    { "src": "icons/icon-512.svg", "sizes": "512x512", "type": "image/svg+xml" }
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
   ]
 }
