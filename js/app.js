@@ -198,12 +198,30 @@ Object.assign(window, {
     const item = await db.Trash.restore(id);
     if (!item) return;
     const { type, data } = item;
-    if (type === 'species')   await db.Species.save(data);
-    if (type === 'plant')     await db.Plants.save(data);
-    if (type === 'landscape') await db.Landscapes.save(data);
-    if (type === 'pot')       await db.Pots.save(data);
+
+    if (type === 'species') {
+      // Restore species
+      await db.Species.save(data);
+      // Also restore all plants that belonged to this species (from trash)
+      const allTrash = await db.Trash.all();
+      const plantItems = allTrash.filter(t => t.type === 'plant' && t.data?.species_id === data.id);
+      for (const pi of plantItems) {
+        await db.Plants.save(pi.data);
+        await db.Trash.delete(pi.id);
+      }
+      if (plantItems.length > 0) {
+        window.showAlert(`Восстановлен вид и ${plantItems.length} растений`, 'Восстановлено', '✅');
+      }
+    } else if (type === 'plant') {
+      await db.Plants.save(data);
+    } else if (type === 'landscape') {
+      await db.Landscapes.save(data);
+    } else if (type === 'pot') {
+      await db.Pots.save(data);
+    }
+
     await db.Trash.delete(id);
-    renderTrash();
+    await renderTrash();
   },
   deleteFromTrash: async (id) => {
     if (!await window.showConfirm('Удалить навсегда?','Подтвердите','⚠️','Да')) return;
