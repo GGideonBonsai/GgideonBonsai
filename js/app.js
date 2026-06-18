@@ -432,6 +432,95 @@ window.saveNotifTime = function() {
   scheduleNotifications();
 };
 
+// ── Care Code Decoder ────────────────────────────────────────────────────────
+window.openCareDecoder = function(code) {
+  if (!code) return;
+  document.getElementById('care-decode-code').textContent = code;
+
+  const parts = code.split('.');
+  const items = [];
+
+  const LIGHT = { D:'Яркий прямой свет, солнце', E:'Яркий рассеянный, возможно утреннее солнце', S:'Умеренный рассеянный', H:'Тень или глубокая тень' };
+  const SEASON = { EV:'Вечнозелёное', DE:'Листопадное', SE:'Полулистопадное' };
+
+  for (const part of parts) {
+    if (!part) continue;
+    // Season
+    if (/^(EV|DE|SE)$/.test(part)) {
+      items.push({ icon:'🍃', title:'Листопадность', val: SEASON[part] || part });
+    }
+    // Light: starts with D,E,S,H optionally followed by letter
+    else if (/^[DESH]/.test(part) && part.length <= 3) {
+      const lightKey = part[0];
+      items.push({ icon:'☀️', title:'Освещение', val: LIGHT[lightKey] || part });
+    }
+    // Temperature: T3-5, T18-35 etc
+    else if (/^T[\d]/.test(part)) {
+      const range = part.slice(1);
+      items.push({ icon:'🌡️', title:'Температура', val: `${range} — оптимальный диапазон °C` });
+    }
+    // Winter/cold: Z1-3
+    else if (/^Z[\d]/.test(part)) {
+      const zone = part.slice(1);
+      const zones = { '1':'Холодная зимовка 0–5°C', '2':'Прохладная 5–10°C', '3':'Умеренная 10–15°C', '4':'Тёплая 15–20°C', '5':'Комнатная 18–25°C' };
+      const zoneNum = zone.split('-')[0];
+      items.push({ icon:'❄️', title:'Зимовка', val: zones[zoneNum] || `Зона ${zone}` });
+    }
+    // Watering: W2-3
+    else if (/^W[\d]/.test(part)) {
+      const lvl = part.slice(1);
+      const vals = { '1':'Редкий полив, просушка между поливами', '2':'Умеренный, между просыханием верхнего слоя', '3':'Регулярный, почва слегка влажная', '4':'Обильный, почва постоянно умеренно влажная', '5':'Очень обильный' };
+      const lvlNum = lvl.split('-')[0];
+      items.push({ icon:'💧', title:'Полив', val: vals[lvlNum] || `Уровень ${lvl}` });
+    }
+    // Humidity: L4-5
+    else if (/^L[\d]/.test(part)) {
+      const lvl = part.slice(1);
+      const vals = { '1':'Низкая', '2':'Умеренная', '3':'Средняя 50–60%', '4':'Повышенная 60–70%', '5':'Высокая 70–80%, опрыскивание' };
+      const lvlNum = lvl.split('-')[0];
+      items.push({ icon:'🌫️', title:'Влажность воздуха', val: vals[lvlNum] || `Уровень ${lvl}` });
+    }
+    // Feeding: S234
+    else if (/^S[\d]/.test(part)) {
+      const months = part.slice(1);
+      const monthNames = { '1':'янв','2':'фев','3':'мар','4':'апр','5':'май','6':'июн','7':'июл','8':'авг','9':'сен','10':'окт','11':'ноя','12':'дек' };
+      const mList = months.split('').map(m => monthNames[m] || m).join(', ');
+      items.push({ icon:'🌿', title:'Подкормки', val: `Месяцы: ${mList}` });
+    }
+    // Pruning: P2-3
+    else if (/^P[\d]/.test(part)) {
+      const cnt = part.slice(1);
+      items.push({ icon:'✂️', title:'Обрезка', val: `${cnt} раз в сезон — формирующая обрезка` });
+    }
+    // Repotting: R2, R3a, R4a
+    else if (/^R[\d]/.test(part)) {
+      const freq = part.slice(1);
+      const freqMap = { '1':'Ежегодно', '2':'Раз в 2–3 года', '3':'Раз в 3 года', '4':'Раз в 3–5 лет', '5':'Редко, раз в 5+ лет' };
+      const freqNum = freq.replace(/[a-z]/g,'');
+      const spring = part.includes('a') ? ', ранней весной' : '';
+      items.push({ icon:'🪴', title:'Пересадка', val: (freqMap[freqNum] || `Раз в ${freqNum} года`) + spring });
+    }
+  }
+
+  const list = document.getElementById('care-decode-list');
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-msg">Код не распознан</div>';
+  } else {
+    list.innerHTML = items.map(i => `
+      <div class="care-decode-item">
+        <div class="care-decode-icon">${i.icon}</div>
+        <div>
+          <div class="care-decode-title">${i.title}</div>
+          <div class="care-decode-val">${i.val}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  // Open as bottom sheet
+  const modal = document.getElementById('mo-care-decode');
+  modal.classList.add('open');
+};
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   await initSupabase();
