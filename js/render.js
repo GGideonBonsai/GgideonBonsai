@@ -6,8 +6,10 @@ export function el(id) { return document.getElementById(id); }
 // ── Date formatting ───────────────────────────────────────────────────────────
 function formatDate(d) {
   if (!d) return '—';
-  const [y, m, day] = d.split('-');
-  return `${day}.${m}.${y}`;
+  // Handle both date strings and ISO timestamps
+  const str = d.includes('T') ? d.split('T')[0] : d;
+  const [y, m, day] = str.split('-');
+  return `${day}/${m}/${y}`;
 }
 
 function daysUntil(dateStr) {
@@ -56,7 +58,10 @@ export async function renderSpecies(filter='') {
         <div class="card-info">
           <div class="card-name">${s.nameRu}</div>
           <div class="card-sub" style="font-style:italic">${s.nameLat||''}</div>
-          <div class="card-code">${s.code} · ${s.careCode||'—'}</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px">
+            <span style="font-size:10px;color:var(--stone);font-family:monospace">${s.code}</span>
+            ${s.careCode ? `<span class="care-chip" onclick="event.stopPropagation();openCareDecoder('${s.careCode}')">${s.careCode} 📖</span>` : ''}
+          </div>
         </div>
         <span class="card-count">${count}</span>
         <span class="card-arrow">›</span>
@@ -133,6 +138,7 @@ export async function renderPlantDetail(plantId) {
     <div class="dc3">${plantLine3(plant,species)}</div>`;
 
   el('itab0').innerHTML = `
+    ${species.careCode ? `<div class="fg"><span class="care-chip" onclick="openCareDecoder('${species.careCode}')">${species.careCode} 📖 Расшифровать</span></div>` : ''}
     <div class="fg"><label class="fl">Синонимы</label><div class="fv">${species.synonyms||'—'}</div></div>
     <button class="add-btn" style="margin-bottom:12px" onclick="openModal('mo-add-plant','${plant.speciesId}')">＋ Добавить экземпляр</button>
     <div class="fg"><label class="fl">Сорт / Вариация</label><div class="fv">${plant.variety||'—'}</div></div>
