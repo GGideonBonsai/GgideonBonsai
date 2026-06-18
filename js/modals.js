@@ -186,12 +186,11 @@ export async function clonePlant(plantId) {
 
 // ── Plant detail ──────────────────────────────────────────────────────────────
 export async function openPlantDetail(plantId) {
-  document.getElementById('mo-plant')._plantId=plantId;
+  document.getElementById('mo-plant')._plantId = plantId;
   document.getElementById('mo-plant').classList.add('open');
   stack.push('mo-plant');
-  document.getElementById('fab').style.display='none';
-  document.querySelectorAll('.itab').forEach((t,i)=>t.classList.toggle('on',i===0));
-  document.querySelectorAll('.itab-body').forEach((b,i)=>b.classList.toggle('on',i===0));
+  document.querySelectorAll('.itab').forEach((t,i) => t.classList.toggle('on', i===0));
+  document.querySelectorAll('.itab-body').forEach((b,i) => b.classList.toggle('on', i===0));
   await renderPlantDetail(plantId);
 }
 export function switchItab(idx) {
@@ -315,13 +314,33 @@ export async function saveAddTask() {
   closeModal('mo-add-task'); renderDeals(); updateBadge();
 }
 export async function completeTask(taskId, plantId) {
-  const task=await DB().Tasks.get(taskId); if(!task) return;
-  if(task.type==='plant'&&task.targetId) {
-    const p=await DB().Plants.get(task.targetId);
-    if(p){if(!p.history)p.history=[];p.history.push({id:'h_'+Date.now(),date:new Date().toISOString().split('T')[0],title:task.name,comment:task.comment||''});await DB().Plants.save(p);}
+  const task = await DB().Tasks.get(taskId);
+  if (!task) return;
+  const today = new Date().toISOString().split('T')[0];
+
+  // Add to plant history only if it's a plant task
+  if (task.type === 'plant' && task.targetId) {
+    const p = await DB().Plants.get(task.targetId);
+    if (p) {
+      if (!p.history) p.history = [];
+      p.history.push({
+        id: 'h_' + Date.now(),
+        date: today,
+        title: task.name,
+        comment: task.comment || ''
+      });
+      await DB().Plants.save(p);
+    }
   }
-  task.done=true; await DB().Tasks.save(task); updateBadge();
-  if(plantId) renderPlantDetail(plantId); renderDeals();
+
+  // Mark done (do NOT add species tasks to any plant history)
+  task.done = true;
+  await DB().Tasks.save(task);
+
+  const { updateBadge, renderDeals, renderPlantDetail } = await import('./render.js');
+  await updateBadge();
+  await renderDeals();
+  if (plantId) await renderPlantDetail(plantId);
 }
 
 // ── Landscapes ────────────────────────────────────────────────────────────────
@@ -539,12 +558,12 @@ export async function completeRegularAction(raId, plantId) {
 }
 
 export function goToLandscape(id) {
-  closeModal('mo-plant'); document.getElementById('fab').style.display='flex';
-  window.switchTab('landscapes');
+  closeModal('mo-plant');
+  window.navTo('landscapes');
   setTimeout(()=>document.querySelector(`[data-ls-id="${id}"]`)?.scrollIntoView({behavior:'smooth'}),300);
 }
 export function goToPot(id) {
-  closeModal('mo-plant'); document.getElementById('fab').style.display='flex';
-  window.switchTab('pots');
+  closeModal('mo-plant');
+  window.navTo('pots');
   setTimeout(()=>document.querySelector(`[data-pot-id="${id}"]`)?.scrollIntoView({behavior:'smooth'}),300);
 }
