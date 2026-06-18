@@ -216,7 +216,7 @@ Object.assign(window, {
     renderTrash();
   },
 
-  // Auth
+  // Auth (только email)
   authSignInEmail: () => {
     const email = document.getElementById('auth-email')?.value;
     const pass  = document.getElementById('auth-pass')?.value;
@@ -313,21 +313,34 @@ function renderProfile() {
   const user = window._currentUser;
   const el = document.getElementById('screen-profile-content');
   if (!el) return;
+  const savedTime = localStorage.getItem('notif_time') || '09:00';
+  const notifStatus = Notification.permission === 'granted' ? '✅ Включены' : '❌ Выключены';
   el.innerHTML = `
     <div class="profile-section">
       <div class="profile-row">
-        <span class="profile-label">Email</span>
+        <span class="profile-label">👤 Email</span>
         <span class="profile-value">${user?.email || '—'}</span>
       </div>
-      <div class="profile-row" onclick="toggleDataBar()" style="cursor:pointer">
-        <span class="profile-label">💾 Данные</span>
-        <span class="profile-value">Резервная копия</span>
+
+      <div style="background:#fff;border-radius:12px;border:1px solid var(--ash);overflow:hidden;margin-bottom:8px">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--ash)">
+          <div style="font-size:13px;font-weight:500;margin-bottom:4px">🔔 Уведомления</div>
+          <div style="font-size:11px;color:var(--stone)">${notifStatus}</div>
+        </div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--ash)">
+          <div style="font-size:12px;color:var(--stone);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Время уведомлений</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="time" id="notif-time-input" value="${savedTime}" class="fi" style="flex:1;font-size:16px;font-family:monospace">
+            <button onclick="saveNotifTime()" class="btn btn-p" style="width:auto;padding:8px 16px;font-size:13px">Сохранить</button>
+          </div>
+          <div style="font-size:11px;color:var(--stone);margin-top:6px">Ежедневное напоминание о запланированных делах</div>
+        </div>
+        <div style="padding:12px 14px" onclick="requestNotifications()" style="cursor:pointer">
+          <button class="btn btn-s" style="margin-top:0">Включить уведомления</button>
+        </div>
       </div>
-      <div class="profile-row" onclick="requestNotifications()" style="cursor:pointer">
-        <span class="profile-label">🔔 Уведомления</span>
-        <span class="profile-value" id="notifStatus">Нажмите для включения</span>
-      </div>
-      <button class="btn btn-d" style="margin-top:16px" onclick="authSignOut()">Выйти из аккаунта</button>
+
+      <button class="btn btn-d" style="margin-top:8px" onclick="authSignOut()">🚪 Выйти из аккаунта</button>
     </div>`;
 }
 
@@ -344,9 +357,59 @@ window.requestNotifications = async function() {
 // ── Service Worker ────────────────────────────────────────────────────────────
 function registerSW() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => {
+        window._swReg = reg;
+        // Schedule notifications after SW ready
+        scheduleNotifications();
+      })
+      .catch(() => {});
   }
 }
+
+// ── Notification scheduling ───────────────────────────────────────────────────
+window.scheduleNotifications = async function() {
+  if (Notification.permission !== 'granted') return;
+  if (!window._swReg?.active) return;
+
+  const time = localStorage.getItem('notif_time') || '09:00';
+  const [h, m] = time.split(':').map(Number);
+
+  // Get pending tasks and RAs
+  const db = window.DB;
+  if (!db) return;
+  const [tasks, ras] = await Promise.all([db.Tasks.pending(), db.RegularActions.pending()]);
+
+  // Calculate next notification time
+  const now = new Date();
+  const next = new Date();
+  next.setHours(h, m, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1); // Tomorrow if already passed
+
+  const msUntil = next - now;
+  const totalItems = tasks.length + ras.length;
+
+  if (totalItems === 0) return;
+
+  // Schedule via SW
+  if (window._swReg?.active) {
+    window._swReg.active.postMessage({
+      type: 'SCHEDULE_ALARM',
+      id: 'daily_reminder',
+      title: '🌿 Gideon Bonsai',
+      body: `У вас ${totalItems} ${totalItems === 1 ? 'дело' : 'дел'} ожидает выполнения`,
+      timestamp: next.getTime()
+    });
+  }
+};
+
+window.saveNotifTime = function() {
+  const time = document.getElementById('notif-time-input')?.value;
+  if (!time) return;
+  localStorage.setItem('notif_time', time);
+  window.showAlert(`Уведомления настроены на ${time}`, 'Сохранено', '✅');
+  scheduleNotifications();
+};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
