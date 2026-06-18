@@ -1,7 +1,7 @@
 // render.js — UI rendering (Supabase version)
 
 export function el(id) { return document.getElementById(id); }
-const DB = () => window.DB;
+
 
 // ── Date formatting ───────────────────────────────────────────────────────────
 function formatDate(d) {
@@ -38,7 +38,7 @@ function sdotClass(s) {
 
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function renderSpecies(filter='') {
-  const [allSpecies, allPlants] = await Promise.all([DB().Species.all(), DB().Plants.all()]);
+  const [allSpecies, allPlants] = await Promise.all([window.DB.Species.all(), window.DB.Plants.all()]);
   const f = filter.toLowerCase();
   const list = allSpecies.filter(s =>
     !f || s.nameRu.toLowerCase().includes(f) || (s.nameLat||'').toLowerCase().includes(f) || s.code.toLowerCase().includes(f)
@@ -47,7 +47,7 @@ export async function renderSpecies(filter='') {
   el('speciesList').innerHTML = list.map(s => {
     const count = allPlants.filter(p => p.speciesId === s.id).length;
     const iconHtml = s.photoPath
-      ? `<div class="card-icon" style="padding:0"><img src="${DB().Photos.getURL(s.photoPath)}"></div>`
+      ? `<div class="card-icon" style="padding:0"><img src="${window.DB.Photos.getURL(s.photoPath)}"></div>`
       : `<div class="card-icon">${s.type||'🌱'}</div>`;
     return `
     <div class="card">
@@ -73,7 +73,7 @@ export async function renderSpecies(filter='') {
 // ── Plants list ───────────────────────────────────────────────────────────────
 export async function renderPlants(speciesId, filter='') {
   const [species, plants, landscapes] = await Promise.all([
-    DB().Species.get(speciesId), DB().Plants.bySpecies(speciesId), DB().Landscapes.all()
+    window.DB.Species.get(speciesId), window.DB.Plants.bySpecies(speciesId), window.DB.Landscapes.all()
   ]);
   const f = filter.toLowerCase();
   plants.forEach(p => {
@@ -101,15 +101,15 @@ export async function renderPlants(speciesId, filter='') {
 async function _loadLazyThumbs() {
   const imgs = document.querySelectorAll('.lazy-thumb[data-photo-id]');
   for (const img of imgs) {
-    const ph = await DB().Photos.get(img.dataset.photoId);
-    if (ph?.storage_path) img.src = DB().Photos.getURL(ph.storage_path);
+    const ph = await window.DB.Photos.get(img.dataset.photoId);
+    if (ph?.storage_path) img.src = window.DB.Photos.getURL(ph.storage_path);
   }
 }
 
 // ── Plant detail ──────────────────────────────────────────────────────────────
 export async function renderPlantDetail(plantId) {
   const [plant, allSpecies, landscapes, pots] = await Promise.all([
-    DB().Plants.get(plantId), DB().Species.all(), DB().Landscapes.all(), DB().Pots.all()
+    window.DB.Plants.get(plantId), window.DB.Species.all(), window.DB.Landscapes.all(), window.DB.Pots.all()
   ]);
   const species   = allSpecies.find(s => s.id === plant.speciesId) || {};
   const landscape = landscapes.find(l => l.id === plant.landscapeId);
@@ -120,8 +120,8 @@ export async function renderPlantDetail(plantId) {
 
   const thumbEl = el('detThumb');
   if (plant.mainPhotoId) {
-    const ph = await DB().Photos.get(plant.mainPhotoId);
-    const url = ph ? DB().Photos.getURL(ph.storage_path) : null;
+    const ph = await window.DB.Photos.get(plant.mainPhotoId);
+    const url = ph ? window.DB.Photos.getURL(ph.storage_path) : null;
     thumbEl.innerHTML = url ? `<img src="${url}">` : `<span style="font-size:60px">${species.type||'🌱'}</span>`;
   } else {
     thumbEl.innerHTML = `<span style="font-size:60px">${species.type||'🌱'}</span>`;
@@ -156,10 +156,10 @@ export async function renderPlantDetail(plantId) {
 
 // ── Photos tab ────────────────────────────────────────────────────────────────
 export async function renderPhotosTab(plant) {
-  const photos = await DB().Photos.forPlant(plant.id);
+  const photos = await window.DB.Photos.forPlant(plant.id);
   let html = photos.length === 0 ? '<div class="empty-msg">📷 Нет фотографий</div>' : '<div class="photo-grid">';
   for (const ph of photos) {
-    const url = DB().Photos.getURL(ph.storage_path);
+    const url = window.DB.Photos.getURL(ph.storage_path);
     const isMain = ph.id === plant.mainPhotoId;
     html += `
       <div class="photo-cell ${isMain?'main':''}">
@@ -183,8 +183,8 @@ export async function renderPhotosTab(plant) {
 // ── History tab ───────────────────────────────────────────────────────────────
 export async function renderHistoryTab(plant) {
   const [tasks, regularActions] = await Promise.all([
-    DB().Tasks.forPlant(plant.id),
-    DB().RegularActions.forPlant(plant.id)
+    window.DB.Tasks.forPlant(plant.id),
+    window.DB.RegularActions.forPlant(plant.id)
   ]);
   const history = (plant.history || []).slice().reverse();
 
@@ -255,7 +255,7 @@ export function switchHistSubtab(tab, plantId) {
 
 // ── Landscapes ────────────────────────────────────────────────────────────────
 export async function renderLandscapes(filter='') {
-  const [all, allPlants] = await Promise.all([DB().Landscapes.all(), DB().Plants.all()]);
+  const [all, allPlants] = await Promise.all([window.DB.Landscapes.all(), window.DB.Plants.all()]);
   const f = filter.toLowerCase();
   const list = all.filter(l => !f || l.name.toLowerCase().includes(f) || l.code.toLowerCase().includes(f));
   el('lsBadge').textContent = list.length;
@@ -278,7 +278,7 @@ export async function renderLandscapes(filter='') {
           locs.map(loc => {
             const plantCount = allPlants.filter(p => p.landscapeId === l.id && p._locCode === loc.code).length;
             const photoPath = locationPhotos[loc.id];
-            const photoUrl = photoPath ? DB().Photos.getURL(photoPath) : null;
+            const photoUrl = photoPath ? window.DB.Photos.getURL(photoPath) : null;
             return `
             <div class="loc-item" onclick="renderLocationPlants('${l.id}','${loc.id}','${loc.name}','${loc.code}')">
               <div class="loc-thumb">${photoUrl ? `<img src="${photoUrl}">` : '📍'}</div>
@@ -303,7 +303,7 @@ export function toggleLs(id) {
 // ── Location plants ───────────────────────────────────────────────────────────
 export async function renderLocationPlants(landscapeId, locId, locName, locCode) {
   const [allPlants, allSpecies, landscape] = await Promise.all([
-    DB().Plants.all(), DB().Species.all(), DB().Landscapes.get(landscapeId)
+    window.DB.Plants.all(), window.DB.Species.all(), window.DB.Landscapes.get(landscapeId)
   ]);
   // Show plants in this landscape
   const plants = allPlants.filter(p => p.landscapeId === landscapeId);
@@ -336,7 +336,7 @@ export async function renderLocationPlants(landscapeId, locId, locName, locCode)
 
 // ── Pots ─────────────────────────────────────────────────────────────────────
 export async function renderPots(filter='') {
-  const all = await DB().Pots.all();
+  const all = await window.DB.Pots.all();
   const f = filter.toLowerCase();
   const mats = {PL:'Пластик',CL:'Глина',CR:'Керамика',CN:'Бетон',FB:'Ткань',WD:'Дерево',MT:'Металл'};
   let html = '';
@@ -357,7 +357,7 @@ export async function renderPots(filter='') {
 // ── Deals ─────────────────────────────────────────────────────────────────────
 export async function renderDeals(filter='') {
   const [tasks, regularActions, allSpecies, allPlants] = await Promise.all([
-    DB().Tasks.pending(), DB().RegularActions.pending(), DB().Species.all(), DB().Plants.all()
+    window.DB.Tasks.pending(), window.DB.RegularActions.pending(), window.DB.Species.all(), window.DB.Plants.all()
   ]);
 
   const getPlantName = (plantId) => {
@@ -420,7 +420,7 @@ export async function renderDeals(filter='') {
 // ── Stats ─────────────────────────────────────────────────────────────────────
 export async function renderStats() {
   const [allSpecies, allPlants, allPots] = await Promise.all([
-    DB().Species.all(), DB().Plants.all(), DB().Pots.all()
+    window.DB.Species.all(), window.DB.Plants.all(), window.DB.Pots.all()
   ]);
   const totalSpent = allPlants.reduce((s, p) => s + (p.price||0) * (p.qty||1), 0);
   const potCount = allPots.length;
@@ -452,7 +452,7 @@ export async function renderStats() {
 
 // ── Trash ─────────────────────────────────────────────────────────────────────
 export async function renderTrash() {
-  const items = await DB().Trash.all();
+  const items = await window.DB.Trash.all();
   const typeNames = { species:'Вид', plant:'Растение', landscape:'Ландшафт', pot:'Горшок' };
   const typeIcons = { species:'🌿', plant:'🌱', landscape:'🌍', pot:'🪴' };
   const container = el('trash-list');
@@ -480,7 +480,7 @@ export async function renderTrash() {
 
 // ── Badge ─────────────────────────────────────────────────────────────────────
 export async function updateBadge() {
-  const [tasks, ra] = await Promise.all([DB().Tasks.pending(), DB().RegularActions.pending()]);
+  const [tasks, ra] = await Promise.all([window.DB.Tasks.pending(), window.DB.RegularActions.pending()]);
   const count = tasks.length + ra.length;
   el('fabBadge') && (el('fabBadge').textContent = count);
   el('dealsBadge') && (el('dealsBadge').textContent = count);
