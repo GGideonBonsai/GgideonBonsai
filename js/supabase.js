@@ -1,8 +1,6 @@
 // supabase.js — Supabase backend for Gideon Bonsai
-// Replace the two constants below with your project values
-
-export const SUPABASE_URL = 'ВСТАВЬТЕ_PROJECT_URL';
-export const SUPABASE_KEY = 'ВСТАВЬТЕ_ANON_KEY';
+// Ключи хранятся в js/config.js — редактируйте только его!
+import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
 
 const PHOTO_BUCKET = 'photos';
 
