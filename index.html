@@ -364,9 +364,9 @@
       <span class="topbar-title">🌿 Новый вид</span>
     </div>
     <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
-      <div class="fg"><label class="fl">Русское название</label><input class="fi" id="as-ru" placeholder="Фикус Бенджамина"></div>
-      <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="as-lat" placeholder="Ficus benjamina" style="font-style:italic"></div>
-      <div class="fg"><label class="fl">Код (3 буквы)</label><input class="fi fi-mono" id="as-code" placeholder="ФБе"></div>
+      <div class="fg"><label class="fl">Русское название</label><input class="fi" id="as-ru" placeholder="Фикус Бенджамина" oninput="document.getElementById('as-preview-name').textContent=this.value||'Новый вид'"></div>
+      <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="as-lat" placeholder="Ficus benjamina" style="font-style:italic" oninput="document.getElementById('as-preview-lat').textContent=this.value"></div>
+      <div class="fg"><label class="fl">Код (3 буквы)</label><input class="fi fi-mono" id="as-code" placeholder="ФБе" oninput="document.getElementById('as-preview-code').textContent=this.value||'КОД'"></div>
       <div class="fg"><label class="fl">Синонимы</label><input class="fi" id="as-syn"></div>
       <div class="fg"><label class="fl">Тип</label><div class="chips" id="as-type">
         <button class="chip on" data-v="🌳" onclick="selChip(this,'as-type')">🌳 Дерево</button>
@@ -378,6 +378,19 @@
         <button class="chip" data-v="✾" onclick="selChip(this,'as-type')">✾ Семена</button>
       </div></div>
       <div class="fg"><label class="fl">Полный код ухода</label><input class="fi fi-mono" id="as-care" placeholder="EV.T18-35.Z15.W3.L4"></div>
+      <!-- Live preview -->
+      <div class="div"></div>
+      <div style="font-size:11px;color:var(--stone);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Предпросмотр карточки</div>
+      <div class="preview-card" id="as-preview">
+        <div class="preview-card-img" id="as-preview-img">🌱</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:500" id="as-preview-name">Новый вид</div>
+          <div style="font-size:11px;color:var(--stone);font-style:italic" id="as-preview-lat"></div>
+          <div style="margin-top:4px"><span style="background:var(--parch);border:1px solid var(--ash);border-radius:12px;padding:2px 10px;font-size:11px;font-family:monospace" id="as-preview-code">КОД</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--stone);background:var(--parch);padding:3px 10px;border-radius:12px">0 шт.</div>
+      </div>
+      <div class="div"></div>
       <button class="btn btn-p" onclick="saveAddSpecies()">Добавить вид</button>
     </div></div>
   </div>
@@ -391,9 +404,9 @@
       <span class="topbar-title">✏️ Редактировать вид</span>
     </div>
     <div style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch"><div style="padding:16px 14px 50px">
-      <div class="fg"><label class="fl">Русское название</label><input class="fi" id="es-ru"></div>
-      <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="es-lat" style="font-style:italic"></div>
-      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="es-code"></div>
+      <div class="fg"><label class="fl">Русское название</label><input class="fi" id="es-ru" oninput="document.getElementById('es-preview-name').textContent=this.value||'—'"></div>
+      <div class="fg"><label class="fl">Латинское название</label><input class="fi" id="es-lat" style="font-style:italic" oninput="document.getElementById('es-preview-lat').textContent=this.value"></div>
+      <div class="fg"><label class="fl">Код</label><input class="fi fi-mono" id="es-code" oninput="document.getElementById('es-preview-code').textContent=this.value||'—'"></div>
       <div class="fg"><label class="fl">Синонимы</label><input class="fi" id="es-syn"></div>
       <div class="fg"><label class="fl">Тип</label><div class="chips" id="es-type">
         <button class="chip" data-v="🌳" onclick="selChip(this,'es-type')">🌳</button>
@@ -410,7 +423,19 @@
         <div class="photo-zone"><input type="file" accept="image/*" onchange="handleSpeciesPhotoFile(event)"><div class="photo-zone-icon">📷</div><div class="photo-zone-text">Нажмите для выбора</div></div>
         <div id="es-photo-preview"></div>
       </div>
-      <button class="btn btn-p" onclick="saveEditSpecies()">💾 Сохранить</button>
+      <!-- Preview -->
+      <div class="div"></div>
+      <div style="font-size:11px;color:var(--stone);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Предпросмотр карточки</div>
+      <div class="preview-card">
+        <div class="preview-card-img" id="es-preview-img">🌱</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:500" id="es-preview-name">—</div>
+          <div style="font-size:11px;color:var(--stone);font-style:italic" id="es-preview-lat"></div>
+          <div style="margin-top:4px"><span style="background:var(--parch);border:1px solid var(--ash);border-radius:12px;padding:2px 10px;font-size:11px;font-family:monospace" id="es-preview-code">—</span></div>
+        </div>
+      </div>
+      <div class="div"></div>
+      <button class="btn btn-p" onclick="saveEditSpecies()">💾 Сохранить вид</button>
       <button class="btn btn-d" onclick="deleteSpecies()">🗑 Удалить вид</button>
     </div></div>
   </div>
@@ -856,7 +881,7 @@
 </div>
 
 <!-- CONFIRM DIALOG -->
-<div class="overlay" id="mo-confirm" style="align-items:center;justify-content:center;padding:0 16px">
+<div class="overlay" id="mo-confirm" style="align-items:center;justify-content:center;padding:0 16px;z-index:500">
   <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
     <div style="padding:24px 20px 8px;text-align:center">
       <div id="confirm-icon" style="font-size:36px;margin-bottom:10px">⚠️</div>
@@ -871,7 +896,7 @@
 </div>
 
 <!-- ALERT DIALOG -->
-<div class="overlay" id="mo-alert" style="align-items:center;justify-content:center;padding:0 16px">
+<div class="overlay" id="mo-alert" style="align-items:center;justify-content:center;padding:0 16px;z-index:500">
   <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
     <div style="padding:24px 20px 8px;text-align:center">
       <div id="alert-icon" style="font-size:36px;margin-bottom:10px">ℹ️</div>
@@ -880,6 +905,25 @@
     </div>
     <div style="border-top:1px solid var(--ash);margin-top:16px">
       <button onclick="window._alertResolve()" style="width:100%;padding:14px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--moss)">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARE CODE DECODER -->
+<div class="overlay" id="mo-care-decode">
+  <div class="modal" style="max-height:85vh">
+    <div class="mhandle"></div>
+    <div class="mhdr">
+      <span class="mtitle">📖 Расшифровка кода ухода</span>
+      <button class="mclose" onclick="closeModal('mo-care-decode')">✕</button>
+    </div>
+    <div class="mbody" style="overflow-y:auto;max-height:70vh">
+      <div id="care-decode-code" style="font-family:monospace;font-size:13px;background:var(--parch);padding:10px 12px;border-radius:10px;margin-bottom:14px;border:1px solid var(--ash);word-break:break-all;color:var(--moss);font-weight:600"></div>
+      <div id="care-decode-list"></div>
+      <div class="div"></div>
+      <div style="font-size:11px;color:var(--stone);font-style:italic;line-height:1.5">
+        🍃 Код ухода — краткая памятка. Подробное описание и рекомендации доступны в полной карточке вида.
+      </div>
     </div>
   </div>
 </div>
