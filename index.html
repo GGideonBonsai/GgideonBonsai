@@ -43,6 +43,11 @@
   <!-- Hidden user email storage -->
   <span id="user-email" style="display:none"></span>
 
+  <!-- EMERGENCY RESET: tap home title 3x -->
+  <div id="emergency-hint" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:20px;font-size:12px;z-index:999;pointer-events:none">
+    Нажмите ещё раз для сброса
+  </div>
+
   <!-- DATA BAR -->
   <div class="data-bar" id="dataBar">
     <button class="d-btn" onclick="requestNotifications()">🔔 Уведомления</button>
@@ -53,7 +58,7 @@
   <div class="screen on" id="screen-home">
     <div class="home-page">
       <div class="home-hero">
-        <div class="home-title">Gideon Bonsai</div>
+        <div class="home-title" onclick="emergencyReset()" style="cursor:default">Gideon Bonsai</div>
         <div class="home-kanji-row">義 典</div>
         <div class="home-logo-wrap">
           <div class="home-logo-ring"></div>
@@ -213,10 +218,19 @@
       <button class="topbar-action" onclick="openModal('mo-add-species')">＋</button>
     </div>
     <div class="srch"><div class="srch-inner"><span class="srch-icon">🔍</span><input class="srch-input" id="srchInput" type="search" placeholder="Поиск..." oninput="doSearch()"></div></div>
+    <!-- Sort bar -->
+    <div style="background:var(--white);border-bottom:1px solid var(--ash);padding:7px 12px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;color:var(--stone)">Сортировка:</span>
+      <select id="species-sort-sel" class="fi" style="flex:1;padding:5px 10px;font-size:13px;border-radius:20px" onchange="setSpeciesSort(this.value)">
+        <option value="az">А — Я</option>
+        <option value="count">По количеству</option>
+        <option value="date">По дате добавления</option>
+      </select>
+      <button onclick="openModal('mo-add-species')" style="background:var(--moss);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">＋</button>
+    </div>
     <div class="content" style="padding-bottom:80px">
-      <div class="sec-hdr"><span class="sec-title">Виды</span><span class="badge" id="speciesBadge">0</span></div>
+      <div class="sec-hdr" style="margin-bottom:6px"><span class="sec-title">Виды</span><span class="badge" id="speciesBadge">0</span></div>
       <div id="speciesList"></div>
-      <button class="add-btn" onclick="openModal('mo-add-species')">＋ Добавить вид</button>
     </div>
     <button class="fab" id="fab" onclick="openModal('mo-deals-fab')" style="display:none">
       ✅ Дела <span class="fab-badge" id="fabBadge">0</span>
