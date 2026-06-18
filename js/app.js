@@ -179,7 +179,7 @@ Object.assign(window, {
   goToLandscape, goToPot, toggleLs, switchHistSubtab, renderLocationPlants,
 
   openAddPhoto: (plantId) => openModal('mo-photo', plantId),
-  setSpeciesSort: (v) => window.setSpeciesSort(v),
+  setSpeciesSort: (v) => { window._speciesSort = v; renderSpecies(); },
   setMainPhotoUI: (plantId, photoId) => setMainPhoto(plantId, photoId),
   deletePhotoUI: (plantId, photoId) => deletePhoto(plantId, photoId),
   viewPhoto: (url) => {
@@ -307,12 +307,21 @@ document.addEventListener('change', e => {
 });
 
 // ── Auth UI ───────────────────────────────────────────────────────────────────
+function _closeAllOverlays() {
+  document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
+  if (window._confirmResolve) { try { window._confirmResolve(false); } catch(e) {} }
+  if (window._alertResolve)   { try { window._alertResolve(); }       catch(e) {} }
+  document.getElementById('mo-prompt')?.remove();
+}
+
 function showAuthScreen() {
+  _closeAllOverlays();
   document.getElementById('app-auth').style.display = 'flex';
   document.getElementById('app-main').style.display = 'none';
 }
 
 function showAppScreen(user) {
+  _closeAllOverlays();
   document.getElementById('app-auth').style.display = 'none';
   document.getElementById('app-main').style.display = 'block';
   const emailEl = document.getElementById('user-email');
@@ -374,6 +383,11 @@ window.requestNotifications = async function() {
   if (!('Notification' in window)) return window.showAlert('Ваш браузер не поддерживает уведомления','Недоступно','ℹ️');
   const p = await Notification.requestPermission();
   document.getElementById('notifStatus').textContent = p === 'granted' ? '✅ Включены' : '❌ Отключены';
+};
+
+window.disableNotifications = function() {
+  // Can't programmatically revoke; guide user to browser settings
+  window.showAlert('Отключите уведомления в настройках браузера (🔒 → Уведомления → Заблокировать)', 'Уведомления', 'ℹ️');
 };
 
 // ── Service Worker ────────────────────────────────────────────────────────────
