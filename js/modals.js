@@ -71,7 +71,8 @@ export async function saveAddSpecies() {
   const nameRu=v('as-ru').trim(), code=v('as-code').trim();
   if(!nameRu||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
   await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
-  closeModal('mo-add-species'); renderSpecies();
+  closeModal('mo-add-species');
+  await renderSpecies(); // instant update
 }
 async function _fillEditSpecies(id) {
   const s=await window.DB.Species.get(id);
@@ -97,7 +98,7 @@ export async function saveEditSpecies() {
       window._esSelectedFile = null;
     } catch(e) { console.warn('Species photo upload failed:', e); }
   }
-  await window.DB.Species.save(s); closeModal('mo-edit-species'); renderSpecies();
+  await window.DB.Species.save(s); closeModal('mo-edit-species'); await renderSpecies();
 }
 export async function deleteSpecies() {
   const id=document.getElementById('mo-edit-species')._editId;
@@ -146,7 +147,7 @@ export async function saveAddPlant() {
   const sid=document.getElementById('mo-add-plant')._speciesId;
   const style=v('ap-style')==='Другой'?v('ap-style-other'):v('ap-style');
   await window.DB.Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
-  closeModal('mo-add-plant'); renderPlants(sid); renderSpecies();
+  closeModal('mo-add-plant'); await renderPlants(sid); await renderSpecies(); // instant
 }
 async function _fillEditPlant(plantId) {
   const p=await window.DB.Plants.get(plantId);
@@ -164,8 +165,8 @@ export async function saveEditPlant() {
   const p=await window.DB.Plants.get(id);
   const style=v('ep-style')==='Другой'?v('ep-style-other'):v('ep-style');
   Object.assign(p,{status:getChip('ep-status')||p.status,checkFlags:getChips('ep-flags'),shortCare:v('ep-care'),origin:getChip('ep-origin')||p.origin,bonsaiStyle:style,dateStart:v('ep-date'),landscapeId:v('ep-ls'),potId:v('ep-pot'),variety:v('ep-variety'),country:v('ep-country'),price:parseFloat(v('ep-price'))||0,qty:parseInt(v('ep-qty'))||1,comment:v('ep-comment')});
-  await window.DB.Plants.save(p); closeModal('mo-edit-plant'); renderPlantDetail(id);
-  const sid=document.getElementById('mo-species')._speciesId; if(sid) renderPlants(sid);
+  await window.DB.Plants.save(p); closeModal('mo-edit-plant'); await renderPlantDetail(id);
+  const sid=document.getElementById('mo-species')._speciesId; if(sid) await renderPlants(sid); // instant
 }
 export async function deletePlant(plantId) {
   if(!await window.showConfirm('Это действие нельзя отменить.','Удалить растение?','🗑','Удалить')) return;
@@ -347,7 +348,7 @@ export async function completeTask(taskId, plantId) {
 export async function saveAddLs() {
   const name=v('al-name').trim(),code=v('al-code').trim(); if(!name||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
   await window.DB.Landscapes.save({name,code,light:getChip('al-light')||'☀️',tempMin:v('al-tmin'),tempMax:v('al-tmax'),humidity:getChip('al-hum')||'≈',locations:[]});
-  closeModal('mo-add-ls'); renderLandscapes();
+  closeModal('mo-add-ls'); await renderLandscapes(); // instant
 }
 async function _fillEditLs(id) {
   const l=await window.DB.Landscapes.get(id);
@@ -359,7 +360,7 @@ export async function saveEditLs() {
   const id=document.getElementById('mo-edit-ls')._editId;
   const l=await window.DB.Landscapes.get(id);
   Object.assign(l,{name:v('el-name').trim(),code:v('el-code').trim(),light:getChip('el-light')||l.light,tempMin:v('el-tmin'),tempMax:v('el-tmax'),humidity:getChip('el-hum')||l.humidity});
-  await window.DB.Landscapes.save(l); closeModal('mo-edit-ls'); renderLandscapes();
+  await window.DB.Landscapes.save(l); closeModal('mo-edit-ls'); await renderLandscapes(); // instant
 }
 export async function deleteLs() {
   if(!await window.showConfirm('Это действие нельзя отменить.','Удалить ландшафт?','🗑','Удалить')) return;
@@ -390,7 +391,7 @@ export async function saveAddPot() {
   const m=getChip('ap2-mat')||'PL',n=v('ap2-num')||'001',sh=getChip('ap2-shape'),pr=getChip('ap2-prop')||'=',sz=getChip('ap2-size')||'M',c=getChip('ap2-color'),p=getChip('ap2-pattern')||'';
   if(!sh||!c) return window.showAlert('Выберите форму и цвет','','ℹ️');
   await window.DB.Pots.save({material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:p,code:potCode(m,n,sh,pr,sz,c,p)});
-  closeModal('mo-add-pot'); renderPots();
+  closeModal('mo-add-pot'); await renderPots(); // instant
 }
 async function _fillEditPot(id) {
   const p=await window.DB.Pots.get(id);
@@ -409,7 +410,7 @@ export async function saveEditPot() {
   const p=await window.DB.Pots.get(id);
   const m=getChip('ep2-mat')||p.material,n=v('ep2-num')||p.number,sh=getChip('ep2-shape')||p.shape,pr=getChip('ep2-prop')||p.prop,sz=getChip('ep2-size')||p.size,c=getChip('ep2-color')||p.color,pt=getChip('ep2-pattern')!==''?getChip('ep2-pattern'):p.pattern;
   Object.assign(p,{material:m,mat_name:MAT[m]||m,number:n,shape:sh,prop:pr,size:sz,color:c,pattern:pt,code:potCode(m,n,sh,pr,sz,c,pt)});
-  await window.DB.Pots.save(p); closeModal('mo-edit-pot'); renderPots();
+  await window.DB.Pots.save(p); closeModal('mo-edit-pot'); await renderPots(); // instant
 }
 export async function deletePot() {
   if(!await window.showConfirm('Это действие нельзя отменить.','Удалить горшок?','🗑','Удалить')) return;
