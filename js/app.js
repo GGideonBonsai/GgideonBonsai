@@ -311,36 +311,39 @@ window.bottomNav = function(tab) {
 
 function renderProfile() {
   const user = window._currentUser;
-  const el = document.getElementById('screen-profile-content');
-  if (!el) return;
+  const profileEl = document.getElementById('screen-profile-content');
+  if (!profileEl) return;
   const savedTime = localStorage.getItem('notif_time') || '09:00';
-  const notifStatus = Notification.permission === 'granted' ? '✅ Включены' : '❌ Выключены';
-  el.innerHTML = `
+  const granted = Notification.permission === 'granted';
+  profileEl.innerHTML = `
     <div class="profile-section">
       <div class="profile-row">
         <span class="profile-label">👤 Email</span>
         <span class="profile-value">${user?.email || '—'}</span>
       </div>
 
-      <div style="background:#fff;border-radius:12px;border:1px solid var(--ash);overflow:hidden;margin-bottom:8px">
-        <div style="padding:12px 14px;border-bottom:1px solid var(--ash)">
-          <div style="font-size:13px;font-weight:500;margin-bottom:4px">🔔 Уведомления</div>
-          <div style="font-size:11px;color:var(--stone)">${notifStatus}</div>
-        </div>
-        <div style="padding:12px 14px;border-bottom:1px solid var(--ash)">
-          <div style="font-size:12px;color:var(--stone);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Время уведомлений</div>
-          <div style="display:flex;align-items:center;gap:10px">
-            <input type="time" id="notif-time-input" value="${savedTime}" class="fi" style="flex:1;font-size:16px;font-family:monospace">
-            <button onclick="saveNotifTime()" class="btn btn-p" style="width:auto;padding:8px 16px;font-size:13px">Сохранить</button>
+      <div style="background:var(--white);border-radius:14px;border:1px solid var(--ash);overflow:hidden;margin-bottom:10px">
+        <div style="padding:14px;border-bottom:1px solid var(--ash);display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:14px;font-weight:500">🔔 Уведомления</div>
+            <div style="font-size:11px;color:var(--stone);margin-top:2px">${granted ? '✅ Включены' : '❌ Выключены'}</div>
           </div>
-          <div style="font-size:11px;color:var(--stone);margin-top:6px">Ежедневное напоминание о запланированных делах</div>
+          ${granted
+            ? `<button onclick="disableNotifications()" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer">Отключить</button>`
+            : `<button onclick="requestNotifications()" style="background:var(--moss);border:none;color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer">Включить</button>`
+          }
         </div>
-        <div style="padding:12px 14px" onclick="requestNotifications()" style="cursor:pointer">
-          <button class="btn btn-s" style="margin-top:0">Включить уведомления</button>
+        <div style="padding:14px">
+          <div style="font-size:11px;color:var(--stone);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Время напоминания</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input type="time" id="notif-time-input" value="${savedTime}" class="fi" style="flex:1;font-size:18px;font-family:monospace;text-align:center">
+            <button onclick="saveNotifTime()" class="btn btn-p" style="width:auto;padding:10px 18px;font-size:13px;border-radius:10px">💾</button>
+          </div>
+          <div style="font-size:11px;color:var(--stone);margin-top:6px;line-height:1.4">Ежедневное напоминание о делах в выбранное время</div>
         </div>
       </div>
 
-      <button class="btn btn-d" style="margin-top:8px" onclick="authSignOut()">🚪 Выйти из аккаунта</button>
+      <button class="btn btn-d" onclick="authSignOut()">🚪 Выйти из аккаунта</button>
     </div>`;
 }
 
