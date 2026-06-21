@@ -258,7 +258,7 @@ Object.assign(window, {
     const email = document.getElementById('auth-email')?.value;
     const pass  = document.getElementById('auth-pass')?.value;
     if (!email || !pass) return window.showAlert('Введите email и пароль','Ошибка','❌');
-    signInWithEmail(email, pass).catch(e => alert('Ошибка входа: ' + e.message));
+    signInWithEmail(email, pass).catch(e => window.showAlert('Ошибка входа: ' + e.message, 'Ошибка', '❌'));
   },
   authSignUp: () => {
     const email = document.getElementById('auth-email')?.value;
@@ -266,7 +266,7 @@ Object.assign(window, {
     if (!email || !pass) return window.showAlert('Введите email и пароль','Ошибка','❌');
     signUpWithEmail(email, pass)
       .then(() => window.showAlert('Проверьте вашу почту для подтверждения регистрации','Регистрация','✅'))
-      .catch(e => alert('Ошибка регистрации: ' + e.message));
+      .catch(e => window.showAlert('Ошибка регистрации: ' + e.message, 'Ошибка', '❌'));
   },
   authSignOut: () => { signOut(); showAuthScreen(); },
 });
