@@ -105,7 +105,7 @@ window.navTo = function(section) {
 
 // ── Expose globals ────────────────────────────────────────────────────────────
 Object.assign(window, {
-  openModal, closeModal, openSpeciesList, openPlantDetail, switchItab,
+  openModal, closeModal, closeTop, openSpeciesList, openPlantDetail, switchItab,
   selChip, togChip,
   saveAddSpecies, saveEditSpecies, deleteSpecies, handleSpeciesPhotoFile,
   editPhotoMeta, savePhotoMeta,
@@ -313,7 +313,18 @@ window.toggleDataBar = function() {
 window.requestNotifications = async function() {
   if (!('Notification' in window)) return window.showAlert('Ваш браузер не поддерживает уведомления','Недоступно','ℹ️');
   const p = await Notification.requestPermission();
-  document.getElementById('notifStatus').textContent = p === 'granted' ? '✅ Включены' : '❌ Отключены';
+  console.log('🔔 Notification permission:', p);
+  renderProfile();
+};
+
+window.disableNotifications = async function() {
+  // Браузер не позволяет программно отозвать разрешение — объясняем пользователю
+  await window.showAlert(
+    'Чтобы отключить уведомления, откройте настройки браузера → Сайты → Уведомления и заблокируйте этот сайт.',
+    'Отключение уведомлений',
+    'ℹ️'
+  );
+  console.log('🔕 disableNotifications: shown browser instructions to user');
 };
 
 
@@ -369,6 +380,7 @@ window.saveNotifTime = function() {
   const time = document.getElementById('notif-time-input')?.value;
   if (!time) return;
   localStorage.setItem('notif_time', time);
+  console.log(`⏰ saveNotifTime: время уведомлений установлено на ${time}`);
   window.showAlert(`Уведомления настроены на ${time}`, 'Сохранено', '✅');
   scheduleNotifications();
 };
