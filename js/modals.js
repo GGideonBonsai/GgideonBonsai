@@ -81,14 +81,21 @@ function styleOpts(sel='') { return STYLES.map(s=>`<option ${s===sel?'selected':
 
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function saveAddSpecies() {
-  const nameRu=v('as-ru').trim(), code=v('as-code').trim();
-    if(!nameRu||!code) { await window.showAlert('Заполните название и код','Ошибка','❌'); return; }
-    await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
-    closeModal('mo-add-species');
-    await renderSpecies();
-  };
+  const nameRu = v('as-ru').trim();
+  const code   = v('as-code').trim();
+  if (!nameRu || !code) {
+    await window.showAlert('Заполните название и код', 'Ошибка', '❌');
+    return;
+  }
+  await window.DB.Species.save({
+    nameRu, nameLat: v('as-lat').trim(), code,
+    type:     getChip('as-type') || '🌳',
+    synonyms: v('as-syn').trim(),
+    careCode: v('as-care').trim()
+  });
+  closeModal('mo-add-species');
+  await renderSpecies();
 }
-
 async function _fillEditSpecies(id) {
   const s=await window.DB.Species.get(id);
   if (!s) return;
