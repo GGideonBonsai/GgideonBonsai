@@ -329,51 +329,78 @@ window.disableNotifications = async function() {
 
 
 function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/GgideonBonsai/sw.js')
-      .then(reg => {
-        window._swReg = reg;
-        // Schedule notifications after SW ready
-        scheduleNotifications();
-      })
-      .catch(() => {});
-  }
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/GgideonBonsai/sw.js')
+    .then(async reg => {
+      window._swReg = reg;
+      // Ждём активного SW (может быть installing/waiting)
+      const sw = reg.active || reg.installing || reg.waiting;
+      if (sw && sw.state !== 'activated') {
+        await new Promise(resolve => sw.addEventListener('statechange', function h() {
+          if (sw.state === 'activated') { sw.removeEventListener('statechange', h); resolve(); }
+        }));
+      }
+      scheduleNotifications();
+
+      // Periodic Background Sync — наиболее надёжный способ для офлайн-уведомлений
+      // Работает в Chrome на Android (установленное PWA)
+      if ('periodicSync' in reg) {
+        try {
+          const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+          if (status.state === 'granted') {
+            await reg.periodicSync.register('daily-reminder', { minInterval: 24 * 60 * 60 * 1000 });
+            console.log('✅ Periodic Background Sync зарегистрирован');
+          }
+        } catch (e) {
+          console.log('ℹ️ Periodic Background Sync недоступен:', e.message);
+        }
+      }
+    })
+    .catch(e => console.warn('SW registration failed:', e));
 }
 
 // ── Notification scheduling ───────────────────────────────────────────────────
 window.scheduleNotifications = async function() {
   if (Notification.permission !== 'granted') return;
-  if (!window._swReg?.active) return;
+
+  const reg = window._swReg;
+  const sw = reg?.active;
+  if (!sw) {
+    console.log('⚠️ scheduleNotifications: SW не активен, пропускаем');
+    return;
+  }
 
   const time = localStorage.getItem('notif_time') || '09:00';
   const [h, m] = time.split(':').map(Number);
 
-  // Get pending tasks and RAs
   const db = window.DB;
   if (!db) return;
   const [tasks, ras] = await Promise.all([db.Tasks.pending(), db.RegularActions.pending()]);
 
-  // Calculate next notification time
-  const now = new Date();
-  const next = new Date();
+  const now   = new Date();
+  const next  = new Date();
   next.setHours(h, m, 0, 0);
-  if (next <= now) next.setDate(next.getDate() + 1); // Tomorrow if already passed
+  if (next <= now) next.setDate(next.getDate() + 1);
 
-  const msUntil = next - now;
   const totalItems = tasks.length + ras.length;
+  const timeStr = next.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
 
-  if (totalItems === 0) return;
+  console.log(`📅 scheduleNotifications: ${totalItems} дел, следующее уведомление в ${timeStr} (${next.toLocaleDateString('ru-RU')})`);
 
-  // Schedule via SW
-  if (window._swReg?.active) {
-    window._swReg.active.postMessage({
-      type: 'SCHEDULE_ALARM',
-      id: 'daily_reminder',
-      title: '🌿 Gideon Bonsai',
-      body: `У вас ${totalItems} ${totalItems === 1 ? 'дело' : 'дел'} ожидает выполнения`,
-      timestamp: next.getTime()
-    });
+  if (totalItems === 0) {
+    console.log('ℹ️ scheduleNotifications: нет дел — уведомление не запланировано');
+    return;
   }
+
+  const plural = totalItems === 1 ? 'дело' : totalItems < 5 ? 'дела' : 'дел';
+  sw.postMessage({
+    type:      'SCHEDULE_ALARM',
+    title:     '🌿 Gideon Bonsai',
+    body:      `${totalItems} ${plural} ожидает выполнения`,
+    timestamp: next.getTime()
+  });
+
+  console.log(`✅ scheduleNotifications: запланировано на ${timeStr}`);
 };
 
 window.saveNotifTime = function() {
