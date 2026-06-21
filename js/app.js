@@ -61,22 +61,16 @@ window._sbClient = getSB;
 window._confirmResolve = null;
 window._alertResolve = null;
 
-window.showConfirm = function(msg, title='Подтвердите', icon='⚠️', yesText='Да', yesColor='var(--danger)') {
+window.showConfirm = function(msg, title, icon, yesText, yesColor) {
   return new Promise(resolve => {
-    document.getElementById('confirm-icon').textContent = icon;
-    document.getElementById('confirm-title').textContent = title;
-    document.getElementById('confirm-msg').textContent = msg;
-    const yesBtn = document.getElementById('confirm-yes-btn');
-    yesBtn.textContent = yesText;
-    yesBtn.style.color = yesColor;
-    const modal = document.getElementById('mo-confirm');
-    modal.classList.add('open');
-    modal.querySelector('.modal').style.transform = 'scale(1)';
-    window._confirmResolve = (result) => {
-      modal.classList.remove('open');
-      modal.querySelector('.modal').style.transform = 'scale(.9)';
-      resolve(result);
-    };
+    _openDialog('mo-confirm', {
+      msg:      msg      || '',
+      title:    title    || 'Подтвердите',
+      icon:     icon     || '⚠️',
+      yesText:  yesText  || 'Да',
+      yesColor: yesColor || '#8b3a3a',
+      callback: resolve
+    });
   });
 };
 
@@ -106,19 +100,14 @@ window.showPrompt = function(label, placeholder='') {
   });
 };
 
-window.showAlert = function(msg, title='', icon='ℹ️') {
+window.showAlert = function(msg, title, icon) {
   return new Promise(resolve => {
-    document.getElementById('alert-icon').textContent = icon;
-    document.getElementById('alert-title').textContent = title;
-    document.getElementById('alert-msg').textContent = msg;
-    const modal = document.getElementById('mo-alert');
-    modal.classList.add('open');
-    modal.querySelector('.modal').style.transform = 'scale(1)';
-    window._alertResolve = () => {
-      modal.classList.remove('open');
-      modal.querySelector('.modal').style.transform = 'scale(.9)';
-      resolve();
-    };
+    _openDialog('mo-alert', {
+      msg:      msg   || '',
+      title:    title || '',
+      icon:     icon  || 'ℹ️',
+      callback: resolve
+    });
   });
 };
 
