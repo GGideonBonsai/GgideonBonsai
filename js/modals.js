@@ -1,6 +1,19 @@
 // modals.js — Modal logic (Supabase version)
 import { renderSpecies, renderPlants, renderPlantDetail, renderLandscapes, renderPots, renderDeals, renderHistoryTab, renderPhotosTab, updateBadge } from './render.js';
 
+// Wrap all async calls with error logging
+const safeCall = async (name, fn) => {
+  console.log(`▶️ ${name} START`);
+  try {
+    const result = await fn();
+    console.log(`✅ ${name} DONE`);
+    return result;
+  } catch(e) {
+    console.error(`❌ ${name} ERROR:`, e);
+    window.showAlert(`Ошибка: ${e.message}`, name, '❌').catch(()=>{});
+  }
+};
+
 
 
 // ── Modal stack ───────────────────────────────────────────────────────────────
@@ -68,11 +81,13 @@ function styleOpts(sel='') { return STYLES.map(s=>`<option ${s===sel?'selected':
 
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function saveAddSpecies() {
-  const nameRu=v('as-ru').trim(), code=v('as-code').trim();
-  if(!nameRu||!code) return window.showAlert('Заполните название и код','Ошибка','❌');
-  await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
-  closeModal('mo-add-species');
-  await renderSpecies(); // instant update
+  return safeCall('saveAddSpecies', async () => {
+    const nameRu=v('as-ru').trim(), code=v('as-code').trim();
+    if(!nameRu||!code) { await window.showAlert('Заполните название и код','Ошибка','❌'); return; }
+    await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
+    closeModal('mo-add-species');
+    await renderSpecies();
+  });
 }
 async function _fillEditSpecies(id) {
   const s=await window.DB.Species.get(id);
@@ -160,10 +175,17 @@ async function _fillAddPlant(speciesId) {
   document.getElementById('ap-style').innerHTML=`<option value="">— не выбран —</option>${styleOpts()}`;
 }
 export async function saveAddPlant() {
+  return safeCall('saveAddPlant', async () => {
   const sid=document.getElementById('mo-add-plant')._speciesId;
   const style=v('ap-style')==='Другой'?v('ap-style-other'):v('ap-style');
   await window.DB.Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
-  closeModal('mo-add-plant'); await renderPlants(sid); await renderSpecies(); // instant
+  closeModal('mo-add-plant');
+  await renderPlants(sid);
+  await renderSpecies();
+  });
+}
+
+// placeholder to fix closure
 }
 async function _fillEditPlant(plantId) {
   const p=await window.DB.Plants.get(plantId);
