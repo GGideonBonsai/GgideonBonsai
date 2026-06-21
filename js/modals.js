@@ -81,8 +81,7 @@ function styleOpts(sel='') { return STYLES.map(s=>`<option ${s===sel?'selected':
 
 // ── Species ───────────────────────────────────────────────────────────────────
 export async function saveAddSpecies() {
-  return safeCall('saveAddSpecies', async () => {
-    const nameRu=v('as-ru').trim(), code=v('as-code').trim();
+  const nameRu=v('as-ru').trim(), code=v('as-code').trim();
     if(!nameRu||!code) { await window.showAlert('Заполните название и код','Ошибка','❌'); return; }
     await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
     closeModal('mo-add-species');
@@ -175,29 +174,34 @@ async function _fillAddPlant(speciesId) {
   document.getElementById('ap-style').innerHTML=`<option value="">— не выбран —</option>${styleOpts()}`;
 }
 export async function saveAddPlant() {
-  return safeCall('saveAddPlant', async () => {
-  const sid=document.getElementById('mo-add-plant')._speciesId;
-  const style=v('ap-style')==='Другой'?v('ap-style-other'):v('ap-style');
-  await window.DB.Plants.save({speciesId:sid,number:parseInt(v('ap-num'))||1,status:getChip('ap-status')||'°',checkFlags:getChips('ap-flags'),shortCare:v('ap-care'),origin:getChip('ap-origin')||'',bonsaiStyle:style,dateStart:v('ap-date'),landscapeId:v('ap-ls'),potId:v('ap-pot'),variety:v('ap-variety'),country:v('ap-country'),price:parseFloat(v('ap-price'))||0,qty:parseInt(v('ap-qty'))||1,comment:v('ap-comment'),photoIds:[],mainPhotoId:null,history:[]});
+  const sid   = document.getElementById('mo-add-plant')._speciesId;
+  const style = v('ap-style') === 'Другой' ? v('ap-style-other') : v('ap-style');
+  await window.DB.Plants.save({
+    speciesId:    sid,
+    number:       parseInt(v('ap-num')) || 1,
+    status:       getChip('ap-status') || '°',
+    checkFlags:   getChips('ap-flags'),
+    shortCare:    v('ap-care'),
+    origin:       getChip('ap-origin') || '',
+    bonsaiStyle:  style,
+    dateStart:    v('ap-date') || null,
+    landscapeId:  v('ap-ls')   || null,
+    potId:        v('ap-pot')  || null,
+    variety:      v('ap-variety'),
+    country:      v('ap-country'),
+    price:        parseFloat(v('ap-price')) || null,
+    qty:          parseInt(v('ap-qty')) || 1,
+    comment:      v('ap-comment'),
+    photoIds:     [],
+    mainPhotoId:  null,
+    history:      []
+  });
   closeModal('mo-add-plant');
   await renderPlants(sid);
   await renderSpecies();
-  });
 }
 
-// placeholder to fix closure
-}
-async function _fillEditPlant(plantId) {
-  const p=await window.DB.Plants.get(plantId);
-  document.getElementById('mo-edit-plant')._plantId=plantId;
-  setChip('ep-status',p.status||'°'); setChips('ep-flags',p.checkFlags||[]);
-  sv('ep-care',p.shortCare);sv('ep-date',p.dateStart);sv('ep-variety',p.variety);sv('ep-country',p.country);sv('ep-price',p.price);sv('ep-qty',p.qty);sv('ep-comment',p.comment);
-  setChip('ep-origin',p.origin||'');
-  document.getElementById('ep-ls').innerHTML=await _lsOpts(p.landscapeId);
-  document.getElementById('ep-pot').innerHTML=await _potOpts(p.potId);
-  document.getElementById('ep-style').innerHTML=`<option value="">— не выбран —</option>${styleOpts(p.bonsaiStyle)}`;
-  document.getElementById('ep-style-other-wrap').style.display=p.bonsaiStyle==='Другой'?'':'none';
-}
+
 export async function saveEditPlant() {
   const id=document.getElementById('mo-edit-plant')._plantId;
   const p=await window.DB.Plants.get(id);
