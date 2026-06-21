@@ -86,7 +86,9 @@ export async function saveAddSpecies() {
     await window.DB.Species.save({nameRu,nameLat:v('as-lat').trim(),code,type:getChip('as-type')||'🌳',synonyms:v('as-syn').trim(),careCode:v('as-care').trim()});
     closeModal('mo-add-species');
     await renderSpecies();
-};
+  };
+}
+
 async function _fillEditSpecies(id) {
   const s=await window.DB.Species.get(id);
   if (!s) return;
