@@ -894,34 +894,7 @@
   </div>
 </div>
 
-<!-- CONFIRM DIALOG -->
-<div class="overlay" id="mo-confirm" style="align-items:center;justify-content:center;padding:0 16px;z-index:500">
-  <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
-    <div style="padding:24px 20px 8px;text-align:center">
-      <div id="confirm-icon" style="font-size:36px;margin-bottom:10px">⚠️</div>
-      <div id="confirm-title" style="font-family:'Noto Serif JP',serif;font-size:16px;font-weight:400;margin-bottom:6px"></div>
-      <div id="confirm-msg" style="font-size:13px;color:var(--stone);line-height:1.5"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ash);margin-top:16px">
-      <button onclick="window._confirmResolve(false)" style="padding:14px;background:none;border:none;border-right:1px solid var(--ash);font-size:15px;color:var(--stone);cursor:pointer;font-family:'Inter',sans-serif">Нет</button>
-      <button id="confirm-yes-btn" onclick="window._confirmResolve(true)" style="padding:14px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--danger)">Да</button>
-    </div>
-  </div>
-</div>
 
-<!-- ALERT DIALOG -->
-<div class="overlay" id="mo-alert" style="align-items:center;justify-content:center;padding:0 16px;z-index:500">
-  <div class="modal" style="border-radius:16px;max-width:320px;margin:0 16px;padding-bottom:0;transform:scale(.9);max-height:none">
-    <div style="padding:24px 20px 8px;text-align:center">
-      <div id="alert-icon" style="font-size:36px;margin-bottom:10px">ℹ️</div>
-      <div id="alert-title" style="font-family:'Noto Serif JP',serif;font-size:16px;font-weight:400;margin-bottom:6px"></div>
-      <div id="alert-msg" style="font-size:13px;color:var(--stone);line-height:1.5"></div>
-    </div>
-    <div style="border-top:1px solid var(--ash);margin-top:16px">
-      <button onclick="window._alertResolve()" style="width:100%;padding:14px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:var(--moss)">OK</button>
-    </div>
-  </div>
-</div>
 
 <!-- CARE CODE DECODER -->
 <div class="overlay" id="mo-care-decode">
@@ -1000,6 +973,34 @@
     renderLandscapes();
   };
 </script>
+
+<!-- ═══ DIALOGS (always on top) ══════════════════════════════════════════════ -->
+<div id="mo-confirm" style="display:none;position:fixed;inset:0;background:rgba(44,36,22,.7);z-index:9999;align-items:center;justify-content:center;padding:0 20px">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:320px;overflow:hidden;transform:scale(.9);transition:transform .2s cubic-bezier(.34,1.56,.64,1)">
+    <div style="padding:28px 20px 16px;text-align:center">
+      <div id="confirm-icon" style="font-size:40px;margin-bottom:12px">⚠️</div>
+      <div id="confirm-title" style="font-family:'Noto Serif JP',serif;font-size:17px;font-weight:400;margin-bottom:8px;color:#2c2416"></div>
+      <div id="confirm-msg" style="font-size:13px;color:#8a7f6e;line-height:1.6"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #e0d8cc">
+      <button onclick="window._confirmResolve(false)" style="padding:16px;background:none;border:none;border-right:1px solid #e0d8cc;font-size:15px;color:#8a7f6e;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500">Нет</button>
+      <button id="confirm-yes-btn" onclick="window._confirmResolve(true)" style="padding:16px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:#8b3a3a">Да</button>
+    </div>
+  </div>
+</div>
+
+<div id="mo-alert" style="display:none;position:fixed;inset:0;background:rgba(44,36,22,.7);z-index:9999;align-items:center;justify-content:center;padding:0 20px">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:320px;overflow:hidden;transform:scale(.9);transition:transform .2s cubic-bezier(.34,1.56,.64,1)">
+    <div style="padding:28px 20px 16px;text-align:center">
+      <div id="alert-icon" style="font-size:40px;margin-bottom:12px">ℹ️</div>
+      <div id="alert-title" style="font-family:'Noto Serif JP',serif;font-size:17px;font-weight:400;margin-bottom:8px;color:#2c2416"></div>
+      <div id="alert-msg" style="font-size:13px;color:#8a7f6e;line-height:1.6"></div>
+    </div>
+    <div style="border-top:1px solid #e0d8cc">
+      <button onclick="window._alertResolve()" style="width:100%;padding:16px;background:none;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;color:#4a5e35">OK</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
