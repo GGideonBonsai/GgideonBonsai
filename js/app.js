@@ -58,8 +58,55 @@ window.DB = {
 window._sbClient = getSB;
 
 // ── Custom dialogs ────────────────────────────────────────────────────────────
-window._confirmResolve = null;
-window._alertResolve = null;
+window._dialogCallback = null;
+
+function _openDialog(id, opts) {
+  ['mo-confirm','mo-alert'].forEach(did => {
+    const d = document.getElementById(did);
+    if (d) d.style.display = 'none';
+  });
+  window._dialogCallback = null;
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  const isConfirm = id === 'mo-confirm';
+  const iconEl  = document.getElementById(isConfirm ? 'confirm-icon'  : 'alert-icon');
+  const titleEl = document.getElementById(isConfirm ? 'confirm-title' : 'alert-title');
+  const msgEl   = document.getElementById(isConfirm ? 'confirm-msg'   : 'alert-msg');
+  if (iconEl)  iconEl.textContent  = opts.icon  || (isConfirm ? '⚠️' : 'ℹ️');
+  if (titleEl) titleEl.textContent = opts.title || '';
+  if (msgEl)   msgEl.textContent   = opts.msg   || '';
+  if (isConfirm) {
+    const btn = document.getElementById('confirm-yes-btn');
+    if (btn) { btn.textContent = opts.yesText || 'Да'; btn.style.color = opts.yesColor || '#8b3a3a'; }
+  }
+  window._dialogCallback = opts.callback;
+  modal.style.display = 'flex';
+  const inner = modal.querySelector('div');
+  if (inner) {
+    inner.style.transform = 'scale(.9)';
+    requestAnimationFrame(() => requestAnimationFrame(() => { inner.style.transform = 'scale(1)'; }));
+  }
+}
+
+function _closeDialog(id) {
+  const modal = document.getElementById(id);
+  if (!modal) return;
+  const inner = modal.querySelector('div');
+  if (inner) inner.style.transform = 'scale(.9)';
+  setTimeout(() => { modal.style.display = 'none'; }, 150);
+  window._dialogCallback = null;
+}
+
+window._confirmResolve = function(result) {
+  const cb = window._dialogCallback;
+  _closeDialog('mo-confirm');
+  if (cb) setTimeout(() => cb(result), 10);
+};
+window._alertResolve = function() {
+  const cb = window._dialogCallback;
+  _closeDialog('mo-alert');
+  if (cb) setTimeout(() => cb(), 10);
+};
 
 window.showConfirm = function(msg, title, icon, yesText, yesColor) {
   return new Promise(resolve => {
