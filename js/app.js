@@ -405,9 +405,9 @@ window.emergencyReset = function() {
   if (_tapCount >= 3) {
     _tapCount = 0;
     // Close ALL overlays
-    document.querySelectorAll('.overlay').forEach(o => {
-      o.classList.remove('open');
-    });
+    document.querySelectorAll('.overlay').forEach(o => { o.classList.remove('open'); });
+    document.getElementById('mo-confirm').style.display='none';
+    document.getElementById('mo-alert').style.display='none';
     // Reset confirm/alert state
     if (window._confirmResolve) { window._confirmResolve(false); }
     if (window._alertResolve) { window._alertResolve(); }
